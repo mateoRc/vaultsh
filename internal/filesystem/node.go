@@ -1,7 +1,5 @@
-// Package filesystem provides Vaultsh's virtual filesystem model.
 package filesystem
 
-// Kind identifies the type of a filesystem node.
 type Kind string
 
 const (

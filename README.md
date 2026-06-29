@@ -123,3 +123,8 @@ A shell engine featuring a virtual filesystem, command parser, and extensible co
 - [ ] WebSocket transport
 - [ ] TUI client
 - [ ] CLI client
+
+## Easter Eggs
+- [ ] Single-command triggers
+- [ ] Command-sequence triggers
+- [ ] Session-scoped progress (for example, 5 out of 5)
