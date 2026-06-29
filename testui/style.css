@@ -73,6 +73,14 @@ h1::after {
   line-height: 1.6;
 }
 
+.tiny-word {
+  display: inline-block;
+  font-size: 0.68em;
+  font-weight: 750;
+  letter-spacing: 0.02em;
+  transform: translateY(-0.08em);
+}
+
 .tags {
   display: flex;
   flex-wrap: wrap;
