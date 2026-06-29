@@ -92,6 +92,32 @@ func TestExecRejectsInvalidJSON(t *testing.T) {
 	}
 }
 
+func TestComplete(t *testing.T) {
+	request := httptest.NewRequest(
+		http.MethodPost,
+		"/api/complete",
+		strings.NewReader(`{"line":"ca","cursor":2}`),
+	)
+	response := httptest.NewRecorder()
+
+	newTestHandler().ServeHTTP(response, request)
+
+	if response.Code != http.StatusOK {
+		t.Fatalf("status = %d, want %d", response.Code, http.StatusOK)
+	}
+
+	var result completeResponse
+	if err := json.NewDecoder(response.Body).Decode(&result); err != nil {
+		t.Fatalf("decode response: %v", err)
+	}
+	if result.Replacement != "cat " {
+		t.Errorf("replacement = %q, want %q", result.Replacement, "cat ")
+	}
+	if result.SessionID == "" {
+		t.Error("session ID is empty")
+	}
+}
+
 func newTestHandler() http.Handler {
 	root := filesystem.NewDirectory("")
 	return NewHandler(shell.NewSessionManager(root))

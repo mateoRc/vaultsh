@@ -20,6 +20,20 @@ type execResponse struct {
 	SessionID string         `json:"session_id"`
 }
 
+type completeRequest struct {
+	Line      string `json:"line"`
+	Cursor    int    `json:"cursor"`
+	SessionID string `json:"session_id,omitempty"`
+}
+
+type completeResponse struct {
+	Start       int      `json:"start"`
+	End         int      `json:"end"`
+	Replacement string   `json:"replacement"`
+	Candidates  []string `json:"candidates"`
+	SessionID   string   `json:"session_id"`
+}
+
 func NewHandler(sessions *shell.SessionManager) http.Handler {
 	mux := http.NewServeMux()
 	mux.HandleFunc("GET /healthz", health)
@@ -30,8 +44,40 @@ func NewHandler(sessions *shell.SessionManager) http.Handler {
 	mux.HandleFunc("POST /api/exec", func(w http.ResponseWriter, r *http.Request) {
 		exec(w, r, sessions)
 	})
+	mux.HandleFunc("POST /api/complete", func(w http.ResponseWriter, r *http.Request) {
+		complete(w, r, sessions)
+	})
 
 	return mux
+}
+
+func complete(w http.ResponseWriter, r *http.Request, sessions *shell.SessionManager) {
+	var request completeRequest
+	if err := json.NewDecoder(r.Body).Decode(&request); err != nil {
+		http.Error(w, "invalid JSON", http.StatusBadRequest)
+		return
+	}
+
+	result, sessionID, err := sessions.Complete(
+		request.SessionID,
+		request.Line,
+		request.Cursor,
+	)
+	if err != nil {
+		http.Error(w, "session creation failed", http.StatusInternalServerError)
+		return
+	}
+
+	response := completeResponse{
+		Start:       result.Start,
+		End:         result.End,
+		Replacement: result.Replacement,
+		Candidates:  result.Candidates,
+		SessionID:   sessionID,
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	_ = json.NewEncoder(w).Encode(response)
 }
 
 func health(w http.ResponseWriter, _ *http.Request) {

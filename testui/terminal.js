@@ -32,8 +32,43 @@ document.addEventListener("keydown", async (event) => {
     event.preventDefault();
     await execute("clear");
     command.focus();
+    return;
+  }
+
+  if (event.key === "Tab" && document.activeElement === command) {
+    event.preventDefault();
+    await complete();
   }
 });
+
+async function complete() {
+  const line = command.value;
+  const cursor = command.selectionStart;
+
+  try {
+    const response = await fetch("/api/complete", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ line, cursor, session_id: sessionId }),
+    });
+    const result = await response.json();
+    sessionId = result.session_id;
+    sessionStorage.setItem("vaultsh-session", sessionId);
+
+    if (!result.replacement) {
+      return;
+    }
+
+    command.value =
+      line.slice(0, result.start) +
+      result.replacement +
+      line.slice(result.end);
+    const nextCursor = result.start + result.replacement.length;
+    command.setSelectionRange(nextCursor, nextCursor);
+  } catch {
+    return;
+  }
+}
 
 async function execute(line) {
   try {
