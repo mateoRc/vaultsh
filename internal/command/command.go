@@ -31,3 +31,8 @@ type Command interface {
 	Description() string
 	Execute(args []string, input Input) Result
 }
+
+func IsHidden(current Command) bool {
+	hidden, ok := current.(interface{ Hidden() bool })
+	return ok && hidden.Hidden()
+}

@@ -151,6 +151,7 @@
 - [ ] Single-command triggers
 - [ ] Command-sequence triggers
 - [ ] Session-scoped progress
-- [ ] `hire mateo` returns a sudo-access hint
-- [ ] `sudo hire mateo -s <salary>` requires a salary
-- [ ] Return a counter-offer at 1.5× the submitted salary
+- [x] `hire mateo` returns a sudo-access hint
+- [x] `sudo hire mateo -s <salary>` requires a salary
+- [x] Return a counter-offer at 1.5× the submitted salary
+- [x] Accept a pending counter-offer with `y` or `Y`
