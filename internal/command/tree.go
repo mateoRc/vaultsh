@@ -23,6 +23,10 @@ func (Tree) Description() string {
 	return "Print a directory tree"
 }
 
+func (Tree) Usage() string {
+	return "tree [path]"
+}
+
 func (t Tree) Execute(args []string) Result {
 	if len(args) > 1 {
 		return Result{

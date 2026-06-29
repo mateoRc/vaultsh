@@ -22,6 +22,10 @@ func (Cd) Description() string {
 	return "Change the current directory"
 }
 
+func (Cd) Usage() string {
+	return "cd [directory]"
+}
+
 func (c Cd) Execute(args []string) Result {
 	if len(args) > 1 {
 		return Result{

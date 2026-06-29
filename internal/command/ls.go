@@ -1,6 +1,7 @@
 package command
 
 import (
+	"fmt"
 	"strings"
 
 	"github.com/mateom/vaultsh/internal/filesystem"
@@ -22,8 +23,40 @@ func (Ls) Description() string {
 	return "List directory contents"
 }
 
-func (l Ls) Execute([]string) Result {
-	children := l.workingDirectory.Directory().Children()
+func (Ls) Usage() string {
+	return "ls [path]"
+}
+
+func (l Ls) Execute(args []string) Result {
+	if len(args) > 1 {
+		return Result{
+			Output:   "usage: ls [path]",
+			ExitCode: 2,
+		}
+	}
+
+	target := "."
+	if len(args) == 1 {
+		target = args[0]
+	}
+
+	node, _, err := l.workingDirectory.Resolve(target)
+	if err != nil {
+		return Result{
+			Output:   fmt.Sprintf("ls: %s: %v", target, err),
+			ExitCode: 1,
+		}
+	}
+
+	directory, ok := node.(*filesystem.Directory)
+	if !ok {
+		return Result{
+			Output:   node.Name(),
+			ExitCode: 0,
+		}
+	}
+
+	children := directory.Children()
 	names := make([]string, 0, len(children))
 	for _, child := range children {
 		name := child.Name()
