@@ -71,7 +71,7 @@ A shell engine featuring a virtual filesystem, command parser, and extensible co
 ## Parser
 - [x] Tokenizer
 - [x] Lexer
-- [ ] Parser
+- [x] Parser
 - [ ] AST
 
 ## Pipes
