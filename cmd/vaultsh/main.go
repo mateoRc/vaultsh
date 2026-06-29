@@ -2,8 +2,9 @@ package main
 
 import (
 	"context"
-	"log"
+	"log/slog"
 	"net/http"
+	"os"
 	"os/signal"
 	"syscall"
 	"time"
@@ -13,6 +14,8 @@ import (
 )
 
 func main() {
+	logger := slog.New(slog.NewJSONHandler(os.Stdout, nil))
+
 	engine := shell.New()
 
 	server := &http.Server{
@@ -20,7 +23,7 @@ func main() {
 		Handler: httpapi.NewHandler(engine),
 	}
 
-	log.Printf("vaultsh listening on %s", server.Addr)
+	logger.Info("server started", "address", server.Addr)
 
 	serverErrors := make(chan error, 1)
 	go func() {
@@ -37,17 +40,18 @@ func main() {
 	select {
 	case err := <-serverErrors:
 		if err != nil && err != http.ErrServerClosed {
-			log.Fatal(err)
+			logger.Error("server failed", "error", err)
+			os.Exit(1)
 		}
 		return
 	case <-signalContext.Done():
-		log.Print("shutting down vaultsh")
+		logger.Info("server stopping")
 	}
 
 	shutdownContext, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
 	if err := server.Shutdown(shutdownContext); err != nil {
-		log.Printf("graceful shutdown failed: %v", err)
+		logger.Error("graceful shutdown failed", "error", err)
 	}
 }
