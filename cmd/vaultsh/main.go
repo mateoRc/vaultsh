@@ -44,6 +44,8 @@ func main() {
 	)
 	defer stop()
 
+	go sessions.RunCleanup(signalContext, shell.DefaultSessionCleanupInterval)
+
 	select {
 	case err := <-serverErrors:
 		if err != nil && err != http.ErrServerClosed {
