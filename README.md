@@ -87,6 +87,8 @@ A shell engine featuring a virtual filesystem, command parser, and extensible co
 - [ ] sort
 
 ## Command Options
+- [x] `ls -a`, `ls -l`, and combined forms
+- [ ] File timestamps and `ls -t`
 - [ ] `ls -R [path]`
 - [ ] `tree -L <depth> [path]`
 - [ ] `cat -n <file>`
