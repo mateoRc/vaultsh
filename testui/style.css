@@ -21,6 +21,8 @@ h1 {
 
 #output {
   min-height: 4rem;
+  max-height: 60vh;
+  overflow-y: auto;
   white-space: pre-wrap;
 }
 
