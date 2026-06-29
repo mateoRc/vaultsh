@@ -34,7 +34,8 @@ A shell engine featuring a virtual filesystem, command parser, and extensible co
 
 ### Developer Experience
 - [x] Graceful shutdown
-- [ ] Structured logging
+- [x] Structured logging
+- [ ] Verbose mode (`--verbose`) for command execution logs
 - [ ] Basic tests
 
 ---
