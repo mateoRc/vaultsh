@@ -40,7 +40,7 @@ func (Ls) Usage() string {
 	return "ls [-al] [path]"
 }
 
-func (l Ls) Execute(args []string) Result {
+func (l Ls) Execute(args []string, _ Input) Result {
 	options, result := parseLsOptions(args)
 	if result != nil {
 		return *result

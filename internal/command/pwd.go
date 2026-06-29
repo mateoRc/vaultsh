@@ -18,7 +18,7 @@ func (Pwd) Description() string {
 	return "Print the current directory"
 }
 
-func (p Pwd) Execute([]string) Result {
+func (p Pwd) Execute([]string, Input) Result {
 	return Result{
 		Output:   p.workingDirectory.Path(),
 		ExitCode: ExitSuccess,

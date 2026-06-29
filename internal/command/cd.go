@@ -26,7 +26,7 @@ func (Cd) Usage() string {
 	return "cd [directory]"
 }
 
-func (c Cd) Execute(args []string) Result {
+func (c Cd) Execute(args []string, _ Input) Result {
 	if len(args) > 1 {
 		return Result{
 			Output:   "usage: cd [directory]",

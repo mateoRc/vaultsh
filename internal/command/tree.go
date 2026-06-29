@@ -27,7 +27,7 @@ func (Tree) Usage() string {
 	return "tree [path]"
 }
 
-func (t Tree) Execute(args []string) Result {
+func (t Tree) Execute(args []string, _ Input) Result {
 	if len(args) > 1 {
 		return Result{
 			Output:   "usage: tree [path]",

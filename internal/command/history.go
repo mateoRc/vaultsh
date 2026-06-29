@@ -23,7 +23,7 @@ func (History) Description() string {
 	return "List commands from this session"
 }
 
-func (h History) Execute([]string) Result {
+func (h History) Execute([]string, Input) Result {
 	var output strings.Builder
 	for index, line := range h.store.Entries() {
 		if index > 0 {

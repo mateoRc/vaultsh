@@ -25,7 +25,7 @@ func (Help) Usage() string {
 	return "help [command]"
 }
 
-func (h Help) Execute(args []string) Result {
+func (h Help) Execute(args []string, _ Input) Result {
 	if len(args) > 1 {
 		return Result{
 			Output:   "usage: help [command]",
