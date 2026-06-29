@@ -10,6 +10,7 @@ import (
 
 type Engine struct {
 	commands *command.Registry
+	context  *ExecutionContext
 }
 
 func New() *Engine {
@@ -17,8 +18,12 @@ func New() *Engine {
 }
 
 func NewWithRoot(root *filesystem.Directory) *Engine {
+	return NewWithContext(NewExecutionContext(root))
+}
+
+func NewWithContext(context *ExecutionContext) *Engine {
 	commands := command.NewRegistry()
-	workingDirectory := filesystem.NewWorkingDirectory(root)
+	workingDirectory := context.WorkingDirectory()
 
 	commands.Register(command.About{})
 	commands.Register(command.NewCat(workingDirectory))
@@ -29,7 +34,10 @@ func NewWithRoot(root *filesystem.Directory) *Engine {
 	commands.Register(command.NewPwd(workingDirectory))
 	commands.Register(command.NewTree(workingDirectory))
 
-	return &Engine{commands: commands}
+	return &Engine{
+		commands: commands,
+		context:  context,
+	}
 }
 
 func (e *Engine) Execute(line string) command.Result {

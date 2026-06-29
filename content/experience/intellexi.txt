@@ -1,0 +1,6 @@
+Software Developer, Intellexi
+February 2023 - December 2023
+
+Owned backend delivery for a financial services platform. Built services under
+evolving requirements and strict regulatory constraints while collaborating
+with client stakeholders and the system architect.

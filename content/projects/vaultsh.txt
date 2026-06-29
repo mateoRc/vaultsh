@@ -1,0 +1,7 @@
+Vaultsh
+
+A read-only virtual shell engine written in Go. It provides an HTTP execution
+API, an extensible command system, session-ready execution contexts, and a
+virtual filesystem with path resolution.
+
+The project is developed in small, tested iterations and runs in Docker.

@@ -1,0 +1,5 @@
+Languages: Python, Java, JavaScript, TypeScript
+Backend: Flask, Spring, Node.js
+Cloud and infrastructure: AWS, Docker, Kubernetes, OpenShift
+Engineering: distributed systems, event-driven systems, APIs, search,
+reliability, performance, code review, mentoring

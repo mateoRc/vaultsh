@@ -1,0 +1,7 @@
+Mateo Mahmutovic is a senior backend engineer with more than six years of
+experience building production systems in cybersecurity, telecom, financial
+services, and pharma.
+
+He works primarily with Python and Java, with a focus on backend services,
+distributed systems, internal tools, and shared libraries. He values reliable,
+pragmatic solutions and mentors engineers who are new to the team.

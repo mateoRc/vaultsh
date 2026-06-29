@@ -9,14 +9,21 @@ import (
 	"syscall"
 	"time"
 
+	"github.com/mateom/vaultsh/content"
 	"github.com/mateom/vaultsh/internal/httpapi"
 	"github.com/mateom/vaultsh/internal/shell"
+	"github.com/mateom/vaultsh/internal/storage"
 )
 
 func main() {
 	logger := slog.New(slog.NewJSONHandler(os.Stdout, nil))
 
-	engine := shell.New()
+	root, err := storage.Load(content.Files)
+	if err != nil {
+		logger.Error("content loading failed", "error", err)
+		os.Exit(1)
+	}
+	engine := shell.NewWithRoot(root)
 
 	server := &http.Server{
 		Addr:    ":8080",
