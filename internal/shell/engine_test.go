@@ -4,6 +4,7 @@ import (
 	"testing"
 
 	"github.com/mateom/vaultsh/internal/command"
+	"github.com/mateom/vaultsh/internal/filesystem"
 )
 
 func TestEngineExecute(t *testing.T) {
@@ -19,7 +20,9 @@ func TestEngineExecute(t *testing.T) {
 				Output: "Available commands:" +
 					"\n  about - Describe Vaultsh" +
 					"\n  clear - Clear the terminal" +
-					"\n  help - List available commands",
+					"\n  help - List available commands" +
+					"\n  ls - List directory contents" +
+					"\n  pwd - Print the current directory",
 				ExitCode: 0,
 			},
 		},
@@ -40,10 +43,26 @@ func TestEngineExecute(t *testing.T) {
 			},
 		},
 		{
-			name: "unknown command",
+			name: "pwd",
 			line: "pwd",
 			want: command.Result{
-				Output:   "command not found: pwd",
+				Output:   "/",
+				ExitCode: 0,
+			},
+		},
+		{
+			name: "ls empty directory",
+			line: "ls",
+			want: command.Result{
+				Output:   "",
+				ExitCode: 0,
+			},
+		},
+		{
+			name: "unknown command",
+			line: "missing",
+			want: command.Result{
+				Output:   "command not found: missing",
 				ExitCode: 127,
 			},
 		},
@@ -57,5 +76,24 @@ func TestEngineExecute(t *testing.T) {
 				t.Errorf("Execute(%q) = %#v, want %#v", tt.line, got, tt.want)
 			}
 		})
+	}
+}
+
+func TestEngineListDirectory(t *testing.T) {
+	root := filesystem.NewDirectory("")
+	if err := root.Add(filesystem.NewDirectory("docs")); err != nil {
+		t.Fatalf("Add(docs): %v", err)
+	}
+	if err := root.Add(filesystem.NewFile("about.txt", "hello")); err != nil {
+		t.Fatalf("Add(about.txt): %v", err)
+	}
+
+	result := NewWithRoot(root).Execute("ls")
+
+	if result.Output != "about.txt\ndocs" {
+		t.Errorf("ls output = %q, want %q", result.Output, "about.txt\ndocs")
+	}
+	if result.ExitCode != 0 {
+		t.Errorf("ls exit code = %d, want 0", result.ExitCode)
 	}
 }

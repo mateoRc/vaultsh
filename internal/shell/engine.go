@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	"github.com/mateom/vaultsh/internal/command"
+	"github.com/mateom/vaultsh/internal/filesystem"
 )
 
 type Engine struct {
@@ -11,10 +12,18 @@ type Engine struct {
 }
 
 func New() *Engine {
+	return NewWithRoot(filesystem.NewDirectory(""))
+}
+
+func NewWithRoot(root *filesystem.Directory) *Engine {
 	commands := command.NewRegistry()
+	workingDirectory := filesystem.NewWorkingDirectory(root)
+
 	commands.Register(command.About{})
 	commands.Register(command.Clear{})
 	commands.Register(command.NewHelp(commands))
+	commands.Register(command.NewLs(workingDirectory))
+	commands.Register(command.NewPwd(workingDirectory))
 
 	return &Engine{commands: commands}
 }
