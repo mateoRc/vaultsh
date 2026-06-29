@@ -19,11 +19,11 @@ A shell engine featuring a virtual filesystem, command parser, and extensible co
 ### Shell Engine
 - [x] Engine
 - [x] Command registry
-- [ ] Command interface
 
 ### Commands
-- [ ] help
+- [x] help
 - [ ] about
+- [ ] Promote commands to Command interface
 - [ ] clear (frontend only)
 
 ### Frontend (Test UI)
