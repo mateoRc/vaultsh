@@ -49,23 +49,32 @@ func (e *Engine) Execute(line string) command.Result {
 			ExitCode: command.ExitUsage,
 		}
 	}
-	if len(tokens) == 0 {
+	commands, err := parser.Parse(tokens)
+	if err != nil {
+		return command.Result{
+			Output:   fmt.Sprintf("syntax error: %v", err),
+			ExitCode: command.ExitUsage,
+		}
+	}
+	if len(commands) == 0 {
 		return command.Result{}
+	}
+	if len(commands) > 1 {
+		return command.Result{
+			Output:   "pipelines are not supported yet",
+			ExitCode: command.ExitUsage,
+		}
 	}
 	e.context.History().Add(line)
 
-	run, found := e.commands.Find(tokens[0].Value)
+	current := commands[0]
+	run, found := e.commands.Find(current[0])
 	if !found {
 		return command.Result{
-			Output:   fmt.Sprintf("command not found: %s", tokens[0].Value),
+			Output:   fmt.Sprintf("command not found: %s", current[0]),
 			ExitCode: command.ExitNotFound,
 		}
 	}
 
-	args := make([]string, 0, len(tokens)-1)
-	for _, token := range tokens[1:] {
-		args = append(args, token.Value)
-	}
-
-	return run.Execute(args)
+	return run.Execute(current[1:])
 }

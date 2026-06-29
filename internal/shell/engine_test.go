@@ -190,6 +190,21 @@ func TestEngineSyntaxError(t *testing.T) {
 	}
 }
 
+func TestEngineRejectsPipelineUntilSupported(t *testing.T) {
+	result := New().Execute("cat about.txt | grep role")
+
+	if result.Output != "pipelines are not supported yet" {
+		t.Errorf(
+			"output = %q, want %q",
+			result.Output,
+			"pipelines are not supported yet",
+		)
+	}
+	if result.ExitCode != command.ExitUsage {
+		t.Errorf("exit code = %d, want %d", result.ExitCode, command.ExitUsage)
+	}
+}
+
 func TestEngineCommandUsage(t *testing.T) {
 	engine := New()
 
