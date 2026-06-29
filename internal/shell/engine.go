@@ -7,20 +7,19 @@ import (
 )
 
 type Engine struct {
-	commands map[string]command.Func
+	commands *command.Registry
 }
 
 func New() *Engine {
-	return &Engine{
-		commands: map[string]command.Func{
-			"about": command.About,
-			"help":  command.Help,
-		},
-	}
+	commands := command.NewRegistry()
+	commands.Register(command.About{})
+	commands.Register(command.NewHelp(commands))
+
+	return &Engine{commands: commands}
 }
 
 func (e *Engine) Execute(line string) command.Result {
-	run, found := e.commands[line]
+	run, found := e.commands.Find(line)
 	if !found {
 		return command.Result{
 			Output:   fmt.Sprintf("command not found: %s", line),
@@ -28,5 +27,5 @@ func (e *Engine) Execute(line string) command.Result {
 		}
 	}
 
-	return run()
+	return run.Execute()
 }

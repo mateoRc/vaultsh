@@ -23,7 +23,7 @@ A shell engine featuring a virtual filesystem, command parser, and extensible co
 ### Commands
 - [x] help
 - [x] about
-- [ ] Promote commands to Command interface
+- [x] Promote commands to Command interface
 - [ ] clear (frontend only)
 
 ### Frontend (Test UI)

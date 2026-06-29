@@ -5,4 +5,8 @@ type Result struct {
 	ExitCode int
 }
 
-type Func func() Result
+type Command interface {
+	Name() string
+	Description() string
+	Execute() Result
+}
