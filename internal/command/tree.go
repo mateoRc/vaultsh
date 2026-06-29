@@ -2,10 +2,13 @@ package command
 
 import (
 	"fmt"
+	"strconv"
 	"strings"
 
 	"github.com/mateom/vaultsh/internal/filesystem"
 )
+
+const unlimitedTreeDepth = -1
 
 type Tree struct {
 	workingDirectory *filesystem.WorkingDirectory
@@ -24,20 +27,13 @@ func (Tree) Description() string {
 }
 
 func (Tree) Usage() string {
-	return "tree [path]"
+	return "tree [-L depth] [path]"
 }
 
 func (t Tree) Execute(args []string, _ Input) Result {
-	if len(args) > 1 {
-		return Result{
-			Output:   "usage: tree [path]",
-			ExitCode: ExitUsage,
-		}
-	}
-
-	target := "."
-	if len(args) == 1 {
-		target = args[0]
+	depth, target, result := parseTreeOptions(args)
+	if result != nil {
+		return *result
 	}
 
 	node, resolvedPath, err := t.workingDirectory.Resolve(target)
@@ -56,7 +52,7 @@ func (t Tree) Execute(args []string, _ Input) Result {
 		label = "/"
 	}
 	output.WriteString(label)
-	writeChildren(&output, node, "")
+	writeChildren(&output, node, "", depth, 0)
 
 	return Result{
 		Output:   output.String(),
@@ -64,7 +60,61 @@ func (t Tree) Execute(args []string, _ Input) Result {
 	}
 }
 
-func writeChildren(output *strings.Builder, node filesystem.Node, prefix string) {
+func parseTreeOptions(args []string) (int, string, *Result) {
+	depth := unlimitedTreeDepth
+	target := "."
+	pathSet := false
+
+	for index := 0; index < len(args); index++ {
+		if args[index] == "-L" {
+			if index+1 >= len(args) {
+				return 0, "", treeUsage()
+			}
+			value, err := strconv.Atoi(args[index+1])
+			if err != nil || value < 1 {
+				return 0, "", &Result{
+					Output:   fmt.Sprintf("tree: invalid depth: %s", args[index+1]),
+					ExitCode: ExitUsage,
+				}
+			}
+			depth = value
+			index++
+			continue
+		}
+		if strings.HasPrefix(args[index], "-") && args[index] != "-" {
+			return 0, "", &Result{
+				Output:   fmt.Sprintf("tree: unknown option: %s", args[index]),
+				ExitCode: ExitUsage,
+			}
+		}
+		if pathSet {
+			return 0, "", treeUsage()
+		}
+		target = args[index]
+		pathSet = true
+	}
+
+	return depth, target, nil
+}
+
+func treeUsage() *Result {
+	return &Result{
+		Output:   "usage: tree [-L depth] [path]",
+		ExitCode: ExitUsage,
+	}
+}
+
+func writeChildren(
+	output *strings.Builder,
+	node filesystem.Node,
+	prefix string,
+	maxDepth int,
+	depth int,
+) {
+	if maxDepth != unlimitedTreeDepth && depth >= maxDepth {
+		return
+	}
+
 	directory, ok := node.(*filesystem.Directory)
 	if !ok {
 		return
@@ -81,6 +131,6 @@ func writeChildren(output *strings.Builder, node filesystem.Node, prefix string)
 		}
 
 		fmt.Fprintf(output, "\n%s%s%s", prefix, connector, child.Name())
-		writeChildren(output, child, childPrefix)
+		writeChildren(output, child, childPrefix, maxDepth, depth+1)
 	}
 }

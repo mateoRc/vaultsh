@@ -3,6 +3,7 @@ role: Software Developer
 period: 2023-02 to 2023-12
 location: Croatia, hybrid
 industry: financial services
+industry: Goverment services
 
 stack: Java, Spring boot, OracleDB, MongoDB, Kafka
 stack: Docker

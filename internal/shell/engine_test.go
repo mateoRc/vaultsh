@@ -261,7 +261,7 @@ func TestEngineCommandUsage(t *testing.T) {
 	}{
 		{line: "cd one two", want: "usage: cd [directory]"},
 		{line: "cat", want: "usage: cat [-n] [file]"},
-		{line: "tree one two", want: "usage: tree [path]"},
+		{line: "tree one two", want: "usage: tree [-L depth] [path]"},
 	}
 
 	for _, tt := range tests {
@@ -488,6 +488,42 @@ func TestEngineTree(t *testing.T) {
 	}
 	if result.ExitCode != 0 {
 		t.Errorf("tree exit code = %d, want 0", result.ExitCode)
+	}
+}
+
+func TestEngineTreeDepth(t *testing.T) {
+	root := filesystem.NewDirectory("")
+	docs := filesystem.NewDirectory("docs")
+	nested := filesystem.NewDirectory("nested")
+	if err := root.Add(docs); err != nil {
+		t.Fatalf("Add(docs): %v", err)
+	}
+	if err := docs.Add(nested); err != nil {
+		t.Fatalf("Add(nested): %v", err)
+	}
+	if err := nested.Add(filesystem.NewFile("readme.txt", "hello")); err != nil {
+		t.Fatalf("Add(readme.txt): %v", err)
+	}
+
+	result := NewWithRoot(root).Execute("tree -L 1")
+	want := ".\n└── docs"
+
+	if result.Output != want {
+		t.Errorf("tree output = %q, want %q", result.Output, want)
+	}
+	if result.ExitCode != command.ExitSuccess {
+		t.Errorf("exit code = %d, want %d", result.ExitCode, command.ExitSuccess)
+	}
+}
+
+func TestEngineTreeRejectsInvalidDepth(t *testing.T) {
+	result := New().Execute("tree -L 0")
+
+	if result.Output != "tree: invalid depth: 0" {
+		t.Errorf("tree output = %q", result.Output)
+	}
+	if result.ExitCode != command.ExitUsage {
+		t.Errorf("exit code = %d, want %d", result.ExitCode, command.ExitUsage)
 	}
 }
 
