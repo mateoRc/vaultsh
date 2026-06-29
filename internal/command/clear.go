@@ -12,7 +12,7 @@ func (Clear) Description() string {
 
 func (Clear) Execute([]string) Result {
 	return Result{
-		ExitCode: 0,
+		ExitCode: ExitSuccess,
 		Action:   ActionClear,
 	}
 }

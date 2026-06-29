@@ -29,7 +29,7 @@ func (h Help) Execute(args []string) Result {
 	if len(args) > 1 {
 		return Result{
 			Output:   "usage: help [command]",
-			ExitCode: 2,
+			ExitCode: ExitUsage,
 		}
 	}
 
@@ -38,7 +38,7 @@ func (h Help) Execute(args []string) Result {
 		if !found {
 			return Result{
 				Output:   fmt.Sprintf("help: no help topic for %s", args[0]),
-				ExitCode: 1,
+				ExitCode: ExitFailure,
 			}
 		}
 
@@ -49,7 +49,7 @@ func (h Help) Execute(args []string) Result {
 
 		return Result{
 			Output:   fmt.Sprintf("Usage: %s\n%s", usage, current.Description()),
-			ExitCode: 0,
+			ExitCode: ExitSuccess,
 		}
 	}
 
@@ -61,6 +61,6 @@ func (h Help) Execute(args []string) Result {
 
 	return Result{
 		Output:   output.String(),
-		ExitCode: 0,
+		ExitCode: ExitSuccess,
 	}
 }

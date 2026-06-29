@@ -13,6 +13,6 @@ func (About) Description() string {
 func (About) Execute([]string) Result {
 	return Result{
 		Output:   "Vaultsh is a read-only virtual shell engine.",
-		ExitCode: 0,
+		ExitCode: ExitSuccess,
 	}
 }

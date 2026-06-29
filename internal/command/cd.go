@@ -30,7 +30,7 @@ func (c Cd) Execute(args []string) Result {
 	if len(args) > 1 {
 		return Result{
 			Output:   "usage: cd [directory]",
-			ExitCode: 2,
+			ExitCode: ExitUsage,
 		}
 	}
 
@@ -42,9 +42,9 @@ func (c Cd) Execute(args []string) Result {
 	if err := c.workingDirectory.Change(target); err != nil {
 		return Result{
 			Output:   fmt.Sprintf("cd: %s: %v", target, err),
-			ExitCode: 1,
+			ExitCode: ExitFailure,
 		}
 	}
 
-	return Result{ExitCode: 0}
+	return Result{ExitCode: ExitSuccess}
 }
