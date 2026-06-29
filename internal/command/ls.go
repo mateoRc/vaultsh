@@ -26,7 +26,11 @@ func (l Ls) Execute([]string) Result {
 	children := l.workingDirectory.Directory().Children()
 	names := make([]string, 0, len(children))
 	for _, child := range children {
-		names = append(names, child.Name())
+		name := child.Name()
+		if child.Kind() == filesystem.KindDirectory {
+			name += "/"
+		}
+		names = append(names, name)
 	}
 
 	return Result{
