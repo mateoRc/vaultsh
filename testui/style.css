@@ -234,6 +234,7 @@ h1::after {
   min-height: 30rem;
   padding: clamp(1rem, 3vw, 1.5rem);
   color: #e9eee9;
+  cursor: text;
   font: 0.9rem/1.65 ui-monospace, SFMono-Regular, Consolas, monospace;
 }
 
