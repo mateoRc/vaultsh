@@ -16,7 +16,9 @@ func TestEngineExecute(t *testing.T) {
 			name: "help",
 			line: "help",
 			want: command.Result{
-				Output:   "Available commands:\n  about\n  help",
+				Output: "Available commands:" +
+					"\n  about - Describe Vaultsh" +
+					"\n  help - List available commands",
 				ExitCode: 0,
 			},
 		},
