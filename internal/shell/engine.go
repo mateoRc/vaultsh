@@ -27,6 +27,7 @@ func NewWithRoot(root *filesystem.Directory) *Engine {
 	commands.Register(command.NewHelp(commands))
 	commands.Register(command.NewLs(workingDirectory))
 	commands.Register(command.NewPwd(workingDirectory))
+	commands.Register(command.NewTree(workingDirectory))
 
 	return &Engine{commands: commands}
 }

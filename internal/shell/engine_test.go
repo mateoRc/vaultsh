@@ -24,7 +24,8 @@ func TestEngineExecute(t *testing.T) {
 					"\n  clear - Clear the terminal" +
 					"\n  help - List available commands" +
 					"\n  ls - List directory contents" +
-					"\n  pwd - Print the current directory",
+					"\n  pwd - Print the current directory" +
+					"\n  tree - Print a directory tree",
 				ExitCode: 0,
 			},
 		},
@@ -131,6 +132,7 @@ func TestEngineCommandUsage(t *testing.T) {
 	}{
 		{line: "cd one two", want: "usage: cd [directory]"},
 		{line: "cat", want: "usage: cat <file>"},
+		{line: "tree one two", want: "usage: tree [path]"},
 	}
 
 	for _, tt := range tests {
@@ -143,5 +145,29 @@ func TestEngineCommandUsage(t *testing.T) {
 				t.Errorf("output = %q, want %q", result.Output, tt.want)
 			}
 		})
+	}
+}
+
+func TestEngineTree(t *testing.T) {
+	root := filesystem.NewDirectory("")
+	docs := filesystem.NewDirectory("docs")
+	if err := root.Add(filesystem.NewFile("about.txt", "hello")); err != nil {
+		t.Fatalf("Add(about.txt): %v", err)
+	}
+	if err := root.Add(docs); err != nil {
+		t.Fatalf("Add(docs): %v", err)
+	}
+	if err := docs.Add(filesystem.NewFile("readme.txt", "hello")); err != nil {
+		t.Fatalf("Add(readme.txt): %v", err)
+	}
+
+	result := NewWithRoot(root).Execute("tree")
+	want := ".\n├── about.txt\n└── docs\n    └── readme.txt"
+
+	if result.Output != want {
+		t.Errorf("tree output = %q, want %q", result.Output, want)
+	}
+	if result.ExitCode != 0 {
+		t.Errorf("tree exit code = %d, want 0", result.ExitCode)
 	}
 }
