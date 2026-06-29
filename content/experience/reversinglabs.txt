@@ -1,7 +1,14 @@
-Software Developer, ReversingLabs
-January 2024 - Present
-
-Leads backend work across distributed, event-driven cybersecurity systems.
-Builds Python and Flask services, processing pipelines, internal frameworks,
-search functionality, and third-party integrations. Coordinates delivery,
-reviews code, and mentors engineers.
+company: ReversingLabs
+role: Software Developer
+period: 2024-present
+location: Croatia, remote
+focus: distributed event-driven cybersecurity systems
+focus: Python and Flask backend services
+focus: backend processing pipelines
+focus: internal frameworks and shared components
+focus: search and query processing
+focus: third-party integrations
+responsibility: technical ownership
+responsibility: delivery coordination
+responsibility: code review
+responsibility: mentoring

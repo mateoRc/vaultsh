@@ -1,6 +1,12 @@
-Software Developer, Intellexi
-February 2023 - December 2023
-
-Owned backend delivery for a financial services platform. Built services under
-evolving requirements and strict regulatory constraints while collaborating
-with client stakeholders and the system architect.
+company: Intellexi
+role: Software Developer
+period: 2023-02 to 2023-12
+location: Croatia, hybrid
+industry: financial services
+focus: backend services
+focus: evolving requirements
+focus: data protection and security
+responsibility: backend delivery
+responsibility: technical decisions
+collaboration: client stakeholders
+collaboration: system architect
