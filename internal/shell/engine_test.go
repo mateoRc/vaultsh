@@ -22,6 +22,7 @@ func TestEngineExecute(t *testing.T) {
 					"\n  cat - Print file contents" +
 					"\n  cd - Change the current directory" +
 					"\n  clear - Clear the terminal" +
+					"\n  grep - Filter lines by a regular expression" +
 					"\n  help - List available commands" +
 					"\n  history - List commands from this session" +
 					"\n  ls - List directory contents" +
@@ -322,6 +323,57 @@ func TestEnginePipelineStopsOnFailure(t *testing.T) {
 			result.ExitCode,
 			command.ExitFailure,
 		)
+	}
+}
+
+func TestEngineGrepPipeline(t *testing.T) {
+	root := filesystem.NewDirectory("")
+	content := "language: Python\nlanguage: Go\nbackend: Flask\n"
+	if err := root.Add(filesystem.NewFile("skills.txt", content)); err != nil {
+		t.Fatalf("Add(skills.txt): %v", err)
+	}
+
+	result := NewWithRoot(root).Execute(`cat skills.txt | grep "^language:"`)
+
+	want := "language: Python\nlanguage: Go"
+	if result.Output != want {
+		t.Errorf("grep output = %q, want %q", result.Output, want)
+	}
+	if result.ExitCode != command.ExitSuccess {
+		t.Errorf("grep exit code = %d, want %d", result.ExitCode, command.ExitSuccess)
+	}
+}
+
+func TestEngineGrepOptions(t *testing.T) {
+	root := filesystem.NewDirectory("")
+	content := "language: Python\nlanguage: Go\nbackend: Flask\n"
+	if err := root.Add(filesystem.NewFile("skills.txt", content)); err != nil {
+		t.Fatalf("Add(skills.txt): %v", err)
+	}
+
+	result := NewWithRoot(root).Execute("grep -in python skills.txt")
+
+	if result.Output != "1:language: Python" {
+		t.Errorf("grep output = %q, want %q", result.Output, "1:language: Python")
+	}
+	if result.ExitCode != command.ExitSuccess {
+		t.Errorf("grep exit code = %d, want %d", result.ExitCode, command.ExitSuccess)
+	}
+}
+
+func TestEngineGrepNoMatch(t *testing.T) {
+	root := filesystem.NewDirectory("")
+	if err := root.Add(filesystem.NewFile("skills.txt", "language: Go\n")); err != nil {
+		t.Fatalf("Add(skills.txt): %v", err)
+	}
+
+	result := NewWithRoot(root).Execute("grep Python skills.txt")
+
+	if result.Output != "" {
+		t.Errorf("grep output = %q, want empty", result.Output)
+	}
+	if result.ExitCode != command.ExitFailure {
+		t.Errorf("grep exit code = %d, want %d", result.ExitCode, command.ExitFailure)
 	}
 }
 

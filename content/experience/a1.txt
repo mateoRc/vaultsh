@@ -4,7 +4,10 @@ period: 2021-10 to 2023-01
 location: Croatia, hybrid
 industry: telecom
 language: TypeScript
+language: Javascript
+language: Java
 framework: Node.js
+framework: Spring boot
 focus: cloud microservices
 focus: AWS, Docker, Kubernetes, and OpenShift
 focus: Salesforce integrations

@@ -29,6 +29,7 @@ func NewWithContext(context *ExecutionContext) *Engine {
 	commands.Register(command.NewCat(workingDirectory))
 	commands.Register(command.NewCd(workingDirectory))
 	commands.Register(command.Clear{})
+	commands.Register(command.NewGrep(workingDirectory))
 	commands.Register(command.NewHelp(commands))
 	commands.Register(command.NewHistory(context.History()))
 	commands.Register(command.NewLs(workingDirectory))
