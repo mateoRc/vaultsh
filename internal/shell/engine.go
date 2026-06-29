@@ -30,6 +30,7 @@ func NewWithContext(context *ExecutionContext) *Engine {
 	commands.Register(command.NewCd(workingDirectory))
 	commands.Register(command.Clear{})
 	commands.Register(command.NewHelp(commands))
+	commands.Register(command.NewHistory(context.History()))
 	commands.Register(command.NewLs(workingDirectory))
 	commands.Register(command.NewPwd(workingDirectory))
 	commands.Register(command.NewTree(workingDirectory))
@@ -45,6 +46,7 @@ func (e *Engine) Execute(line string) command.Result {
 	if len(fields) == 0 {
 		return command.Result{}
 	}
+	e.context.History().Add(line)
 
 	run, found := e.commands.Find(fields[0])
 	if !found {

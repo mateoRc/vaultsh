@@ -23,6 +23,7 @@ func TestEngineExecute(t *testing.T) {
 					"\n  cd - Change the current directory" +
 					"\n  clear - Clear the terminal" +
 					"\n  help - List available commands" +
+					"\n  history - List commands from this session" +
 					"\n  ls - List directory contents" +
 					"\n  pwd - Print the current directory" +
 					"\n  tree - Print a directory tree",
@@ -240,5 +241,21 @@ func TestEnginesKeepIndependentWorkingDirectories(t *testing.T) {
 	}
 	if result := second.Execute("pwd"); result.Output != "/" {
 		t.Errorf("second pwd output = %q, want /", result.Output)
+	}
+}
+
+func TestEngineHistory(t *testing.T) {
+	engine := New()
+	engine.Execute("pwd")
+	engine.Execute("about")
+
+	result := engine.Execute("history")
+	want := "1  pwd\n2  about\n3  history"
+
+	if result.Output != want {
+		t.Errorf("history output = %q, want %q", result.Output, want)
+	}
+	if result.ExitCode != 0 {
+		t.Errorf("history exit code = %d, want 0", result.ExitCode)
 	}
 }
