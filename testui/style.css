@@ -100,47 +100,6 @@ h1::after {
   background: #dce8ff;
 }
 
-.sticker {
-  display: grid;
-  width: 8.5rem;
-  aspect-ratio: 1;
-  margin-top: 1.25rem;
-  place-content: center;
-  padding: 1.2rem;
-  transform: rotate(5deg);
-  background: #f0a735;
-  clip-path: polygon(
-    50% 0%,
-    61% 18%,
-    78% 6%,
-    80% 28%,
-    100% 27%,
-    87% 46%,
-    100% 59%,
-    78% 64%,
-    82% 86%,
-    61% 76%,
-    50% 100%,
-    39% 78%,
-    18% 92%,
-    21% 68%,
-    0% 64%,
-    14% 48%,
-    0% 31%,
-    22% 29%,
-    20% 7%,
-    40% 18%
-  );
-  font: 800 0.75rem/1.15 ui-sans-serif, system-ui, sans-serif;
-  text-align: center;
-  text-transform: uppercase;
-}
-
-.sticker span {
-  display: block;
-  font-size: 0.65rem;
-}
-
 .engine-note {
   display: flex;
   align-items: end;
@@ -420,19 +379,6 @@ h1::after {
 
   .terminal-body {
     min-height: 14rem;
-  }
-}
-
-@media (min-width: 52rem) {
-  .intro {
-    padding-right: 9rem;
-  }
-
-  .sticker {
-    position: absolute;
-    right: 0;
-    bottom: -0.25rem;
-    margin: 0;
   }
 }
 
