@@ -14,15 +14,30 @@ fetch("/healthz")
 form.addEventListener("submit", async (event) => {
   event.preventDefault();
 
+  const line = command.value;
+  if (!line.trim()) {
+    command.focus();
+    return;
+  }
+
+  command.value = "";
+  command.focus();
+
   try {
     const response = await fetch("/api/exec", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ line: command.value }),
+      body: JSON.stringify({ line }),
     });
     const result = await response.json();
-    output.textContent = result.output;
+    appendEntry(line, result.output);
   } catch {
-    output.textContent = "request failed";
+    appendEntry(line, "request failed");
   }
 });
+
+function appendEntry(line, result) {
+  const separator = output.textContent ? "\n" : "";
+  output.textContent += `${separator}$ ${line}\n${result}\n`;
+  output.scrollTop = output.scrollHeight;
+}

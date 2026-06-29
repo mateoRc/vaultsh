@@ -29,8 +29,8 @@ A shell engine featuring a virtual filesystem, command parser, and extensible co
 ### Frontend (Test UI)
 - [x] Send commands to API
 - [x] Render output
-- [ ] Basic history
-- [ ] Auto focus
+- [x] Basic history
+- [x] Auto focus
 
 ### Developer Experience
 - [ ] Graceful shutdown
