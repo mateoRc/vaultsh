@@ -171,3 +171,23 @@ func TestEngineTree(t *testing.T) {
 		t.Errorf("tree exit code = %d, want 0", result.ExitCode)
 	}
 }
+
+func TestEnginesKeepIndependentWorkingDirectories(t *testing.T) {
+	root := filesystem.NewDirectory("")
+	if err := root.Add(filesystem.NewDirectory("docs")); err != nil {
+		t.Fatalf("Add(docs): %v", err)
+	}
+	first := NewWithContext(NewExecutionContext(root))
+	second := NewWithContext(NewExecutionContext(root))
+
+	if result := first.Execute("cd docs"); result.ExitCode != 0 {
+		t.Fatalf("cd exit code = %d, output = %q", result.ExitCode, result.Output)
+	}
+
+	if result := first.Execute("pwd"); result.Output != "/docs" {
+		t.Errorf("first pwd output = %q, want /docs", result.Output)
+	}
+	if result := second.Execute("pwd"); result.Output != "/" {
+		t.Errorf("second pwd output = %q, want /", result.Output)
+	}
+}

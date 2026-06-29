@@ -57,7 +57,7 @@ A shell engine featuring a virtual filesystem, command parser, and extensible co
 - [x] tree
 
 ## Sessions
-- [ ] Execution context
+- [x] Execution context
 - [ ] Session ID
 - [ ] Command history
 - [ ] Working directory per session
@@ -91,7 +91,7 @@ A shell engine featuring a virtual filesystem, command parser, and extensible co
 # v3
 
 ## Storage
-- [ ] Embedded content
+- [x] Embedded content
 - [ ] SQLite backend
 - [ ] Filesystem abstraction
 
