@@ -141,10 +141,3 @@ func parseGrepOptions(args []string) (grepOptions, *Result) {
 	}
 	return options, nil
 }
-
-func lines(data string) []string {
-	if data == "" {
-		return nil
-	}
-	return strings.Split(strings.TrimSuffix(data, "\n"), "\n")
-}

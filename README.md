@@ -122,9 +122,7 @@ curl -X POST http://localhost:8080/api/exec \
   -d '{"line":"cd experience","session_id":"<session-id>"}'
 ```
 
-## Planned Advanced Examples
-
-These examples document the intended interface but are not implemented yet:
+## Advanced Examples
 
 Compose multiple pipeline stages:
 
@@ -147,7 +145,7 @@ cat skills.txt | tail -n 5
 cat skills.txt | wc -l
 ```
 
-Use planned command options:
+The following command options are planned but not implemented yet:
 
 ```sh
 cat -n about.txt
@@ -236,10 +234,10 @@ ls -lt
 
 ## Built-ins
 - [x] grep
-- [ ] head
-- [ ] tail
-- [ ] wc
-- [ ] sort
+- [x] head
+- [x] tail
+- [x] wc
+- [x] sort
 
 ## Command Options
 - [x] `ls -a`, `ls -l`, and combined forms
@@ -248,8 +246,8 @@ ls -lt
 - [ ] `tree -L <depth> [path]`
 - [ ] `cat -n <file>`
 - [x] `grep -i` and `grep -n`
-- [ ] `head -n <count>` and `tail -n <count>`
-- [ ] `sort -r`
+- [x] `head -n <count>` and `tail -n <count>`
+- [x] `sort -r`
 - [ ] Verbose output (`--verbose`) returned with command results
 
 ---

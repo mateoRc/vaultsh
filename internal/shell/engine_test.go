@@ -23,11 +23,15 @@ func TestEngineExecute(t *testing.T) {
 					"\n  cd - Change the current directory" +
 					"\n  clear - Clear the terminal" +
 					"\n  grep - Filter lines by a regular expression" +
+					"\n  head - Print the first lines" +
 					"\n  help - List available commands" +
 					"\n  history - List commands from this session" +
 					"\n  ls - List directory contents" +
 					"\n  pwd - Print the current directory" +
-					"\n  tree - Print a directory tree",
+					"\n  sort - Sort lines" +
+					"\n  tail - Print the last lines" +
+					"\n  tree - Print a directory tree" +
+					"\n  wc - Count lines, words and bytes",
 				ExitCode: 0,
 			},
 		},
@@ -374,6 +378,62 @@ func TestEngineGrepNoMatch(t *testing.T) {
 	}
 	if result.ExitCode != command.ExitFailure {
 		t.Errorf("grep exit code = %d, want %d", result.ExitCode, command.ExitFailure)
+	}
+}
+
+func TestEngineLineFilters(t *testing.T) {
+	root := filesystem.NewDirectory("")
+	if err := root.Add(filesystem.NewFile("values.txt", "c\nb\na\n")); err != nil {
+		t.Fatalf("Add(values.txt): %v", err)
+	}
+	engine := NewWithRoot(root)
+
+	tests := []struct {
+		line string
+		want string
+	}{
+		{line: "head -n 2 values.txt", want: "c\nb"},
+		{line: "tail -n 2 values.txt", want: "b\na"},
+		{line: "sort values.txt", want: "a\nb\nc"},
+		{line: "sort -r values.txt", want: "c\nb\na"},
+		{line: "wc -l values.txt", want: "3"},
+		{line: "wc values.txt", want: "3 3 6"},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.line, func(t *testing.T) {
+			result := engine.Execute(tt.line)
+			if result.Output != tt.want {
+				t.Errorf("output = %q, want %q", result.Output, tt.want)
+			}
+			if result.ExitCode != command.ExitSuccess {
+				t.Errorf(
+					"exit code = %d, want %d",
+					result.ExitCode,
+					command.ExitSuccess,
+				)
+			}
+		})
+	}
+}
+
+func TestEngineMultiStagePipeline(t *testing.T) {
+	root := filesystem.NewDirectory("")
+	content := "language: Python\nbackend: Flask\nlanguage: Go\nlanguage: Java\n"
+	if err := root.Add(filesystem.NewFile("skills.txt", content)); err != nil {
+		t.Fatalf("Add(skills.txt): %v", err)
+	}
+
+	result := NewWithRoot(root).Execute(
+		`cat skills.txt | grep "^language:" | sort | head -n 2`,
+	)
+
+	want := "language: Go\nlanguage: Java"
+	if result.Output != want {
+		t.Errorf("pipeline output = %q, want %q", result.Output, want)
+	}
+	if result.ExitCode != command.ExitSuccess {
+		t.Errorf("exit code = %d, want %d", result.ExitCode, command.ExitSuccess)
 	}
 }
 

@@ -30,11 +30,15 @@ func NewWithContext(context *ExecutionContext) *Engine {
 	commands.Register(command.NewCd(workingDirectory))
 	commands.Register(command.Clear{})
 	commands.Register(command.NewGrep(workingDirectory))
+	commands.Register(command.NewHead(workingDirectory))
 	commands.Register(command.NewHelp(commands))
 	commands.Register(command.NewHistory(context.History()))
 	commands.Register(command.NewLs(workingDirectory))
 	commands.Register(command.NewPwd(workingDirectory))
+	commands.Register(command.NewSort(workingDirectory))
+	commands.Register(command.NewTail(workingDirectory))
 	commands.Register(command.NewTree(workingDirectory))
+	commands.Register(command.NewWc(workingDirectory))
 
 	return &Engine{
 		commands: commands,
