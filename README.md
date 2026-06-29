@@ -58,9 +58,9 @@ A shell engine featuring a virtual filesystem, command parser, and extensible co
 
 ## Sessions
 - [x] Execution context
-- [ ] Session ID
+- [x] Session ID
 - [ ] Command history
-- [ ] Working directory per session
+- [x] Working directory per session
 
 ---
 
@@ -92,8 +92,13 @@ A shell engine featuring a virtual filesystem, command parser, and extensible co
 
 ## Storage
 - [x] Embedded content
+- [ ] Session store abstraction
+- [ ] External session store
 - [ ] SQLite backend
 - [ ] Filesystem abstraction
+
+## Authentication
+- [ ] JWT authentication
 
 ## Performance
 - [ ] LRU cache

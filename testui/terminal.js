@@ -2,6 +2,7 @@ const status = document.querySelector("#status");
 const form = document.querySelector("#command-form");
 const command = document.querySelector("#command");
 const output = document.querySelector("#output");
+let sessionId = sessionStorage.getItem("vaultsh-session") || "";
 
 fetch("/healthz")
   .then((response) => {
@@ -39,9 +40,11 @@ async function execute(line) {
     const response = await fetch("/api/exec", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ line }),
+      body: JSON.stringify({ line, session_id: sessionId }),
     });
     const result = await response.json();
+    sessionId = result.session_id;
+    sessionStorage.setItem("vaultsh-session", sessionId);
     handleResult(line, result);
   } catch {
     appendEntry(line, "request failed");
