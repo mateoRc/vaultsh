@@ -66,8 +66,57 @@ cat skills.txt
 history
 ```
 
+## Command Reference
+
+| Command | Usage | Purpose |
+| --- | --- | --- |
+| `help` | `help [command]` | List commands or show command-specific usage |
+| `about` | `about` | Describe Vaultsh |
+| `pwd` | `pwd` | Print the current virtual directory |
+| `ls` | `ls [-alR] [path]` | List files and directories |
+| `cd` | `cd [directory]` | Change the current virtual directory |
+| `cat` | `cat [-n] [file]` | Print a file or pipeline input |
+| `tree` | `tree [-L depth] [path]` | Print a directory tree |
+| `grep` | `grep [-in] <pattern> [file]` | Filter lines using a regular expression |
+| `head` | `head [-n count] [file]` | Print the first lines |
+| `tail` | `tail [-n count] [file]` | Print the last lines |
+| `wc` | `wc [-lwc] [file]` | Count lines, words, and bytes |
+| `sort` | `sort [-r] [file]` | Sort lines |
+| `history` | `history` | List commands from the current session |
+| `clear` | `clear` | Clear the terminal through a backend action |
+
 Directories end with `/` in standard `ls` output. `ls -a` includes hidden
 entries, while `ls -l` includes the read-only mode and file size.
+
+List the root with hidden entries and long formatting:
+
+```sh
+ls -la /
+```
+
+Example output:
+
+```text
+-r--r--r--      428 about.txt
+-r--r--r--      120 education.txt
+dr-xr-xr-x        - experience/
+dr-xr-xr-x        - projects/
+-r--r--r--      537 skills.txt
+```
+
+File sizes change when embedded content is edited.
+
+List recursively:
+
+```sh
+ls -R experience
+```
+
+Limit a tree to two levels:
+
+```sh
+tree -L 2 /
+```
 
 Paths can be absolute or relative:
 
@@ -85,6 +134,21 @@ cat "file with spaces.txt"
 cat file\ with\ spaces.txt
 ```
 
+Print numbered content:
+
+```sh
+cat -n education.txt
+```
+
+Example output:
+
+```text
+     1	institution: University of Rijeka
+     2	degree: Master of Education (MEd)
+     3	field: Information Technology
+     4	graduation_year: 2019
+```
+
 ## Pipelines
 
 Pipeline execution and regular-expression filtering are available:
@@ -98,10 +162,65 @@ cat experience/reversinglabs.txt | grep -n highlight
 Each stage receives the previous stage's output. Execution stops when a stage
 returns a non-zero exit code.
 
+List programming languages alphabetically:
+
+```sh
+cat skills.txt | grep "^language:" | sort
+```
+
+Show the first three ReversingLabs highlights:
+
+```sh
+cat experience/reversinglabs.txt | grep "^highlight:" | head -n 3
+```
+
+Count A1 stack groups:
+
+```sh
+cat experience/a1.txt | grep "^stack:" | wc -l
+```
+
+Show numbered, case-insensitive matches:
+
+```sh
+cat skills.txt | grep -in "python"
+```
+
+Display the five most recent history entries:
+
+```sh
+history | tail -n 5
+```
+
+Reverse-sort the backend skills:
+
+```sh
+cat skills.txt | grep "^backend:" | sort -r
+```
+
+Commands that accept `[file]` can read either a virtual file directly or
+pipeline input:
+
+```sh
+head -n 5 skills.txt
+cat skills.txt | head -n 5
+```
+
+`grep` returns exit code `1` when no lines match. Syntax and option errors return
+exit code `2`. Unknown commands return `127`.
+
 ## Keyboard Shortcuts
 
 - `Tab`: complete commands and virtual filesystem paths
 - `Ctrl+L`: run the backend-owned `clear` command
+
+Autocomplete uses the current session directory:
+
+```text
+cat exp<Tab>       -> cat experience/
+cd experience
+cat rev<Tab>       -> cat reversinglabs.txt
+```
 
 ## HTTP API
 
@@ -120,6 +239,20 @@ the working directory and history:
 curl -X POST http://localhost:8080/api/exec \
   -H "Content-Type: application/json" \
   -d '{"line":"cd experience","session_id":"<session-id>"}'
+```
+
+Continue in the same directory:
+
+```sh
+curl -X POST http://localhost:8080/api/exec \
+  -H "Content-Type: application/json" \
+  -d '{"line":"pwd","session_id":"<session-id>"}'
+```
+
+Expected command output:
+
+```text
+/experience
 ```
 
 ## Advanced Examples
