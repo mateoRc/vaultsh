@@ -1,7 +1,9 @@
 package shell
 
 import (
+	"context"
 	"testing"
+	"time"
 
 	"github.com/mateom/vaultsh/internal/filesystem"
 )
@@ -83,5 +85,108 @@ func TestSessionManagerReplacesUnknownSessionID(t *testing.T) {
 	}
 	if sessionID == "" || sessionID == "unknown" {
 		t.Errorf("session ID = %q, want a new server-generated ID", sessionID)
+	}
+}
+
+func TestSessionManagerCleansUpExpiredSessions(t *testing.T) {
+	now := time.Date(2026, time.January, 1, 0, 0, 0, 0, time.UTC)
+	manager := NewSessionManagerWithConfig(
+		filesystem.NewDirectory(""),
+		SessionConfig{
+			TTL: time.Hour,
+			Now: func() time.Time {
+				return now
+			},
+		},
+	)
+
+	_, sessionID, err := manager.Execute("", "pwd")
+	if err != nil {
+		t.Fatalf("Execute(): %v", err)
+	}
+
+	now = now.Add(time.Hour)
+	if removed := manager.CleanupExpired(); removed != 1 {
+		t.Errorf("CleanupExpired() = %d, want 1", removed)
+	}
+
+	_, replacementID, err := manager.Execute(sessionID, "pwd")
+	if err != nil {
+		t.Fatalf("Execute(expired): %v", err)
+	}
+	if replacementID == sessionID {
+		t.Error("expired session ID was reused")
+	}
+}
+
+func TestSessionManagerRefreshesActivity(t *testing.T) {
+	now := time.Date(2026, time.January, 1, 0, 0, 0, 0, time.UTC)
+	manager := NewSessionManagerWithConfig(
+		filesystem.NewDirectory(""),
+		SessionConfig{
+			TTL: time.Hour,
+			Now: func() time.Time {
+				return now
+			},
+		},
+	)
+
+	_, sessionID, err := manager.Execute("", "pwd")
+	if err != nil {
+		t.Fatalf("first Execute(): %v", err)
+	}
+	now = now.Add(50 * time.Minute)
+	if _, _, err := manager.Complete(sessionID, "c", 1); err != nil {
+		t.Fatalf("Complete(): %v", err)
+	}
+	now = now.Add(20 * time.Minute)
+
+	if removed := manager.CleanupExpired(); removed != 0 {
+		t.Errorf("CleanupExpired() = %d, want 0", removed)
+	}
+}
+
+func TestSessionManagerRejectsExpiredSessionBeforeCleanup(t *testing.T) {
+	now := time.Date(2026, time.January, 1, 0, 0, 0, 0, time.UTC)
+	manager := NewSessionManagerWithConfig(
+		filesystem.NewDirectory(""),
+		SessionConfig{
+			TTL: time.Hour,
+			Now: func() time.Time {
+				return now
+			},
+		},
+	)
+
+	_, sessionID, err := manager.Execute("", "pwd")
+	if err != nil {
+		t.Fatalf("first Execute(): %v", err)
+	}
+	now = now.Add(time.Hour)
+
+	_, replacementID, err := manager.Execute(sessionID, "pwd")
+	if err != nil {
+		t.Fatalf("second Execute(): %v", err)
+	}
+	if replacementID == sessionID {
+		t.Error("expired session ID was reused before cleanup")
+	}
+}
+
+func TestSessionManagerCleanupStopsWithContext(t *testing.T) {
+	manager := NewSessionManager(filesystem.NewDirectory(""))
+	ctx, cancel := context.WithCancel(context.Background())
+	stopped := make(chan struct{})
+
+	go func() {
+		manager.RunCleanup(ctx, time.Hour)
+		close(stopped)
+	}()
+	cancel()
+
+	select {
+	case <-stopped:
+	case <-time.After(time.Second):
+		t.Fatal("RunCleanup() did not stop after context cancellation")
 	}
 }
