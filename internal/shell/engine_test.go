@@ -101,6 +101,41 @@ func TestEngineListDirectory(t *testing.T) {
 	}
 }
 
+func TestEngineListPath(t *testing.T) {
+	root := filesystem.NewDirectory("")
+	docs := filesystem.NewDirectory("docs")
+	if err := root.Add(docs); err != nil {
+		t.Fatalf("Add(docs): %v", err)
+	}
+	if err := docs.Add(filesystem.NewFile("readme.txt", "hello")); err != nil {
+		t.Fatalf("Add(readme.txt): %v", err)
+	}
+
+	result := NewWithRoot(root).Execute("ls /docs")
+
+	if result.Output != "readme.txt" {
+		t.Errorf("ls output = %q, want %q", result.Output, "readme.txt")
+	}
+	if result.ExitCode != 0 {
+		t.Errorf("ls exit code = %d, want 0", result.ExitCode)
+	}
+}
+
+func TestEngineCommandHelp(t *testing.T) {
+	result := New().Execute("help cat")
+
+	if result.Output != "Usage: cat <file>\nPrint file contents" {
+		t.Errorf(
+			"help output = %q, want %q",
+			result.Output,
+			"Usage: cat <file>\nPrint file contents",
+		)
+	}
+	if result.ExitCode != 0 {
+		t.Errorf("help exit code = %d, want 0", result.ExitCode)
+	}
+}
+
 func TestEngineChangeDirectoryAndReadFile(t *testing.T) {
 	root := filesystem.NewDirectory("")
 	docs := filesystem.NewDirectory("docs")

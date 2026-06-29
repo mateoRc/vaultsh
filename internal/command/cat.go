@@ -22,6 +22,10 @@ func (Cat) Description() string {
 	return "Print file contents"
 }
 
+func (Cat) Usage() string {
+	return "cat <file>"
+}
+
 func (c Cat) Execute(args []string) Result {
 	if len(args) != 1 {
 		return Result{

@@ -55,6 +55,7 @@ A shell engine featuring a virtual filesystem, command parser, and extensible co
 - [x] cd
 - [x] cat
 - [x] tree
+- [x] Command-specific help
 
 ## Sessions
 - [x] Execution context
