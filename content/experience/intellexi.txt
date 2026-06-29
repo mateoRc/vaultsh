@@ -3,10 +3,12 @@ role: Software Developer
 period: 2023-02 to 2023-12
 location: Croatia, hybrid
 industry: financial services
+language: Java
+framework: not specified
 focus: backend services
 focus: evolving requirements
 focus: data protection and security
 responsibility: backend delivery
 responsibility: technical decisions
-collaboration: client stakeholders
-collaboration: system architect
+responsibility: client stakeholder collaboration
+responsibility: system architect collaboration

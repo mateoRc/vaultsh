@@ -5,11 +5,10 @@ location: Croatia, hybrid
 industry: pharma
 language: Java
 language: C#
-language: Javascript
-technology: JSP
-technology: Spring
+language: JavaScript
 framework: Spring
 focus: enterprise document management
+focus: JSP-based application development
 focus: regulated systems
 responsibility: core product features
 responsibility: production issue resolution

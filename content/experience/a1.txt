@@ -4,11 +4,11 @@ period: 2021-10 to 2023-01
 location: Croatia, hybrid
 industry: telecom
 language: TypeScript
-runtime: Node.js
-cloud: AWS
-infrastructure: Docker
-infrastructure: Kubernetes
-infrastructure: OpenShift
+framework: Node.js
 focus: cloud microservices
+focus: AWS, Docker, Kubernetes, and OpenShift
 focus: Salesforce integrations
 focus: internal automation tools
+responsibility: backend development
+responsibility: operational efficiency
+responsibility: system reliability

@@ -1,3 +1,4 @@
 institution: University of Rijeka
 degree: Master of Education (MEd)
 field: Information Technology
+graduation_year: 2019
