@@ -158,15 +158,22 @@ h1::after {
   font-size: 0.78rem;
 }
 
-.engine-note a {
+.profile-links {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: end;
+  gap: 0.85rem;
+}
+
+.profile-links a {
   border-bottom: 2px solid #1d1f1e;
   color: inherit;
   font-weight: 800;
   text-decoration: none;
 }
 
-.engine-note a:hover,
-.engine-note a:focus-visible {
+.profile-links a:hover,
+.profile-links a:focus-visible {
   border-color: #f05a28;
   color: #f05a28;
 }
@@ -353,6 +360,15 @@ h1::after {
 
   .hint {
     margin-left: 0;
+  }
+
+  .engine-note {
+    align-items: start;
+    flex-direction: column;
+  }
+
+  .profile-links {
+    justify-content: start;
   }
 
 }
