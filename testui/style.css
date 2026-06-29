@@ -108,6 +108,14 @@ h1::after {
   background: #dce8ff;
 }
 
+.tags span:nth-child(5) {
+  background: #eadfff;
+}
+
+.tags span:nth-child(6) {
+  background: #ead6bd;
+}
+
 .engine-note {
   display: flex;
   align-items: end;
