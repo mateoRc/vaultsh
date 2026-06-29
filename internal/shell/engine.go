@@ -16,6 +16,7 @@ type Engine struct {
 func New() *Engine {
 	return &Engine{
 		commands: map[string]commandFunc{
+			"about": about,
 			"help": help,
 		},
 	}
@@ -31,11 +32,4 @@ func (e *Engine) Execute(line string) Result {
 	}
 
 	return command()
-}
-
-func help() Result {
-	return Result{
-		Output:   "Available commands:\n  help",
-		ExitCode: 0,
-	}
 }
