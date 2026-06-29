@@ -3,29 +3,41 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-  <meta name="description" content="Explore Mateo Mahmutović's backend engineering experience through a virtual shell.">
-  <title>Mateo's Vault</title>
+  <meta name="description" content="Vaultsh is a read-only virtual shell engine exposing Mateo Mahmutović's portfolio.">
+  <title>Vaultsh by Mateo Mahmutović</title>
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
   <main class="page">
     <header class="intro">
-      <p class="eyebrow">Definitely a backend portfolio</p>
-      <h1>Mateo's Vault</h1>
+      <p class="eyebrow">Read-only virtual shell engine</p>
+      <h1>Vaultsh</h1>
+      <p class="byline">by Mateo Mahmutović</p>
       <p class="summary">
-        Senior backend engineering, packaged as a tiny read-only shell.
-        Browse the work, inspect the stack, break absolutely nothing.
+        A backend shell engine exposing a virtual filesystem containing my
+        portfolio. Browse the work, inspect the stack, break absolutely nothing.
       </p>
       <div class="tags" aria-label="Primary engineering focus">
-        <span>Production tested*</span>
-        <span>Zero signup required</span>
-        <span>100% read-only</span>
+        <span>Backend</span>
+        <span>Infrastructure</span>
+        <span>Search</span>
+        <span>Developer tooling</span>
       </div>
       <div class="sticker" aria-label="Not endorsed by Bash">
         <span>Not endorsed</span>
         by /bin/bash
       </div>
     </header>
+
+    <div class="engine-note">
+      <span>
+        <strong>Powered by Vaultsh</strong>
+        Read-only virtual shell engine
+      </span>
+      <a href="https://github.com/mateom/vaultsh" target="_blank" rel="noreferrer">
+        GitHub ↗
+      </a>
+    </div>
 
     <section class="terminal" aria-label="Interactive portfolio terminal">
       <header class="terminal-bar">
@@ -39,8 +51,7 @@
       </header>
 
       <div class="terminal-body">
-        <pre id="output" aria-live="polite">Mateo Mahmutović
-Senior Backend Engineer
+        <pre id="output" aria-live="polite">Vaultsh v0.1
 
 Type 'help' to begin.</pre>
 
@@ -60,7 +71,6 @@ Type 'help' to begin.</pre>
     </section>
 
     <p class="hint">Tab completes your thoughts · Ctrl+L deletes the evidence</p>
-    <p class="disclaimer">*Mostly in the “real systems with real consequences” sense.</p>
   </main>
   <script src="terminal.js"></script>
 </body>
