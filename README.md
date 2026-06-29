@@ -14,7 +14,7 @@ A shell engine featuring a virtual filesystem, command parser, and extensible co
 ### HTTP API
 - [x] POST /api/exec
 - [x] Request/response models
-- [ ] Unknown command handling
+- [x] Unknown command handling
 
 ### Shell Engine
 - [ ] Engine
