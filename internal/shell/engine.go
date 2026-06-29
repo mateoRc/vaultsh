@@ -24,7 +24,9 @@ func NewWithRoot(root *filesystem.Directory) *Engine {
 func NewWithContext(context *ExecutionContext) *Engine {
 	commands := command.NewRegistry()
 	workingDirectory := context.WorkingDirectory()
+	negotiation := context.Negotiation()
 
+	commands.Register(command.NewAcceptOffer("Y", negotiation))
 	commands.Register(command.About{})
 	commands.Register(command.NewCat(workingDirectory))
 	commands.Register(command.NewCd(workingDirectory))
@@ -33,12 +35,15 @@ func NewWithContext(context *ExecutionContext) *Engine {
 	commands.Register(command.NewHead(workingDirectory))
 	commands.Register(command.NewHelp(commands))
 	commands.Register(command.NewHistory(context.History()))
+	commands.Register(command.Hire{})
 	commands.Register(command.NewLs(workingDirectory))
 	commands.Register(command.NewPwd(workingDirectory))
 	commands.Register(command.NewSort(workingDirectory))
+	commands.Register(command.NewSudo(negotiation))
 	commands.Register(command.NewTail(workingDirectory))
 	commands.Register(command.NewTree(workingDirectory))
 	commands.Register(command.NewWc(workingDirectory))
+	commands.Register(command.NewAcceptOffer("y", negotiation))
 
 	return &Engine{
 		commands: commands,

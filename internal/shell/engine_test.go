@@ -595,3 +595,93 @@ func TestEngineHistory(t *testing.T) {
 		t.Errorf("history exit code = %d, want 0", result.ExitCode)
 	}
 }
+
+func TestEngineHireEasterEgg(t *testing.T) {
+	engine := New()
+
+	result := engine.Execute("hire mateo")
+
+	want := "hire: permission denied\nhint: try sudo hire mateo -s <salary>"
+	if result.Output != want {
+		t.Errorf("hire output = %q, want %q", result.Output, want)
+	}
+	if result.ExitCode != command.ExitFailure {
+		t.Errorf("exit code = %d, want %d", result.ExitCode, command.ExitFailure)
+	}
+}
+
+func TestEngineSudoHireEasterEgg(t *testing.T) {
+	result := New().Execute("sudo hire mateo -s 100000")
+
+	want := "sudo: access granted\n" +
+		"salary offered: 100000.00\n" +
+		"counter-offer: 150000.00\n" +
+		"accept counter-offer? [Y/y]"
+	if result.Output != want {
+		t.Errorf("sudo hire output = %q, want %q", result.Output, want)
+	}
+	if result.ExitCode != command.ExitSuccess {
+		t.Errorf("exit code = %d, want %d", result.ExitCode, command.ExitSuccess)
+	}
+}
+
+func TestEngineAcceptsCounterOfferOnce(t *testing.T) {
+	engine := New()
+	if result := engine.Execute("sudo hire mateo -s 100000"); result.ExitCode != command.ExitSuccess {
+		t.Fatalf("sudo hire failed: %s", result.Output)
+	}
+
+	result := engine.Execute("y")
+	want := "counter-offer accepted: 150000.00\n" +
+		"welcome aboard. paperwork has entered the chat."
+	if result.Output != want {
+		t.Errorf("accept output = %q, want %q", result.Output, want)
+	}
+	if result.ExitCode != command.ExitSuccess {
+		t.Errorf("exit code = %d, want %d", result.ExitCode, command.ExitSuccess)
+	}
+
+	result = engine.Execute("Y")
+	if result.Output != "Y: no pending counter-offer" {
+		t.Errorf("second accept output = %q", result.Output)
+	}
+	if result.ExitCode != command.ExitFailure {
+		t.Errorf("exit code = %d, want %d", result.ExitCode, command.ExitFailure)
+	}
+}
+
+func TestEngineCounterOfferIsSessionScoped(t *testing.T) {
+	first := New()
+	second := New()
+	first.Execute("sudo hire mateo -s 100000")
+
+	result := second.Execute("y")
+
+	if result.Output != "y: no pending counter-offer" {
+		t.Errorf("second session output = %q", result.Output)
+	}
+	if result.ExitCode != command.ExitFailure {
+		t.Errorf("exit code = %d, want %d", result.ExitCode, command.ExitFailure)
+	}
+}
+
+func TestEngineSudoHireRequiresValidSalary(t *testing.T) {
+	tests := []string{
+		"sudo hire mateo",
+		"sudo hire mateo -s nope",
+		"sudo hire mateo -s 0",
+	}
+
+	for _, line := range tests {
+		t.Run(line, func(t *testing.T) {
+			result := New().Execute(line)
+			if result.ExitCode != command.ExitUsage {
+				t.Errorf(
+					"exit code = %d, want %d",
+					result.ExitCode,
+					command.ExitUsage,
+				)
+			}
+		})
+	}
+}

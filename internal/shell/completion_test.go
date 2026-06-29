@@ -33,6 +33,14 @@ func TestCompleteCommandCommonPrefix(t *testing.T) {
 	}
 }
 
+func TestCompleteHidesEasterEggCommands(t *testing.T) {
+	result := New().Complete("hi", len("hi"))
+
+	if len(result.Candidates) != 1 || result.Candidates[0] != "history" {
+		t.Errorf("candidates = %q, want [history]", result.Candidates)
+	}
+}
+
 func TestCompletePath(t *testing.T) {
 	root := filesystem.NewDirectory("")
 	if err := root.Add(filesystem.NewDirectory("experience")); err != nil {

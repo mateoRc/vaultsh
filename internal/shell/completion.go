@@ -5,6 +5,7 @@ import (
 	"sort"
 	"strings"
 
+	"github.com/mateom/vaultsh/internal/command"
 	"github.com/mateom/vaultsh/internal/filesystem"
 )
 
@@ -55,6 +56,9 @@ func (e *Engine) Complete(line string, cursor int) Completion {
 func (e *Engine) completeCommand(fragment string) []string {
 	var candidates []string
 	for _, current := range e.commands.Commands() {
+		if command.IsHidden(current) {
+			continue
+		}
 		if strings.HasPrefix(current.Name(), fragment) {
 			candidates = append(candidates, current.Name())
 		}

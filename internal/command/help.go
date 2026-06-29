@@ -56,6 +56,9 @@ func (h Help) Execute(args []string, _ Input) Result {
 	var output strings.Builder
 	output.WriteString("Available commands:")
 	for _, command := range h.registry.Commands() {
+		if IsHidden(command) {
+			continue
+		}
 		fmt.Fprintf(&output, "\n  %s - %s", command.Name(), command.Description())
 	}
 
