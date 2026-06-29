@@ -2,7 +2,25 @@ const status = document.querySelector("#status");
 const form = document.querySelector("#command-form");
 const command = document.querySelector("#command");
 const output = document.querySelector("#output");
+const terminal = document.querySelector(".terminal");
 let sessionId = sessionStorage.getItem("vaultsh-session") || "";
+
+if (window.matchMedia("(pointer: fine)").matches) {
+  focusCommand();
+}
+
+terminal.addEventListener("click", (event) => {
+  if (event.target === command) {
+    return;
+  }
+  if (event.target.closest("a, button")) {
+    return;
+  }
+  if (window.getSelection()?.toString()) {
+    return;
+  }
+  focusCommand();
+});
 
 fetch("/healthz")
   .then((response) => {
@@ -17,17 +35,23 @@ function setStatus(state) {
   status.dataset.state = state;
 }
 
+function focusCommand() {
+  command.focus();
+  const end = command.value.length;
+  command.setSelectionRange(end, end);
+}
+
 form.addEventListener("submit", async (event) => {
   event.preventDefault();
 
   const line = command.value;
   if (!line.trim()) {
-    command.focus();
+    focusCommand();
     return;
   }
 
   command.value = "";
-  command.focus();
+  focusCommand();
 
   await execute(line);
 });
@@ -36,7 +60,7 @@ document.addEventListener("keydown", async (event) => {
   if (event.ctrlKey && event.key.toLowerCase() === "l") {
     event.preventDefault();
     await execute("clear");
-    command.focus();
+    focusCommand();
     return;
   }
 
