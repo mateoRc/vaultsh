@@ -22,7 +22,7 @@ func (Ls) Description() string {
 	return "List directory contents"
 }
 
-func (l Ls) Execute() Result {
+func (l Ls) Execute([]string) Result {
 	children := l.workingDirectory.Directory().Children()
 	names := make([]string, 0, len(children))
 	for _, child := range children {

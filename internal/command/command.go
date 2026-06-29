@@ -16,5 +16,5 @@ type Result struct {
 type Command interface {
 	Name() string
 	Description() string
-	Execute() Result
+	Execute(args []string) Result
 }

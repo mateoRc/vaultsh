@@ -14,7 +14,7 @@ func (stubCommand) Description() string {
 	return "test command"
 }
 
-func (stubCommand) Execute() Result {
+func (stubCommand) Execute([]string) Result {
 	return Result{}
 }
 

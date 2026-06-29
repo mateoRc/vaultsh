@@ -21,7 +21,7 @@ func (Help) Description() string {
 	return "List available commands"
 }
 
-func (h Help) Execute() Result {
+func (h Help) Execute([]string) Result {
 	var output strings.Builder
 	output.WriteString("Available commands:")
 	for _, command := range h.registry.Commands() {
