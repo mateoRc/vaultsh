@@ -6,11 +6,16 @@ let sessionId = sessionStorage.getItem("vaultsh-session") || "";
 
 fetch("/healthz")
   .then((response) => {
-    status.textContent = response.ok ? "online" : "unavailable";
+    setStatus(response.ok ? "online" : "unavailable");
   })
   .catch(() => {
-    status.textContent = "unavailable";
+    setStatus("unavailable");
   });
+
+function setStatus(state) {
+  status.textContent = state;
+  status.dataset.state = state;
+}
 
 form.addEventListener("submit", async (event) => {
   event.preventDefault();

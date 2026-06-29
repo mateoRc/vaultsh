@@ -3,27 +3,54 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Vaultsh Test UI</title>
+  <meta name="description" content="Explore Mateo Mahmutović's backend engineering experience through a virtual shell.">
+  <title>Mateo's Vault</title>
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <main class="terminal">
-    <h1>Vaultsh</h1>
-    <p>Read-only virtual shell</p>
-    <pre>Mateo Mahmutović
+  <main class="page">
+    <header class="intro">
+      <p class="eyebrow">Backend engineer portfolio</p>
+      <h1>Mateo's Vault</h1>
+      <p class="summary">
+        Explore experience, skills, and personal projects through a read-only
+        virtual shell.
+      </p>
+    </header>
+
+    <section class="terminal" aria-label="Interactive portfolio terminal">
+      <header class="terminal-bar">
+        <div class="window-controls" aria-hidden="true">
+          <span></span>
+          <span></span>
+          <span></span>
+        </div>
+        <span class="terminal-title">mateo@vault: ~</span>
+        <span id="status" class="status" data-state="checking">checking</span>
+      </header>
+
+      <div class="terminal-body">
+        <pre id="output" aria-live="polite">Mateo Mahmutović
 Senior Backend Engineer
 
-Explore experience, skills and projects
-through a virtual shell.
-
 Type 'help' to begin.</pre>
-    <p>Backend: <span id="status">checking</span></p>
-    <pre id="output" aria-live="polite"></pre>
-    <form id="command-form">
-      <label for="command">vault:~$</label>
-      <input id="command" name="command" autocomplete="off">
-      <button type="submit">Run</button>
-    </form>
+
+        <form id="command-form">
+          <label for="command">vault:~$</label>
+          <input
+            id="command"
+            name="command"
+            autocomplete="off"
+            autocapitalize="off"
+            spellcheck="false"
+            aria-label="Shell command"
+          >
+          <button class="visually-hidden" type="submit">Run command</button>
+        </form>
+      </div>
+    </section>
+
+    <p class="hint">Tab to autocomplete · Ctrl+L to clear</p>
   </main>
   <script src="terminal.js"></script>
 </body>
