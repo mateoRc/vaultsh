@@ -11,6 +11,12 @@
     <h1>Vaultsh</h1>
     <p>Disposable test UI</p>
     <p>Backend: <span id="status">checking</span></p>
+    <pre id="output" aria-live="polite"></pre>
+    <form id="command-form">
+      <label for="command">$</label>
+      <input id="command" name="command" autocomplete="off">
+      <button type="submit">Run</button>
+    </form>
   </main>
   <script src="terminal.js"></script>
 </body>
