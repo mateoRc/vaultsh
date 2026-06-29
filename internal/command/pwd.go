@@ -21,6 +21,6 @@ func (Pwd) Description() string {
 func (p Pwd) Execute([]string) Result {
 	return Result{
 		Output:   p.workingDirectory.Path(),
-		ExitCode: 0,
+		ExitCode: ExitSuccess,
 	}
 }

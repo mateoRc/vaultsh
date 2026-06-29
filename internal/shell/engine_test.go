@@ -159,6 +159,37 @@ func TestEngineChangeDirectoryAndReadFile(t *testing.T) {
 	}
 }
 
+func TestEngineQuotedArgument(t *testing.T) {
+	root := filesystem.NewDirectory("")
+	if err := root.Add(filesystem.NewFile("my file.txt", "hello")); err != nil {
+		t.Fatalf("Add(my file.txt): %v", err)
+	}
+
+	result := NewWithRoot(root).Execute(`cat "my file.txt"`)
+
+	if result.Output != "hello" {
+		t.Errorf("cat output = %q, want %q", result.Output, "hello")
+	}
+	if result.ExitCode != 0 {
+		t.Errorf("cat exit code = %d, want 0", result.ExitCode)
+	}
+}
+
+func TestEngineSyntaxError(t *testing.T) {
+	result := New().Execute(`cat "about.txt`)
+
+	if result.Output != "syntax error: unterminated quote" {
+		t.Errorf(
+			"output = %q, want %q",
+			result.Output,
+			"syntax error: unterminated quote",
+		)
+	}
+	if result.ExitCode != 2 {
+		t.Errorf("exit code = %d, want 2", result.ExitCode)
+	}
+}
+
 func TestEngineCommandUsage(t *testing.T) {
 	engine := New()
 

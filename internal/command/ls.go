@@ -31,7 +31,7 @@ func (l Ls) Execute(args []string) Result {
 	if len(args) > 1 {
 		return Result{
 			Output:   "usage: ls [path]",
-			ExitCode: 2,
+			ExitCode: ExitUsage,
 		}
 	}
 
@@ -44,7 +44,7 @@ func (l Ls) Execute(args []string) Result {
 	if err != nil {
 		return Result{
 			Output:   fmt.Sprintf("ls: %s: %v", target, err),
-			ExitCode: 1,
+			ExitCode: ExitFailure,
 		}
 	}
 
@@ -52,7 +52,7 @@ func (l Ls) Execute(args []string) Result {
 	if !ok {
 		return Result{
 			Output:   node.Name(),
-			ExitCode: 0,
+			ExitCode: ExitSuccess,
 		}
 	}
 
@@ -68,6 +68,6 @@ func (l Ls) Execute(args []string) Result {
 
 	return Result{
 		Output:   strings.Join(names, "\n"),
-		ExitCode: 0,
+		ExitCode: ExitSuccess,
 	}
 }

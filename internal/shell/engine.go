@@ -2,10 +2,10 @@ package shell
 
 import (
 	"fmt"
-	"strings"
 
 	"github.com/mateom/vaultsh/internal/command"
 	"github.com/mateom/vaultsh/internal/filesystem"
+	"github.com/mateom/vaultsh/internal/parser"
 )
 
 type Engine struct {
@@ -42,19 +42,25 @@ func NewWithContext(context *ExecutionContext) *Engine {
 }
 
 func (e *Engine) Execute(line string) command.Result {
-	fields := strings.Fields(line)
-	if len(fields) == 0 {
+	tokens, err := parser.Tokenize(line)
+	if err != nil {
+		return command.Result{
+			Output:   fmt.Sprintf("syntax error: %v", err),
+			ExitCode: command.ExitUsage,
+		}
+	}
+	if len(tokens) == 0 {
 		return command.Result{}
 	}
 	e.context.History().Add(line)
 
-	run, found := e.commands.Find(fields[0])
+	run, found := e.commands.Find(tokens[0])
 	if !found {
 		return command.Result{
-			Output:   fmt.Sprintf("command not found: %s", fields[0]),
-			ExitCode: 127,
+			Output:   fmt.Sprintf("command not found: %s", tokens[0]),
+			ExitCode: command.ExitNotFound,
 		}
 	}
 
-	return run.Execute(fields[1:])
+	return run.Execute(tokens[1:])
 }

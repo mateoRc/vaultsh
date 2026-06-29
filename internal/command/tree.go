@@ -31,7 +31,7 @@ func (t Tree) Execute(args []string) Result {
 	if len(args) > 1 {
 		return Result{
 			Output:   "usage: tree [path]",
-			ExitCode: 2,
+			ExitCode: ExitUsage,
 		}
 	}
 
@@ -44,7 +44,7 @@ func (t Tree) Execute(args []string) Result {
 	if err != nil {
 		return Result{
 			Output:   fmt.Sprintf("tree: %s: %v", target, err),
-			ExitCode: 1,
+			ExitCode: ExitFailure,
 		}
 	}
 
@@ -60,7 +60,7 @@ func (t Tree) Execute(args []string) Result {
 
 	return Result{
 		Output:   output.String(),
-		ExitCode: 0,
+		ExitCode: ExitSuccess,
 	}
 }
 

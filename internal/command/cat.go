@@ -30,7 +30,7 @@ func (c Cat) Execute(args []string) Result {
 	if len(args) != 1 {
 		return Result{
 			Output:   "usage: cat <file>",
-			ExitCode: 2,
+			ExitCode: ExitUsage,
 		}
 	}
 
@@ -38,7 +38,7 @@ func (c Cat) Execute(args []string) Result {
 	if err != nil {
 		return Result{
 			Output:   fmt.Sprintf("cat: %s: %v", args[0], err),
-			ExitCode: 1,
+			ExitCode: ExitFailure,
 		}
 	}
 
@@ -46,12 +46,12 @@ func (c Cat) Execute(args []string) Result {
 	if !ok {
 		return Result{
 			Output:   fmt.Sprintf("cat: %s: is a directory", args[0]),
-			ExitCode: 1,
+			ExitCode: ExitFailure,
 		}
 	}
 
 	return Result{
 		Output:   file.Content(),
-		ExitCode: 0,
+		ExitCode: ExitSuccess,
 	}
 }

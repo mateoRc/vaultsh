@@ -34,6 +34,6 @@ func (h History) Execute([]string) Result {
 
 	return Result{
 		Output:   output.String(),
-		ExitCode: 0,
+		ExitCode: ExitSuccess,
 	}
 }
