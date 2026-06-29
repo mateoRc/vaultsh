@@ -49,17 +49,17 @@ func (e *Engine) Execute(line string) command.Result {
 			ExitCode: command.ExitUsage,
 		}
 	}
-	commands, err := parser.Parse(tokens)
+	syntaxTree, err := parser.Parse(tokens)
 	if err != nil {
 		return command.Result{
 			Output:   fmt.Sprintf("syntax error: %v", err),
 			ExitCode: command.ExitUsage,
 		}
 	}
-	if len(commands) == 0 {
+	if len(syntaxTree.Pipeline) == 0 {
 		return command.Result{}
 	}
-	if len(commands) > 1 {
+	if len(syntaxTree.Pipeline) > 1 {
 		return command.Result{
 			Output:   "pipelines are not supported yet",
 			ExitCode: command.ExitUnsupported,
@@ -67,14 +67,14 @@ func (e *Engine) Execute(line string) command.Result {
 	}
 	e.context.History().Add(line)
 
-	current := commands[0]
-	run, found := e.commands.Find(current[0])
+	current := syntaxTree.Pipeline[0]
+	run, found := e.commands.Find(current.Name)
 	if !found {
 		return command.Result{
-			Output:   fmt.Sprintf("command not found: %s", current[0]),
+			Output:   fmt.Sprintf("command not found: %s", current.Name),
 			ExitCode: command.ExitNotFound,
 		}
 	}
 
-	return run.Execute(current[1:])
+	return run.Execute(current.Args)
 }

@@ -4,27 +4,32 @@ import "errors"
 
 var ErrUnexpectedPipe = errors.New("unexpected pipe")
 
-func Parse(tokens []Token) ([][]string, error) {
+func Parse(tokens []Token) (SyntaxTree, error) {
 	if len(tokens) == 0 {
-		return nil, nil
+		return SyntaxTree{}, nil
 	}
 
-	commands := make([][]string, 1)
+	commands := make([]CommandNode, 1)
 	for _, token := range tokens {
 		if token.Kind == TokenPipe {
-			if len(commands[len(commands)-1]) == 0 {
-				return nil, ErrUnexpectedPipe
+			if commands[len(commands)-1].Name == "" {
+				return SyntaxTree{}, ErrUnexpectedPipe
 			}
-			commands = append(commands, nil)
+			commands = append(commands, CommandNode{})
 			continue
 		}
 
-		commands[len(commands)-1] = append(commands[len(commands)-1], token.Value)
+		current := &commands[len(commands)-1]
+		if current.Name == "" {
+			current.Name = token.Value
+			continue
+		}
+		current.Args = append(current.Args, token.Value)
 	}
 
-	if len(commands[len(commands)-1]) == 0 {
-		return nil, ErrUnexpectedPipe
+	if commands[len(commands)-1].Name == "" {
+		return SyntaxTree{}, ErrUnexpectedPipe
 	}
 
-	return commands, nil
+	return SyntaxTree{Pipeline: commands}, nil
 }

@@ -1,6 +1,51 @@
 # vaultsh
 A shell engine featuring a virtual filesystem, command parser, and extensible command system.
 
+# Startup
+
+## Docker
+
+Prerequisites:
+- Docker Engine or Docker Desktop
+- Docker Compose v2
+
+Start Vaultsh:
+
+```sh
+docker compose up --build
+```
+
+Open:
+
+```text
+http://localhost:8080/testui/
+```
+
+Stop Vaultsh:
+
+```sh
+docker compose down
+```
+
+## Local Development
+
+Prerequisites:
+- Go 1.24 or newer
+
+Run from the repository root:
+
+```sh
+go run ./cmd/vaultsh
+```
+
+Run tests:
+
+```sh
+go test ./...
+```
+
+The test UI is plain HTML, CSS, and JavaScript; it does not require Node.js or npm.
+
 # Roadmap
 
 ## MVP
@@ -73,7 +118,7 @@ A shell engine featuring a virtual filesystem, command parser, and extensible co
 - [x] Tokenizer
 - [x] Lexer
 - [x] Parser
-- [ ] AST
+- [x] AST
 
 ## Pipes
 - [ ] |
