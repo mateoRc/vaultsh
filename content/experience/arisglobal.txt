@@ -4,7 +4,10 @@ period: 2019-10 to 2021-10
 location: Croatia, hybrid
 industry: pharma
 language: Java
+language: C#
+language: Javascript
 technology: JSP
+technology: Spring
 framework: Spring
 focus: enterprise document management
 focus: regulated systems

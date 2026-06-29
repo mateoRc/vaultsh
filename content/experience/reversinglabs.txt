@@ -2,6 +2,10 @@ company: ReversingLabs
 role: Software Developer
 period: 2024-present
 location: Croatia, remote
+industry: cybersecurity
+language: Python
+language: Go
+framework: Flask
 focus: distributed event-driven cybersecurity systems
 focus: Python and Flask backend services
 focus: backend processing pipelines

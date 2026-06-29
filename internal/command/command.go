@@ -21,8 +21,13 @@ type Result struct {
 	Action   Action
 }
 
+type Input struct {
+	Data    string
+	Present bool
+}
+
 type Command interface {
 	Name() string
 	Description() string
-	Execute(args []string) Result
+	Execute(args []string, input Input) Result
 }

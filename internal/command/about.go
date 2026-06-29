@@ -10,7 +10,7 @@ func (About) Description() string {
 	return "Describe Vaultsh"
 }
 
-func (About) Execute([]string) Result {
+func (About) Execute([]string, Input) Result {
 	return Result{
 		Output:   "Vaultsh is a read-only virtual shell engine.",
 		ExitCode: ExitSuccess,

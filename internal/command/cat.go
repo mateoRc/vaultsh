@@ -26,7 +26,13 @@ func (Cat) Usage() string {
 	return "cat <file>"
 }
 
-func (c Cat) Execute(args []string) Result {
+func (c Cat) Execute(args []string, input Input) Result {
+	if len(args) == 0 && input.Present {
+		return Result{
+			Output:   input.Data,
+			ExitCode: ExitSuccess,
+		}
+	}
 	if len(args) != 1 {
 		return Result{
 			Output:   "usage: cat <file>",

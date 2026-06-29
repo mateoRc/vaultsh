@@ -59,22 +59,28 @@ func (e *Engine) Execute(line string) command.Result {
 	if len(syntaxTree.Pipeline) == 0 {
 		return command.Result{}
 	}
-	if len(syntaxTree.Pipeline) > 1 {
-		return command.Result{
-			Output:   "pipelines are not supported yet",
-			ExitCode: command.ExitUnsupported,
-		}
-	}
 	e.context.History().Add(line)
 
-	current := syntaxTree.Pipeline[0]
-	run, found := e.commands.Find(current.Name)
-	if !found {
-		return command.Result{
-			Output:   fmt.Sprintf("command not found: %s", current.Name),
-			ExitCode: command.ExitNotFound,
+	var result command.Result
+	input := command.Input{}
+	for _, current := range syntaxTree.Pipeline {
+		run, found := e.commands.Find(current.Name)
+		if !found {
+			return command.Result{
+				Output:   fmt.Sprintf("command not found: %s", current.Name),
+				ExitCode: command.ExitNotFound,
+			}
+		}
+
+		result = run.Execute(current.Args, input)
+		if result.ExitCode != command.ExitSuccess {
+			return result
+		}
+		input = command.Input{
+			Data:    result.Output,
+			Present: true,
 		}
 	}
 
-	return run.Execute(current.Args)
+	return result
 }

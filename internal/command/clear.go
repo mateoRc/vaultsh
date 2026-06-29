@@ -10,7 +10,7 @@ func (Clear) Description() string {
 	return "Clear the terminal"
 }
 
-func (Clear) Execute([]string) Result {
+func (Clear) Execute([]string, Input) Result {
 	return Result{
 		ExitCode: ExitSuccess,
 		Action:   ActionClear,

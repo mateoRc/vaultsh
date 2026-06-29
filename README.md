@@ -121,8 +121,8 @@ The test UI is plain HTML, CSS, and JavaScript; it does not require Node.js or n
 - [x] AST
 
 ## Pipes
-- [ ] |
-- [ ] Pipeline executor
+- [x] |
+- [x] Pipeline executor
 
 ## Built-ins
 - [ ] grep

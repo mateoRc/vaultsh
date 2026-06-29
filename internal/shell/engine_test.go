@@ -247,21 +247,6 @@ func TestEngineSyntaxError(t *testing.T) {
 	}
 }
 
-func TestEngineRejectsPipelineUntilSupported(t *testing.T) {
-	result := New().Execute("cat about.txt | grep role")
-
-	if result.Output != "pipelines are not supported yet" {
-		t.Errorf(
-			"output = %q, want %q",
-			result.Output,
-			"pipelines are not supported yet",
-		)
-	}
-	if result.ExitCode != command.ExitUnsupported {
-		t.Errorf("exit code = %d, want %d", result.ExitCode, command.ExitUnsupported)
-	}
-}
-
 func TestEngineCommandUsage(t *testing.T) {
 	engine := New()
 
@@ -300,6 +285,43 @@ func TestEngineCatRejectsDirectory(t *testing.T) {
 	}
 	if result.ExitCode != 1 {
 		t.Errorf("cat exit code = %d, want 1", result.ExitCode)
+	}
+}
+
+func TestEnginePipeline(t *testing.T) {
+	root := filesystem.NewDirectory("")
+	if err := root.Add(filesystem.NewFile("about.txt", "hello")); err != nil {
+		t.Fatalf("Add(about.txt): %v", err)
+	}
+
+	result := NewWithRoot(root).Execute("cat about.txt | cat")
+
+	if result.Output != "hello" {
+		t.Errorf("pipeline output = %q, want %q", result.Output, "hello")
+	}
+	if result.ExitCode != command.ExitSuccess {
+		t.Errorf(
+			"pipeline exit code = %d, want %d",
+			result.ExitCode,
+			command.ExitSuccess,
+		)
+	}
+}
+
+func TestEnginePipelineStopsOnFailure(t *testing.T) {
+	root := filesystem.NewDirectory("")
+	if err := root.Add(filesystem.NewFile("about.txt", "hello")); err != nil {
+		t.Fatalf("Add(about.txt): %v", err)
+	}
+
+	result := NewWithRoot(root).Execute("cat missing.txt | cat")
+
+	if result.ExitCode != command.ExitFailure {
+		t.Errorf(
+			"pipeline exit code = %d, want %d",
+			result.ExitCode,
+			command.ExitFailure,
+		)
 	}
 }
 
