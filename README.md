@@ -12,8 +12,8 @@ A shell engine featuring a virtual filesystem, command parser, and extensible co
 - [x] Health endpoint
 
 ### HTTP API
-- [ ] POST /api/exec
-- [ ] Request/response models
+- [x] POST /api/exec
+- [x] Request/response models
 - [ ] Unknown command handling
 
 ### Shell Engine

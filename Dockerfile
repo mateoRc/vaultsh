@@ -4,6 +4,7 @@ WORKDIR /src
 
 COPY go.mod ./
 COPY cmd ./cmd
+COPY internal ./internal
 
 RUN CGO_ENABLED=0 go build -o /vaultsh ./cmd/vaultsh
 
