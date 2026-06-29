@@ -42,7 +42,7 @@ func NewWithContext(context *ExecutionContext) *Engine {
 }
 
 func (e *Engine) Execute(line string) command.Result {
-	tokens, err := parser.Tokenize(line)
+	tokens, err := parser.Lex(line)
 	if err != nil {
 		return command.Result{
 			Output:   fmt.Sprintf("syntax error: %v", err),
@@ -54,13 +54,18 @@ func (e *Engine) Execute(line string) command.Result {
 	}
 	e.context.History().Add(line)
 
-	run, found := e.commands.Find(tokens[0])
+	run, found := e.commands.Find(tokens[0].Value)
 	if !found {
 		return command.Result{
-			Output:   fmt.Sprintf("command not found: %s", tokens[0]),
+			Output:   fmt.Sprintf("command not found: %s", tokens[0].Value),
 			ExitCode: command.ExitNotFound,
 		}
 	}
 
-	return run.Execute(tokens[1:])
+	args := make([]string, 0, len(tokens)-1)
+	for _, token := range tokens[1:] {
+		args = append(args, token.Value)
+	}
+
+	return run.Execute(args)
 }
