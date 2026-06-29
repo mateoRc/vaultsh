@@ -2,6 +2,7 @@ package httpapi
 
 import (
 	"encoding/json"
+	"fmt"
 	"net/http"
 )
 
@@ -41,6 +42,10 @@ func exec(w http.ResponseWriter, r *http.Request) {
 	response := execResponse{
 		Output:   "Available commands:\n  help",
 		ExitCode: 0,
+	}
+	if request.Line != "help" {
+		response.Output = fmt.Sprintf("command not found: %s", request.Line)
+		response.ExitCode = 127
 	}
 
 	w.Header().Set("Content-Type", "application/json")
