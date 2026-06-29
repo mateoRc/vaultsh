@@ -41,7 +41,7 @@ func (c Cat) Execute(args []string) Result {
 	file, ok := node.(*filesystem.File)
 	if !ok {
 		return Result{
-			Output:   fmt.Sprintf("cat: %s: not a file", args[0]),
+			Output:   fmt.Sprintf("cat: %s: is a directory", args[0]),
 			ExitCode: 1,
 		}
 	}

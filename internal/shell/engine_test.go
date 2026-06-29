@@ -93,8 +93,8 @@ func TestEngineListDirectory(t *testing.T) {
 
 	result := NewWithRoot(root).Execute("ls")
 
-	if result.Output != "about.txt\ndocs" {
-		t.Errorf("ls output = %q, want %q", result.Output, "about.txt\ndocs")
+	if result.Output != "about.txt\ndocs/" {
+		t.Errorf("ls output = %q, want %q", result.Output, "about.txt\ndocs/")
 	}
 	if result.ExitCode != 0 {
 		t.Errorf("ls exit code = %d, want 0", result.ExitCode)
@@ -145,6 +145,22 @@ func TestEngineCommandUsage(t *testing.T) {
 				t.Errorf("output = %q, want %q", result.Output, tt.want)
 			}
 		})
+	}
+}
+
+func TestEngineCatRejectsDirectory(t *testing.T) {
+	root := filesystem.NewDirectory("")
+	if err := root.Add(filesystem.NewDirectory("docs")); err != nil {
+		t.Fatalf("Add(docs): %v", err)
+	}
+
+	result := NewWithRoot(root).Execute("cat docs")
+
+	if result.Output != "cat: docs: is a directory" {
+		t.Errorf("cat output = %q, want %q", result.Output, "cat: docs: is a directory")
+	}
+	if result.ExitCode != 1 {
+		t.Errorf("cat exit code = %d, want 1", result.ExitCode)
 	}
 }
 
