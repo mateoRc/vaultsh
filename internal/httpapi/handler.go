@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"net/http"
 
+	"github.com/mateom/vaultsh/internal/command"
 	"github.com/mateom/vaultsh/internal/shell"
 )
 
@@ -12,8 +13,9 @@ type execRequest struct {
 }
 
 type execResponse struct {
-	Output   string `json:"output"`
-	ExitCode int    `json:"exit_code"`
+	Output   string         `json:"output"`
+	ExitCode int            `json:"exit_code"`
+	Action   command.Action `json:"action,omitempty"`
 }
 
 func NewHandler(engine *shell.Engine) http.Handler {
@@ -46,6 +48,7 @@ func exec(w http.ResponseWriter, r *http.Request, engine *shell.Engine) {
 	response := execResponse{
 		Output:   result.Output,
 		ExitCode: result.ExitCode,
+		Action:   result.Action,
 	}
 
 	w.Header().Set("Content-Type", "application/json")

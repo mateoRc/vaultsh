@@ -18,6 +18,7 @@ func TestEngineExecute(t *testing.T) {
 			want: command.Result{
 				Output: "Available commands:" +
 					"\n  about - Describe Vaultsh" +
+					"\n  clear - Clear the terminal" +
 					"\n  help - List available commands",
 				ExitCode: 0,
 			},
@@ -28,6 +29,14 @@ func TestEngineExecute(t *testing.T) {
 			want: command.Result{
 				Output:   "Vaultsh is a read-only virtual shell engine.",
 				ExitCode: 0,
+			},
+		},
+		{
+			name: "clear",
+			line: "clear",
+			want: command.Result{
+				ExitCode: 0,
+				Action:   command.ActionClear,
 			},
 		},
 		{
