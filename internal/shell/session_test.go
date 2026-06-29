@@ -43,3 +43,32 @@ func TestSessionManagerKeepsWorkingDirectoriesIndependent(t *testing.T) {
 		t.Errorf("second session pwd = %q, want /", result.Output)
 	}
 }
+
+func TestSessionManagerKeepsHistoriesIndependent(t *testing.T) {
+	manager := NewSessionManager(filesystem.NewDirectory(""))
+
+	_, firstID, err := manager.Execute("", "pwd")
+	if err != nil {
+		t.Fatalf("first Execute(): %v", err)
+	}
+	_, secondID, err := manager.Execute("", "about")
+	if err != nil {
+		t.Fatalf("second Execute(): %v", err)
+	}
+
+	firstHistory, _, err := manager.Execute(firstID, "history")
+	if err != nil {
+		t.Fatalf("first history: %v", err)
+	}
+	secondHistory, _, err := manager.Execute(secondID, "history")
+	if err != nil {
+		t.Fatalf("second history: %v", err)
+	}
+
+	if firstHistory.Output != "1  pwd\n2  history" {
+		t.Errorf("first history = %q", firstHistory.Output)
+	}
+	if secondHistory.Output != "1  about\n2  history" {
+		t.Errorf("second history = %q", secondHistory.Output)
+	}
+}

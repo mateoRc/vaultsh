@@ -55,12 +55,13 @@ A shell engine featuring a virtual filesystem, command parser, and extensible co
 - [x] cd
 - [x] cat
 - [x] tree
+- [x] history
 - [x] Command-specific help
 
 ## Sessions
 - [x] Execution context
 - [x] Session ID
-- [ ] Command history
+- [x] Command history
 - [x] Working directory per session
 
 ---
@@ -135,6 +136,7 @@ A shell engine featuring a virtual filesystem, command parser, and extensible co
 - [ ] WebSocket transport
 - [ ] TUI client
 - [ ] CLI client
+- [ ] Fuzzy history search with Ctrl+R (frontend)
 
 ## Easter Eggs
 - [ ] Single-command triggers
