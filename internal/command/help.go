@@ -1,6 +1,6 @@
-package shell
+package command
 
-func help() Result {
+func Help() Result {
 	return Result{
 		Output:   "Available commands:\n  about\n  help",
 		ExitCode: 0,

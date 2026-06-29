@@ -1,35 +1,32 @@
 package shell
 
-import "fmt"
+import (
+	"fmt"
 
-type Result struct {
-	Output   string
-	ExitCode int
-}
-
-type commandFunc func() Result
+	"github.com/mateom/vaultsh/internal/command"
+)
 
 type Engine struct {
-	commands map[string]commandFunc
+	commands map[string]command.Func
 }
 
 func New() *Engine {
 	return &Engine{
-		commands: map[string]commandFunc{
-			"about": about,
-			"help": help,
+		commands: map[string]command.Func{
+			"about": command.About,
+			"help":  command.Help,
 		},
 	}
 }
 
-func (e *Engine) Execute(line string) Result {
-	command, found := e.commands[line]
+func (e *Engine) Execute(line string) command.Result {
+	run, found := e.commands[line]
 	if !found {
-		return Result{
+		return command.Result{
 			Output:   fmt.Sprintf("command not found: %s", line),
 			ExitCode: 127,
 		}
 	}
 
-	return command()
+	return run()
 }

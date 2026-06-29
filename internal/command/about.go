@@ -1,6 +1,6 @@
-package shell
+package command
 
-func about() Result {
+func About() Result {
 	return Result{
 		Output:   "Vaultsh is a read-only virtual shell engine.",
 		ExitCode: 0,
