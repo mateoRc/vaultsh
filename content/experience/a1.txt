@@ -1,17 +1,13 @@
 company: A1 Hrvatska
-role: Software Developer
+role: Software Engineer
 period: 2021-10 to 2023-01
 location: Croatia, hybrid
 industry: telecom
-language: TypeScript
-language: Javascript
-language: Java
-framework: Node.js
-framework: Spring boot
-focus: cloud microservices
-focus: AWS, Docker, Kubernetes, and OpenShift
-focus: Salesforce integrations
-focus: internal automation tools
-responsibility: backend development
-responsibility: operational efficiency
-responsibility: system reliability
+
+stack: Node.js, Java, Spring Boot
+stack: Docker, OpenShift, ArgoCD
+stack: OracleDB, MongoDB
+
+highlight: Developed cloud-native backend microservices
+highlight: Built Salesforce integrations
+highlight: Created internal automation tooling

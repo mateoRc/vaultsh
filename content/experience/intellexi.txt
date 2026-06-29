@@ -3,12 +3,11 @@ role: Software Developer
 period: 2023-02 to 2023-12
 location: Croatia, hybrid
 industry: financial services
-language: Java
-framework: not specified
-focus: backend services
-focus: evolving requirements
-focus: data protection and security
-responsibility: backend delivery
-responsibility: technical decisions
-responsibility: client stakeholder collaboration
-responsibility: system architect collaboration
+
+stack: Java, Spring boot, OracleDB, MongoDB, Kafka
+stack: Docker
+
+highlight: Owned backend delivery under tight deadlines
+highlight: Built backend services under evolving requirements
+highlight: Delivered within data protection and security constraints
+highlight: Collaborated with client stakeholders and the system architect

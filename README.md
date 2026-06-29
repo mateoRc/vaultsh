@@ -92,7 +92,7 @@ Pipeline execution and regular-expression filtering are available:
 ```sh
 cat skills.txt | grep "^language:"
 cat skills.txt | grep -i python
-cat experience/reversinglabs.txt | grep -n responsibility
+cat experience/reversinglabs.txt | grep -n highlight
 ```
 
 Each stage receives the previous stage's output. Execution stops when a stage
@@ -131,8 +131,8 @@ Compose multiple pipeline stages:
 ```sh
 cat skills.txt | grep "^language:" | sort
 cat skills.txt | grep "^backend:" | sort -r
-cat experience/reversinglabs.txt | grep responsibility | head -n 3
-cat experience/reversinglabs.txt | grep focus | wc -l
+cat experience/reversinglabs.txt | grep highlight | head -n 3
+cat experience/reversinglabs.txt | grep "^stack:" | wc -l
 history | tail -n 5
 tree | grep ".txt" | sort
 ```
