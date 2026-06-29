@@ -9,7 +9,7 @@ import (
 )
 
 func main() {
-	engine := &shell.Engine{}
+	engine := shell.New()
 
 	server := &http.Server{
 		Addr:    ":8080",

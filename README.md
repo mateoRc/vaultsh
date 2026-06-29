@@ -18,8 +18,7 @@ A shell engine featuring a virtual filesystem, command parser, and extensible co
 
 ### Shell Engine
 - [x] Engine
-- [ ] Execution context
-- [ ] Command registry
+- [x] Command registry
 - [ ] Command interface
 
 ### Commands
@@ -57,6 +56,7 @@ A shell engine featuring a virtual filesystem, command parser, and extensible co
 - [ ] tree
 
 ## Sessions
+- [ ] Execution context
 - [ ] Session ID
 - [ ] Command history
 - [ ] Working directory per session
