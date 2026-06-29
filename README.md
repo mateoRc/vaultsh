@@ -44,7 +44,7 @@ A shell engine featuring a virtual filesystem, command parser, and extensible co
 
 ## Virtual Filesystem
 - [x] Node model
-- [ ] Directory
+- [x] Directory
 - [ ] File
 - [ ] Path resolver
 - [ ] Current working directory
