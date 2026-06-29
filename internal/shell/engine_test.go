@@ -184,6 +184,39 @@ func TestEngineListRejectsTimestampSortWithoutMetadata(t *testing.T) {
 	}
 }
 
+func TestEngineListRecursive(t *testing.T) {
+	root := filesystem.NewDirectory("")
+	docs := filesystem.NewDirectory("docs")
+	nested := filesystem.NewDirectory("nested")
+	if err := root.Add(filesystem.NewFile("about.txt", "hello")); err != nil {
+		t.Fatalf("Add(about.txt): %v", err)
+	}
+	if err := root.Add(docs); err != nil {
+		t.Fatalf("Add(docs): %v", err)
+	}
+	if err := docs.Add(filesystem.NewFile("readme.txt", "hello")); err != nil {
+		t.Fatalf("Add(readme.txt): %v", err)
+	}
+	if err := docs.Add(nested); err != nil {
+		t.Fatalf("Add(nested): %v", err)
+	}
+	if err := nested.Add(filesystem.NewFile("deep.txt", "hello")); err != nil {
+		t.Fatalf("Add(deep.txt): %v", err)
+	}
+
+	result := NewWithRoot(root).Execute("ls -R")
+	want := "/:\nabout.txt\ndocs/\n\n" +
+		"/docs:\nnested/\nreadme.txt\n\n" +
+		"/docs/nested:\ndeep.txt"
+
+	if result.Output != want {
+		t.Errorf("ls -R output = %q, want %q", result.Output, want)
+	}
+	if result.ExitCode != command.ExitSuccess {
+		t.Errorf("exit code = %d, want %d", result.ExitCode, command.ExitSuccess)
+	}
+}
+
 func TestEngineCommandHelp(t *testing.T) {
 	result := New().Execute("help cat")
 

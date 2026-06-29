@@ -140,6 +140,7 @@ Limit and inspect output:
 ```sh
 cat -n about.txt
 tree -L 2
+ls -R experience
 cat skills.txt | sort
 cat skills.txt | sort -r
 cat skills.txt | head -n 5
@@ -150,7 +151,6 @@ cat skills.txt | wc -l
 The following command options are planned but not implemented yet:
 
 ```sh
-ls -R experience
 ls -lt
 ```
 
@@ -242,7 +242,7 @@ ls -lt
 ## Command Options
 - [x] `ls -a`, `ls -l`, and combined forms
 - [ ] File timestamps and `ls -t`
-- [ ] `ls -R [path]`
+- [x] `ls -R [path]`
 - [x] `tree -L <depth> [path]`
 - [x] `cat -n <file>`
 - [x] `grep -i` and `grep -n`

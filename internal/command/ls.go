@@ -2,6 +2,7 @@ package command
 
 import (
 	"fmt"
+	"path"
 	"strconv"
 	"strings"
 
@@ -18,10 +19,11 @@ type Ls struct {
 }
 
 type lsOptions struct {
-	all     bool
-	long    bool
-	path    string
-	pathSet bool
+	all       bool
+	long      bool
+	recursive bool
+	path      string
+	pathSet   bool
 }
 
 func NewLs(workingDirectory *filesystem.WorkingDirectory) Ls {
@@ -37,7 +39,7 @@ func (Ls) Description() string {
 }
 
 func (Ls) Usage() string {
-	return "ls [-al] [path]"
+	return "ls [-alR] [path]"
 }
 
 func (l Ls) Execute(args []string, _ Input) Result {
@@ -46,7 +48,7 @@ func (l Ls) Execute(args []string, _ Input) Result {
 		return *result
 	}
 
-	node, _, err := l.workingDirectory.Resolve(options.path)
+	node, resolvedPath, err := l.workingDirectory.Resolve(options.path)
 	if err != nil {
 		return Result{
 			Output:   fmt.Sprintf("ls: %s: %v", options.path, err),
@@ -66,27 +68,17 @@ func (l Ls) Execute(args []string, _ Input) Result {
 		}
 	}
 
-	children := directory.Children()
-	names := make([]string, 0, len(children))
-	for _, child := range children {
-		if !options.all && strings.HasPrefix(child.Name(), ".") {
-			continue
+	if options.recursive {
+		var sections []string
+		collectRecursiveListings(directory, resolvedPath, options, &sections)
+		return Result{
+			Output:   strings.Join(sections, "\n\n"),
+			ExitCode: ExitSuccess,
 		}
-
-		if options.long {
-			names = append(names, formatLongEntry(child))
-			continue
-		}
-
-		name := child.Name()
-		if child.Kind() == filesystem.KindDirectory {
-			name += "/"
-		}
-		names = append(names, name)
 	}
 
 	return Result{
-		Output:   strings.Join(names, "\n"),
+		Output:   strings.Join(formatDirectoryEntries(directory, options), "\n"),
 		ExitCode: ExitSuccess,
 	}
 }
@@ -107,6 +99,8 @@ func parseLsOptions(args []string) (lsOptions, *Result) {
 					options.all = true
 				case 'l':
 					options.long = true
+				case 'R':
+					options.recursive = true
 				case 't':
 					return options, &Result{
 						Output:   "ls: option -t requires file timestamps",
@@ -123,7 +117,7 @@ func parseLsOptions(args []string) (lsOptions, *Result) {
 		}
 		if options.pathSet {
 			return options, &Result{
-				Output:   "usage: ls [-al] [path]",
+				Output:   "usage: ls [-alR] [path]",
 				ExitCode: ExitUsage,
 			}
 		}
@@ -132,6 +126,65 @@ func parseLsOptions(args []string) (lsOptions, *Result) {
 	}
 
 	return options, nil
+}
+
+func collectRecursiveListings(
+	directory *filesystem.Directory,
+	directoryPath string,
+	options lsOptions,
+	sections *[]string,
+) {
+	entries := visibleChildren(directory, options.all)
+	lines := []string{directoryPath + ":"}
+	for _, entry := range entries {
+		lines = append(lines, formatLsEntry(entry, options.long))
+	}
+	*sections = append(*sections, strings.Join(lines, "\n"))
+
+	for _, entry := range entries {
+		child, ok := entry.(*filesystem.Directory)
+		if !ok {
+			continue
+		}
+		collectRecursiveListings(
+			child,
+			path.Join(directoryPath, child.Name()),
+			options,
+			sections,
+		)
+	}
+}
+
+func formatDirectoryEntries(directory *filesystem.Directory, options lsOptions) []string {
+	children := visibleChildren(directory, options.all)
+	entries := make([]string, 0, len(children))
+	for _, child := range children {
+		entries = append(entries, formatLsEntry(child, options.long))
+	}
+	return entries
+}
+
+func visibleChildren(directory *filesystem.Directory, all bool) []filesystem.Node {
+	var children []filesystem.Node
+	for _, child := range directory.Children() {
+		if !all && strings.HasPrefix(child.Name(), ".") {
+			continue
+		}
+		children = append(children, child)
+	}
+	return children
+}
+
+func formatLsEntry(node filesystem.Node, long bool) string {
+	if long {
+		return formatLongEntry(node)
+	}
+
+	name := node.Name()
+	if node.Kind() == filesystem.KindDirectory {
+		name += "/"
+	}
+	return name
 }
 
 func formatLongEntry(node filesystem.Node) string {
