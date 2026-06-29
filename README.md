@@ -50,8 +50,8 @@ A shell engine featuring a virtual filesystem, command parser, and extensible co
 - [x] Current working directory
 
 ## Commands
-- [ ] pwd
-- [ ] ls
+- [x] pwd
+- [x] ls
 - [ ] cd
 - [ ] cat
 - [ ] tree
