@@ -53,6 +53,12 @@ func TestParseRejectsUnexpectedPipe(t *testing.T) {
 			},
 		},
 		{
+			name: "only pipe",
+			tokens: []Token{
+				{Kind: TokenPipe, Value: "|"},
+			},
+		},
+		{
 			name: "trailing",
 			tokens: []Token{
 				{Kind: TokenWord, Value: "cat"},

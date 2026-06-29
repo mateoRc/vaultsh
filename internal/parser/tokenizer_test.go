@@ -38,6 +38,11 @@ func TestTokenize(t *testing.T) {
 			want: []string{"cat", "my file.txt"},
 		},
 		{
+			name: "escaped quote",
+			line: `cat "my \"file\".txt"`,
+			want: []string{"cat", `my "file".txt`},
+		},
+		{
 			name: "pipe boundary",
 			line: "cat about.txt|grep role",
 			want: []string{"cat", "about.txt", "|", "grep", "role"},

@@ -62,7 +62,7 @@ func (e *Engine) Execute(line string) command.Result {
 	if len(commands) > 1 {
 		return command.Result{
 			Output:   "pipelines are not supported yet",
-			ExitCode: command.ExitUsage,
+			ExitCode: command.ExitUnsupported,
 		}
 	}
 	e.context.History().Add(line)

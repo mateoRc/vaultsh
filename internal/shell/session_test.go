@@ -72,3 +72,16 @@ func TestSessionManagerKeepsHistoriesIndependent(t *testing.T) {
 		t.Errorf("second history = %q", secondHistory.Output)
 	}
 }
+
+func TestSessionManagerReplacesUnknownSessionID(t *testing.T) {
+	manager := NewSessionManager(filesystem.NewDirectory(""))
+
+	_, sessionID, err := manager.Execute("unknown", "pwd")
+
+	if err != nil {
+		t.Fatalf("Execute(): %v", err)
+	}
+	if sessionID == "" || sessionID == "unknown" {
+		t.Errorf("session ID = %q, want a new server-generated ID", sessionID)
+	}
+}

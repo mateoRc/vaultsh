@@ -122,6 +122,22 @@ func TestEngineListPath(t *testing.T) {
 	}
 }
 
+func TestEngineListFile(t *testing.T) {
+	root := filesystem.NewDirectory("")
+	if err := root.Add(filesystem.NewFile("about.txt", "hello")); err != nil {
+		t.Fatalf("Add(about.txt): %v", err)
+	}
+
+	result := NewWithRoot(root).Execute("ls about.txt")
+
+	if result.Output != "about.txt" {
+		t.Errorf("ls output = %q, want %q", result.Output, "about.txt")
+	}
+	if result.ExitCode != command.ExitSuccess {
+		t.Errorf("ls exit code = %d, want %d", result.ExitCode, command.ExitSuccess)
+	}
+}
+
 func TestEngineCommandHelp(t *testing.T) {
 	result := New().Execute("help cat")
 
@@ -200,8 +216,8 @@ func TestEngineRejectsPipelineUntilSupported(t *testing.T) {
 			"pipelines are not supported yet",
 		)
 	}
-	if result.ExitCode != command.ExitUsage {
-		t.Errorf("exit code = %d, want %d", result.ExitCode, command.ExitUsage)
+	if result.ExitCode != command.ExitUnsupported {
+		t.Errorf("exit code = %d, want %d", result.ExitCode, command.ExitUnsupported)
 	}
 }
 

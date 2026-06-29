@@ -63,6 +63,7 @@ A shell engine featuring a virtual filesystem, command parser, and extensible co
 - [x] Session ID
 - [x] Command history
 - [x] Working directory per session
+- [ ] Session expiration and cleanup
 
 ---
 
