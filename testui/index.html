@@ -9,18 +9,18 @@
 <body>
   <main class="terminal">
     <h1>Vaultsh</h1>
-    <p>Explore Mateo's experience, skills, and projects through a virtual shell.</p>
-    <pre>Try:
-  help
-  tree
-  cat about.txt
-  cd experience
-  ls
-  cat reversinglabs.txt</pre>
+    <p>Read-only virtual shell</p>
+    <pre>Mateo Mahmutović
+Senior Backend Engineer
+
+Explore experience, skills and projects
+through a virtual shell.
+
+Type 'help' to begin.</pre>
     <p>Backend: <span id="status">checking</span></p>
     <pre id="output" aria-live="polite"></pre>
     <form id="command-form">
-      <label for="command">$</label>
+      <label for="command">vault:~$</label>
       <input id="command" name="command" autocomplete="off">
       <button type="submit">Run</button>
     </form>
