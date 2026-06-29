@@ -23,11 +23,11 @@ func main() {
 		logger.Error("content loading failed", "error", err)
 		os.Exit(1)
 	}
-	engine := shell.NewWithRoot(root)
+	sessions := shell.NewSessionManager(root)
 
 	server := &http.Server{
 		Addr:    ":8080",
-		Handler: httpapi.NewHandler(engine),
+		Handler: httpapi.NewHandler(sessions),
 	}
 
 	logger.Info("server started", "address", server.Addr)

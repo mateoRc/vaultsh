@@ -7,6 +7,7 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/mateom/vaultsh/internal/filesystem"
 	"github.com/mateom/vaultsh/internal/shell"
 )
 
@@ -14,7 +15,7 @@ func TestHealth(t *testing.T) {
 	request := httptest.NewRequest(http.MethodGet, "/healthz", nil)
 	response := httptest.NewRecorder()
 
-	NewHandler(shell.New()).ServeHTTP(response, request)
+	newTestHandler().ServeHTTP(response, request)
 
 	if response.Code != http.StatusOK {
 		t.Errorf("status = %d, want %d", response.Code, http.StatusOK)
@@ -32,7 +33,7 @@ func TestExec(t *testing.T) {
 	)
 	response := httptest.NewRecorder()
 
-	NewHandler(shell.New()).ServeHTTP(response, request)
+	newTestHandler().ServeHTTP(response, request)
 
 	if response.Code != http.StatusOK {
 		t.Fatalf("status = %d, want %d", response.Code, http.StatusOK)
@@ -48,6 +49,9 @@ func TestExec(t *testing.T) {
 	if result.ExitCode != 0 {
 		t.Errorf("exit code = %d, want 0", result.ExitCode)
 	}
+	if result.SessionID == "" {
+		t.Error("session ID is empty")
+	}
 }
 
 func TestExecReturnsClearAction(t *testing.T) {
@@ -58,7 +62,7 @@ func TestExecReturnsClearAction(t *testing.T) {
 	)
 	response := httptest.NewRecorder()
 
-	NewHandler(shell.New()).ServeHTTP(response, request)
+	newTestHandler().ServeHTTP(response, request)
 
 	if response.Code != http.StatusOK {
 		t.Fatalf("status = %d, want %d", response.Code, http.StatusOK)
@@ -81,9 +85,14 @@ func TestExecRejectsInvalidJSON(t *testing.T) {
 	)
 	response := httptest.NewRecorder()
 
-	NewHandler(shell.New()).ServeHTTP(response, request)
+	newTestHandler().ServeHTTP(response, request)
 
 	if response.Code != http.StatusBadRequest {
 		t.Errorf("status = %d, want %d", response.Code, http.StatusBadRequest)
 	}
+}
+
+func newTestHandler() http.Handler {
+	root := filesystem.NewDirectory("")
+	return NewHandler(shell.NewSessionManager(root))
 }
