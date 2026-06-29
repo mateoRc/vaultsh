@@ -2,6 +2,7 @@ package command
 
 import (
 	"fmt"
+	"strings"
 
 	"github.com/mateom/vaultsh/internal/filesystem"
 )
@@ -23,41 +24,68 @@ func (Cat) Description() string {
 }
 
 func (Cat) Usage() string {
-	return "cat <file>"
+	return "cat [-n] [file]"
 }
 
 func (c Cat) Execute(args []string, input Input) Result {
-	if len(args) == 0 && input.Present {
-		return Result{
-			Output:   input.Data,
-			ExitCode: ExitSuccess,
-		}
+	numberLines, path, result := parseCatOptions(args)
+	if result != nil {
+		return *result
 	}
-	if len(args) != 1 {
+	if path == "" && !input.Present {
 		return Result{
-			Output:   "usage: cat <file>",
+			Output:   "usage: cat [-n] [file]",
 			ExitCode: ExitUsage,
 		}
 	}
 
-	node, _, err := c.workingDirectory.Resolve(args[0])
-	if err != nil {
-		return Result{
-			Output:   fmt.Sprintf("cat: %s: %v", args[0], err),
-			ExitCode: ExitFailure,
-		}
+	data, result := readInput("cat", path, input, c.workingDirectory)
+	if result != nil {
+		return *result
 	}
 
-	file, ok := node.(*filesystem.File)
-	if !ok {
-		return Result{
-			Output:   fmt.Sprintf("cat: %s: is a directory", args[0]),
-			ExitCode: ExitFailure,
+	if numberLines {
+		numbered := make([]string, 0, len(lines(data)))
+		for index, line := range lines(data) {
+			numbered = append(numbered, fmt.Sprintf("%6d\t%s", index+1, line))
 		}
+		data = joinLines(numbered)
 	}
 
 	return Result{
-		Output:   file.Content(),
+		Output:   data,
 		ExitCode: ExitSuccess,
 	}
+}
+
+func parseCatOptions(args []string) (bool, string, *Result) {
+	numberLines := false
+	optionsEnded := false
+	var path string
+
+	for _, arg := range args {
+		if !optionsEnded && arg == "--" {
+			optionsEnded = true
+			continue
+		}
+		if !optionsEnded && arg == "-n" {
+			numberLines = true
+			continue
+		}
+		if !optionsEnded && strings.HasPrefix(arg, "-") && arg != "-" {
+			return false, "", &Result{
+				Output:   fmt.Sprintf("cat: unknown option: %s", arg),
+				ExitCode: ExitUsage,
+			}
+		}
+		if path != "" {
+			return false, "", &Result{
+				Output:   "usage: cat [-n] [file]",
+				ExitCode: ExitUsage,
+			}
+		}
+		path = arg
+	}
+
+	return numberLines, path, nil
 }

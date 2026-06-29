@@ -187,11 +187,11 @@ func TestEngineListRejectsTimestampSortWithoutMetadata(t *testing.T) {
 func TestEngineCommandHelp(t *testing.T) {
 	result := New().Execute("help cat")
 
-	if result.Output != "Usage: cat <file>\nPrint file contents" {
+	if result.Output != "Usage: cat [-n] [file]\nPrint file contents" {
 		t.Errorf(
 			"help output = %q, want %q",
 			result.Output,
-			"Usage: cat <file>\nPrint file contents",
+			"Usage: cat [-n] [file]\nPrint file contents",
 		)
 	}
 	if result.ExitCode != 0 {
@@ -260,7 +260,7 @@ func TestEngineCommandUsage(t *testing.T) {
 		want string
 	}{
 		{line: "cd one two", want: "usage: cd [directory]"},
-		{line: "cat", want: "usage: cat <file>"},
+		{line: "cat", want: "usage: cat [-n] [file]"},
 		{line: "tree one two", want: "usage: tree [path]"},
 	}
 
@@ -290,6 +290,36 @@ func TestEngineCatRejectsDirectory(t *testing.T) {
 	}
 	if result.ExitCode != 1 {
 		t.Errorf("cat exit code = %d, want 1", result.ExitCode)
+	}
+}
+
+func TestEngineCatLineNumbers(t *testing.T) {
+	root := filesystem.NewDirectory("")
+	if err := root.Add(filesystem.NewFile("about.txt", "first\nsecond\n")); err != nil {
+		t.Fatalf("Add(about.txt): %v", err)
+	}
+	engine := NewWithRoot(root)
+
+	tests := []string{
+		"cat -n about.txt",
+		"cat about.txt | cat -n",
+	}
+	want := "     1\tfirst\n     2\tsecond"
+
+	for _, line := range tests {
+		t.Run(line, func(t *testing.T) {
+			result := engine.Execute(line)
+			if result.Output != want {
+				t.Errorf("output = %q, want %q", result.Output, want)
+			}
+			if result.ExitCode != command.ExitSuccess {
+				t.Errorf(
+					"exit code = %d, want %d",
+					result.ExitCode,
+					command.ExitSuccess,
+				)
+			}
+		})
 	}
 }
 
