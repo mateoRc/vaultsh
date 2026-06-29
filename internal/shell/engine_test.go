@@ -138,6 +138,47 @@ func TestEngineListFile(t *testing.T) {
 	}
 }
 
+func TestEngineListOptions(t *testing.T) {
+	root := filesystem.NewDirectory("")
+	for _, node := range []filesystem.Node{
+		filesystem.NewFile(".secret", "hidden"),
+		filesystem.NewFile("about.txt", "hello"),
+		filesystem.NewDirectory("docs"),
+	} {
+		if err := root.Add(node); err != nil {
+			t.Fatalf("Add(%s): %v", node.Name(), err)
+		}
+	}
+	engine := NewWithRoot(root)
+
+	if result := engine.Execute("ls"); result.Output != "about.txt\ndocs/" {
+		t.Errorf("ls output = %q", result.Output)
+	}
+
+	result := engine.Execute("ls -la")
+	want := "-r--r--r--        6 .secret\n" +
+		"-r--r--r--        5 about.txt\n" +
+		"dr-xr-xr-x        - docs/"
+	if result.Output != want {
+		t.Errorf("ls -la output = %q, want %q", result.Output, want)
+	}
+}
+
+func TestEngineListRejectsTimestampSortWithoutMetadata(t *testing.T) {
+	result := New().Execute("ls -lt")
+
+	if result.Output != "ls: option -t requires file timestamps" {
+		t.Errorf("ls -lt output = %q", result.Output)
+	}
+	if result.ExitCode != command.ExitUnsupported {
+		t.Errorf(
+			"ls -lt exit code = %d, want %d",
+			result.ExitCode,
+			command.ExitUnsupported,
+		)
+	}
+}
+
 func TestEngineCommandHelp(t *testing.T) {
 	result := New().Execute("help cat")
 
