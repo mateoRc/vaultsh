@@ -9,7 +9,10 @@ RUN CGO_ENABLED=0 go build -o /vaultsh ./cmd/vaultsh
 
 FROM alpine:3.21
 
+WORKDIR /app
+
 COPY --from=build /vaultsh /usr/local/bin/vaultsh
+COPY testui ./testui
 
 EXPOSE 8080
 
