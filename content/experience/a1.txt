@@ -1,6 +1,14 @@
-Software Developer, A1 Hrvatska
-October 2021 - January 2023
-
-Developed cloud-based microservices with Node.js, TypeScript, AWS, Docker,
-Kubernetes, and OpenShift. Built Salesforce integrations and internal tools
-that automated manual processes.
+company: A1 Hrvatska
+role: Software Developer
+period: 2021-10 to 2023-01
+location: Croatia, hybrid
+industry: telecom
+language: TypeScript
+runtime: Node.js
+cloud: AWS
+infrastructure: Docker
+infrastructure: Kubernetes
+infrastructure: OpenShift
+focus: cloud microservices
+focus: Salesforce integrations
+focus: internal automation tools

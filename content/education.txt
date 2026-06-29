@@ -1,2 +1,3 @@
-University of Rijeka
-Master of Education (MEd), Information Technology
+institution: University of Rijeka
+degree: Master of Education (MEd)
+field: Information Technology

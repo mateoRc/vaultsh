@@ -1,6 +1,14 @@
-Software Developer, Amplexor / ArisGlobal
-October 2019 - October 2021
-
-Worked on a long-lived enterprise document management platform using Java,
-JSP, and Spring. Delivered core features, resolved production issues, improved
-performance, and refactored legacy code in a regulated environment.
+company: Amplexor / ArisGlobal
+role: Software Developer
+period: 2019-10 to 2021-10
+location: Croatia, hybrid
+industry: pharma
+language: Java
+technology: JSP
+framework: Spring
+focus: enterprise document management
+focus: regulated systems
+responsibility: core product features
+responsibility: production issue resolution
+responsibility: performance improvements
+responsibility: legacy code refactoring
