@@ -1,15 +1,23 @@
 company: Amplexor / ArisGlobal
+
 role: Software Developer
+
 period: 2019-10 to 2021-10
+
 location: Croatia, hybrid
+
 industry: pharma
+
 language: Java
 language: C#
 language: JavaScript
+
 framework: Spring
+
 focus: enterprise document management
 focus: JSP-based application development
 focus: regulated systems
+
 responsibility: core product features
 responsibility: production issue resolution
 responsibility: performance improvements

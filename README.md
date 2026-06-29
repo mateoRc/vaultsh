@@ -46,6 +46,116 @@ go test ./...
 
 The test UI is plain HTML, CSS, and JavaScript; it does not require Node.js or npm.
 
+# Usage
+
+## Explore the Virtual Filesystem
+
+```sh
+help
+help cat
+pwd
+tree
+ls
+ls -la
+ls experience
+cd experience
+pwd
+cat reversinglabs.txt
+cd ..
+cat skills.txt
+history
+```
+
+Directories end with `/` in standard `ls` output. `ls -a` includes hidden
+entries, while `ls -l` includes the read-only mode and file size.
+
+Paths can be absolute or relative:
+
+```sh
+cat /about.txt
+cat projects/vaultsh.txt
+cd /experience
+cd ..
+```
+
+Quoted and escaped arguments are supported:
+
+```sh
+cat "file with spaces.txt"
+cat file\ with\ spaces.txt
+```
+
+## Pipelines
+
+Pipeline execution and regular-expression filtering are available:
+
+```sh
+cat skills.txt | grep "^language:"
+cat skills.txt | grep -i python
+cat experience/reversinglabs.txt | grep -n responsibility
+```
+
+Each stage receives the previous stage's output. Execution stops when a stage
+returns a non-zero exit code.
+
+## Keyboard Shortcuts
+
+- `Tab`: complete commands and virtual filesystem paths
+- `Ctrl+L`: run the backend-owned `clear` command
+
+## HTTP API
+
+Execute a command:
+
+```sh
+curl -X POST http://localhost:8080/api/exec \
+  -H "Content-Type: application/json" \
+  -d '{"line":"tree"}'
+```
+
+The response includes a `session_id`. Send it with later requests to preserve
+the working directory and history:
+
+```sh
+curl -X POST http://localhost:8080/api/exec \
+  -H "Content-Type: application/json" \
+  -d '{"line":"cd experience","session_id":"<session-id>"}'
+```
+
+## Planned Advanced Examples
+
+These examples document the intended interface but are not implemented yet:
+
+Compose multiple pipeline stages:
+
+```sh
+cat skills.txt | grep "^language:" | sort
+cat skills.txt | grep "^backend:" | sort -r
+cat experience/reversinglabs.txt | grep responsibility | head -n 3
+cat experience/reversinglabs.txt | grep focus | wc -l
+history | tail -n 5
+tree | grep ".txt" | sort
+```
+
+Limit and inspect output:
+
+```sh
+cat skills.txt | sort
+cat skills.txt | sort -r
+cat skills.txt | head -n 5
+cat skills.txt | tail -n 5
+cat skills.txt | wc -l
+```
+
+Use planned command options:
+
+```sh
+cat -n about.txt
+tree -L 2
+ls -R experience
+ls -lt
+```
+
 # Roadmap
 
 ## MVP
@@ -125,7 +235,7 @@ The test UI is plain HTML, CSS, and JavaScript; it does not require Node.js or n
 - [x] Pipeline executor
 
 ## Built-ins
-- [ ] grep
+- [x] grep
 - [ ] head
 - [ ] tail
 - [ ] wc
@@ -137,7 +247,7 @@ The test UI is plain HTML, CSS, and JavaScript; it does not require Node.js or n
 - [ ] `ls -R [path]`
 - [ ] `tree -L <depth> [path]`
 - [ ] `cat -n <file>`
-- [ ] `grep -i` and `grep -n`
+- [x] `grep -i` and `grep -n`
 - [ ] `head -n <count>` and `tail -n <count>`
 - [ ] `sort -r`
 - [ ] Verbose output (`--verbose`) returned with command results
