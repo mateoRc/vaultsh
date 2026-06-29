@@ -2,6 +2,7 @@ package shell
 
 import (
 	"fmt"
+	"strings"
 
 	"github.com/mateom/vaultsh/internal/command"
 	"github.com/mateom/vaultsh/internal/filesystem"
@@ -20,6 +21,8 @@ func NewWithRoot(root *filesystem.Directory) *Engine {
 	workingDirectory := filesystem.NewWorkingDirectory(root)
 
 	commands.Register(command.About{})
+	commands.Register(command.NewCat(workingDirectory))
+	commands.Register(command.NewCd(workingDirectory))
 	commands.Register(command.Clear{})
 	commands.Register(command.NewHelp(commands))
 	commands.Register(command.NewLs(workingDirectory))
@@ -29,13 +32,18 @@ func NewWithRoot(root *filesystem.Directory) *Engine {
 }
 
 func (e *Engine) Execute(line string) command.Result {
-	run, found := e.commands.Find(line)
+	fields := strings.Fields(line)
+	if len(fields) == 0 {
+		return command.Result{}
+	}
+
+	run, found := e.commands.Find(fields[0])
 	if !found {
 		return command.Result{
-			Output:   fmt.Sprintf("command not found: %s", line),
+			Output:   fmt.Sprintf("command not found: %s", fields[0]),
 			ExitCode: 127,
 		}
 	}
 
-	return run.Execute()
+	return run.Execute(fields[1:])
 }

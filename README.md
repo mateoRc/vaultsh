@@ -52,8 +52,8 @@ A shell engine featuring a virtual filesystem, command parser, and extensible co
 ## Commands
 - [x] pwd
 - [x] ls
-- [ ] cd
-- [ ] cat
+- [x] cd
+- [x] cat
 - [ ] tree
 
 ## Sessions

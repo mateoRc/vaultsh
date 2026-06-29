@@ -19,6 +19,8 @@ func TestEngineExecute(t *testing.T) {
 			want: command.Result{
 				Output: "Available commands:" +
 					"\n  about - Describe Vaultsh" +
+					"\n  cat - Print file contents" +
+					"\n  cd - Change the current directory" +
 					"\n  clear - Clear the terminal" +
 					"\n  help - List available commands" +
 					"\n  ls - List directory contents" +
@@ -95,5 +97,51 @@ func TestEngineListDirectory(t *testing.T) {
 	}
 	if result.ExitCode != 0 {
 		t.Errorf("ls exit code = %d, want 0", result.ExitCode)
+	}
+}
+
+func TestEngineChangeDirectoryAndReadFile(t *testing.T) {
+	root := filesystem.NewDirectory("")
+	docs := filesystem.NewDirectory("docs")
+	if err := root.Add(docs); err != nil {
+		t.Fatalf("Add(docs): %v", err)
+	}
+	if err := docs.Add(filesystem.NewFile("readme.txt", "hello")); err != nil {
+		t.Fatalf("Add(readme.txt): %v", err)
+	}
+	engine := NewWithRoot(root)
+
+	if result := engine.Execute("cd docs"); result.ExitCode != 0 {
+		t.Fatalf("cd exit code = %d, output = %q", result.ExitCode, result.Output)
+	}
+	if result := engine.Execute("pwd"); result.Output != "/docs" {
+		t.Errorf("pwd output = %q, want %q", result.Output, "/docs")
+	}
+	if result := engine.Execute("cat readme.txt"); result.Output != "hello" {
+		t.Errorf("cat output = %q, want %q", result.Output, "hello")
+	}
+}
+
+func TestEngineCommandUsage(t *testing.T) {
+	engine := New()
+
+	tests := []struct {
+		line string
+		want string
+	}{
+		{line: "cd one two", want: "usage: cd [directory]"},
+		{line: "cat", want: "usage: cat <file>"},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.line, func(t *testing.T) {
+			result := engine.Execute(tt.line)
+			if result.ExitCode != 2 {
+				t.Errorf("exit code = %d, want 2", result.ExitCode)
+			}
+			if result.Output != tt.want {
+				t.Errorf("output = %q, want %q", result.Output, tt.want)
+			}
+		})
 	}
 }
