@@ -85,6 +85,12 @@ A shell engine featuring a virtual filesystem, command parser, and extensible co
 - [ ] sort
 
 ## Command Options
+- [ ] `ls -R [path]`
+- [ ] `tree -L <depth> [path]`
+- [ ] `cat -n <file>`
+- [ ] `grep -i` and `grep -n`
+- [ ] `head -n <count>` and `tail -n <count>`
+- [ ] `sort -r`
 - [ ] Verbose output (`--verbose`) returned with command results
 
 ---
