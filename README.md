@@ -47,7 +47,7 @@ A shell engine featuring a virtual filesystem, command parser, and extensible co
 - [x] Directory
 - [x] File
 - [x] Path resolver
-- [ ] Current working directory
+- [x] Current working directory
 
 ## Commands
 - [ ] pwd
