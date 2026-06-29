@@ -2,8 +2,9 @@ package httpapi
 
 import (
 	"encoding/json"
-	"fmt"
 	"net/http"
+
+	"github.com/mateom/vaultsh/internal/shell"
 )
 
 type execRequest struct {
@@ -15,14 +16,16 @@ type execResponse struct {
 	ExitCode int    `json:"exit_code"`
 }
 
-func NewHandler() http.Handler {
+func NewHandler(engine *shell.Engine) http.Handler {
 	mux := http.NewServeMux()
 	mux.HandleFunc("GET /healthz", health)
 	mux.Handle(
 		"GET /testui/",
 		http.StripPrefix("/testui/", http.FileServer(http.Dir("testui"))),
 	)
-	mux.HandleFunc("POST /api/exec", exec)
+	mux.HandleFunc("POST /api/exec", func(w http.ResponseWriter, r *http.Request) {
+		exec(w, r, engine)
+	})
 
 	return mux
 }
@@ -32,20 +35,17 @@ func health(w http.ResponseWriter, _ *http.Request) {
 	_, _ = w.Write([]byte("ok"))
 }
 
-func exec(w http.ResponseWriter, r *http.Request) {
+func exec(w http.ResponseWriter, r *http.Request, engine *shell.Engine) {
 	var request execRequest
 	if err := json.NewDecoder(r.Body).Decode(&request); err != nil {
 		http.Error(w, "invalid JSON", http.StatusBadRequest)
 		return
 	}
 
+	result := engine.Execute(request.Line)
 	response := execResponse{
-		Output:   "Available commands:\n  help",
-		ExitCode: 0,
-	}
-	if request.Line != "help" {
-		response.Output = fmt.Sprintf("command not found: %s", request.Line)
-		response.ExitCode = 127
+		Output:   result.Output,
+		ExitCode: result.ExitCode,
 	}
 
 	w.Header().Set("Content-Type", "application/json")
