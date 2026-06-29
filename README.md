@@ -17,7 +17,7 @@ A shell engine featuring a virtual filesystem, command parser, and extensible co
 - [x] Unknown command handling
 
 ### Shell Engine
-- [ ] Engine
+- [x] Engine
 - [ ] Execution context
 - [ ] Command registry
 - [ ] Command interface
