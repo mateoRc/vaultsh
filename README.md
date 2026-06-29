@@ -33,7 +33,7 @@ A shell engine featuring a virtual filesystem, command parser, and extensible co
 - [x] Auto focus
 
 ### Developer Experience
-- [ ] Graceful shutdown
+- [x] Graceful shutdown
 - [ ] Structured logging
 - [ ] Basic tests
 
