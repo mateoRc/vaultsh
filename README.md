@@ -175,7 +175,7 @@ The test UI is plain HTML, CSS, and JavaScript; it does not require Node.js or n
 
 # Nice to Have
 
-- [ ] Autocomplete
+- [x] Command and path autocomplete
 - [ ] Aliases
 - [ ] Environment variables
 - [ ] Configuration

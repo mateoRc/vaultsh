@@ -39,6 +39,22 @@ func (m *SessionManager) Execute(sessionID, line string) (command.Result, string
 	return current.engine.Execute(line), sessionID, nil
 }
 
+func (m *SessionManager) Complete(
+	sessionID string,
+	line string,
+	cursor int,
+) (Completion, string, error) {
+	current, sessionID, err := m.get(sessionID)
+	if err != nil {
+		return Completion{}, "", err
+	}
+
+	current.mu.Lock()
+	defer current.mu.Unlock()
+
+	return current.engine.Complete(line, cursor), sessionID, nil
+}
+
 func (m *SessionManager) get(sessionID string) (*session, string, error) {
 	m.mu.Lock()
 	defer m.mu.Unlock()
