@@ -20,9 +20,11 @@ func TestParse(t *testing.T) {
 		t.Fatalf("Parse(): %v", err)
 	}
 
-	want := [][]string{
-		{"cat", "about.txt"},
-		{"grep", "role"},
+	want := SyntaxTree{
+		Pipeline: []CommandNode{
+			{Name: "cat", Args: []string{"about.txt"}},
+			{Name: "grep", Args: []string{"role"}},
+		},
 	}
 	if !reflect.DeepEqual(got, want) {
 		t.Errorf("Parse() = %#v, want %#v", got, want)
@@ -35,8 +37,8 @@ func TestParseEmptyInput(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Parse(): %v", err)
 	}
-	if got != nil {
-		t.Errorf("Parse() = %#v, want nil", got)
+	if !reflect.DeepEqual(got, SyntaxTree{}) {
+		t.Errorf("Parse() = %#v, want empty syntax tree", got)
 	}
 }
 
