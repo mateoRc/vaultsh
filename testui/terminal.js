@@ -2,25 +2,11 @@ const status = document.querySelector("#status");
 const form = document.querySelector("#command-form");
 const command = document.querySelector("#command");
 const output = document.querySelector("#output");
-const terminal = document.querySelector(".terminal");
 let sessionId = sessionStorage.getItem("vaultsh-session") || "";
 
 if (window.matchMedia("(pointer: fine)").matches) {
   focusCommand();
 }
-
-terminal.addEventListener("click", (event) => {
-  if (event.target === command) {
-    return;
-  }
-  if (event.target.closest("a, button")) {
-    return;
-  }
-  if (window.getSelection()?.toString()) {
-    return;
-  }
-  focusCommand();
-});
 
 fetch("/healthz")
   .then((response) => {
