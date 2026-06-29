@@ -97,7 +97,7 @@ h1::after {
   border: 3px solid #1d1f1e;
   border-radius: 0.55rem;
   background: #171918;
-  box-shadow: 9px 9px 0 #1d1f1e;
+  box-shadow: 0 1rem 2.5rem rgb(29 31 30 / 18%);
 }
 
 .terminal-bar {
@@ -248,10 +248,6 @@ h1::after {
 
   .summary {
     line-height: 1.5;
-  }
-
-  .terminal {
-    box-shadow: 5px 5px 0 #1d1f1e;
   }
 
   .terminal-bar {
