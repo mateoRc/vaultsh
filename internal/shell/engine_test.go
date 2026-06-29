@@ -11,7 +11,15 @@ func TestEngineExecute(t *testing.T) {
 		{
 			name: "help",
 			line: "help",
-			want: Result{Output: "Available commands:\n  help", ExitCode: 0},
+			want: Result{Output: "Available commands:\n  about\n  help", ExitCode: 0},
+		},
+		{
+			name: "about",
+			line: "about",
+			want: Result{
+				Output:   "Vaultsh is a read-only virtual shell engine.",
+				ExitCode: 0,
+			},
 		},
 		{
 			name: "unknown command",
