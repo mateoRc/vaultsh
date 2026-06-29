@@ -1,22 +1,29 @@
 package shell
 
-import "testing"
+import (
+	"testing"
+
+	"github.com/mateom/vaultsh/internal/command"
+)
 
 func TestEngineExecute(t *testing.T) {
 	tests := []struct {
 		name string
 		line string
-		want Result
+		want command.Result
 	}{
 		{
 			name: "help",
 			line: "help",
-			want: Result{Output: "Available commands:\n  about\n  help", ExitCode: 0},
+			want: command.Result{
+				Output:   "Available commands:\n  about\n  help",
+				ExitCode: 0,
+			},
 		},
 		{
 			name: "about",
 			line: "about",
-			want: Result{
+			want: command.Result{
 				Output:   "Vaultsh is a read-only virtual shell engine.",
 				ExitCode: 0,
 			},
@@ -24,7 +31,10 @@ func TestEngineExecute(t *testing.T) {
 		{
 			name: "unknown command",
 			line: "pwd",
-			want: Result{Output: "command not found: pwd", ExitCode: 127},
+			want: command.Result{
+				Output:   "command not found: pwd",
+				ExitCode: 127,
+			},
 		},
 	}
 
