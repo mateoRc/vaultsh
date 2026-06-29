@@ -23,6 +23,18 @@ form.addEventListener("submit", async (event) => {
   command.value = "";
   command.focus();
 
+  await execute(line);
+});
+
+document.addEventListener("keydown", async (event) => {
+  if (event.ctrlKey && event.key.toLowerCase() === "l") {
+    event.preventDefault();
+    await execute("clear");
+    command.focus();
+  }
+});
+
+async function execute(line) {
   try {
     const response = await fetch("/api/exec", {
       method: "POST",
@@ -30,11 +42,20 @@ form.addEventListener("submit", async (event) => {
       body: JSON.stringify({ line }),
     });
     const result = await response.json();
-    appendEntry(line, result.output);
+    handleResult(line, result);
   } catch {
     appendEntry(line, "request failed");
   }
-});
+}
+
+function handleResult(line, result) {
+  if (result.action === "clear") {
+    output.textContent = "";
+    return;
+  }
+
+  appendEntry(line, result.output);
+}
 
 function appendEntry(line, result) {
   const separator = output.textContent ? "\n" : "";

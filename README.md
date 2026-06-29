@@ -23,20 +23,20 @@ A shell engine featuring a virtual filesystem, command parser, and extensible co
 ### Commands
 - [x] help
 - [x] about
+- [x] clear (backend action)
 - [x] Promote commands to Command interface
-- [ ] clear (frontend only)
 
 ### Frontend (Test UI)
 - [x] Send commands to API
 - [x] Render output
 - [x] Basic history
 - [x] Auto focus
+- [x] Clear shortcut (Ctrl+L)
 
 ### Developer Experience
 - [x] Graceful shutdown
 - [x] Structured logging
-- [ ] Verbose mode (`--verbose`) for command execution logs
-- [ ] Basic tests
+- [x] Basic tests
 
 ---
 
@@ -82,6 +82,9 @@ A shell engine featuring a virtual filesystem, command parser, and extensible co
 - [ ] tail
 - [ ] wc
 - [ ] sort
+
+## Command Options
+- [ ] Verbose output (`--verbose`) returned with command results
 
 ---
 

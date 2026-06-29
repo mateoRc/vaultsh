@@ -13,6 +13,7 @@ type Engine struct {
 func New() *Engine {
 	commands := command.NewRegistry()
 	commands.Register(command.About{})
+	commands.Register(command.Clear{})
 	commands.Register(command.NewHelp(commands))
 
 	return &Engine{commands: commands}
