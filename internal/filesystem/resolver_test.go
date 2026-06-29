@@ -46,6 +46,13 @@ func TestResolverResolve(t *testing.T) {
 			wantPath:         "/",
 		},
 		{
+			name:             "parent of root",
+			workingDirectory: "/",
+			target:           "..",
+			wantNode:         root,
+			wantPath:         "/",
+		},
+		{
 			name:     "clean path",
 			target:   "/docs//./readme.txt",
 			wantNode: readme,

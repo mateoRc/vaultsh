@@ -8,10 +8,11 @@ const (
 )
 
 const (
-	ExitSuccess  = 0
-	ExitFailure  = 1
-	ExitUsage    = 2
-	ExitNotFound = 127
+	ExitSuccess     = 0
+	ExitFailure     = 1
+	ExitUsage       = 2
+	ExitUnsupported = 126
+	ExitNotFound    = 127
 )
 
 type Result struct {
