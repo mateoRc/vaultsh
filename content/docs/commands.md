@@ -13,7 +13,7 @@ the API result. The command's normal text output is unchanged.
 | `ls` | `ls [-alR] [path]` | List files and directories |
 | `cd` | `cd [directory]` | Change the current virtual directory |
 | `cat` | `cat [-n] [file]` | Print a file or pipeline input |
-| `tree` | `tree [-L depth] [path]` | Print a directory tree |
+| `tree` | `tree [-a] [-L depth] [path]` | Print a directory tree |
 | `grep` | `grep [-in] <pattern> [file]` | Filter lines using a regular expression |
 | `head` | `head [-n count] [file]` | Print the first lines |
 | `tail` | `tail [-n count] [file]` | Print the last lines |
@@ -36,6 +36,7 @@ ls
 ls -la /
 ls -R experience
 tree
+tree -a
 tree -L 2 /
 cd experience
 cat reversinglabs.txt

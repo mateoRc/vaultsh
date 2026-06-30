@@ -99,6 +99,7 @@
 - [ ] File timestamps and `ls -t`
 - [x] `ls -R [path]`
 - [x] `tree -L <depth> [path]`
+- [x] `tree -a` includes hidden entries
 - [x] `cat -n <file>`
 - [x] `grep -i` and `grep -n`
 - [x] `head -n <count>` and `tail -n <count>`
@@ -154,6 +155,8 @@
 - [ ] Command-sequence triggers
 - [ ] Session-scoped progress
 - [x] `hire mateo` returns a sudo-access hint
-- [x] `sudo hire mateo -s <salary>` requires a salary
+- [x] `sudo hire mateo -s <yearly>` requires a yearly amount
+- [x] Yearly amounts below `70` suggest `100`
+- [x] Yearly amounts above `150` return an immediate start response
 - [x] Return a counter-offer at 1.5× the submitted salary
 - [x] Accept a pending counter-offer with `y` or `Y`

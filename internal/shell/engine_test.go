@@ -1,6 +1,7 @@
 package shell
 
 import (
+	"strings"
 	"testing"
 
 	"github.com/mateom/vaultsh/internal/command"
@@ -340,7 +341,7 @@ func TestEngineCommandUsage(t *testing.T) {
 	}{
 		{line: "cd one two", want: "usage: cd [directory]"},
 		{line: "cat", want: "usage: cat [-n] [file]"},
-		{line: "tree one two", want: "usage: tree [-L depth] [path]"},
+		{line: "tree one two", want: "usage: tree [-a] [-L depth] [path]"},
 	}
 
 	for _, tt := range tests {
@@ -570,6 +571,25 @@ func TestEngineTree(t *testing.T) {
 	}
 }
 
+func TestEngineTreeHidesDotfilesUnlessAllIsSet(t *testing.T) {
+	root := filesystem.NewDirectory("")
+	if err := root.Add(filesystem.NewFile(".motd", "Welcome to Vaultsh.")); err != nil {
+		t.Fatalf("Add(.motd): %v", err)
+	}
+	if err := root.Add(filesystem.NewFile("about.txt", "hello")); err != nil {
+		t.Fatalf("Add(about.txt): %v", err)
+	}
+	engine := NewWithRoot(root)
+
+	if result := engine.Execute("tree"); strings.Contains(result.Output, ".motd") {
+		t.Errorf("tree output includes hidden file: %q", result.Output)
+	}
+	result := engine.Execute("tree -a")
+	if !strings.Contains(result.Output, ".motd") {
+		t.Errorf("tree -a output excludes hidden file: %q", result.Output)
+	}
+}
+
 func TestEngineTreeDepth(t *testing.T) {
 	root := filesystem.NewDirectory("")
 	docs := filesystem.NewDirectory("docs")
@@ -647,7 +667,7 @@ func TestEngineHireEasterEgg(t *testing.T) {
 
 	result := engine.Execute("hire mateo")
 
-	want := "hire: permission denied\nhint: try sudo hire mateo -s <salary>"
+	want := "hire: permission denied\nhint: try sudo hire mateo -s <yearly>"
 	if result.Output != want {
 		t.Errorf("hire output = %q, want %q", result.Output, want)
 	}
@@ -657,11 +677,11 @@ func TestEngineHireEasterEgg(t *testing.T) {
 }
 
 func TestEngineSudoHireEasterEgg(t *testing.T) {
-	result := New().Execute("sudo hire mateo -s 100000")
+	result := New().Execute("sudo hire mateo -s 100")
 
 	want := "sudo: access granted\n" +
-		"salary offered: 100000.00\n" +
-		"counter-offer: 150000.00\n" +
+		"salary offered: 100.00\n" +
+		"counter-offer: 150.00\n" +
 		"accept counter-offer? [Y/y]"
 	if result.Output != want {
 		t.Errorf("sudo hire output = %q, want %q", result.Output, want)
@@ -671,14 +691,72 @@ func TestEngineSudoHireEasterEgg(t *testing.T) {
 	}
 }
 
+func TestEngineSudoHireQuestionsLowSalary(t *testing.T) {
+	engine := New()
+
+	result := engine.Execute("sudo hire mateo -s 69")
+
+	if result.Output != "did you mean 100?" {
+		t.Errorf("output = %q, want %q", result.Output, "did you mean 100?")
+	}
+	if result.ExitCode != command.ExitFailure {
+		t.Errorf("exit code = %d, want %d", result.ExitCode, command.ExitFailure)
+	}
+
+	result = engine.Execute("y")
+	if result.Output != "y: no pending counter-offer" {
+		t.Errorf("accept output = %q, want no pending counter-offer", result.Output)
+	}
+}
+
+func TestEngineSudoHireAcceptsMinimumSalary(t *testing.T) {
+	result := New().Execute("sudo hire mateo -s 70")
+
+	if result.ExitCode != command.ExitSuccess {
+		t.Errorf("exit code = %d, want %d", result.ExitCode, command.ExitSuccess)
+	}
+	if !strings.Contains(result.Output, "counter-offer: 105.00") {
+		t.Errorf("output = %q, want minimum-salary counter-offer", result.Output)
+	}
+}
+
+func TestEngineSudoHireAcceptsCrazyHighOfferImmediately(t *testing.T) {
+	engine := New()
+
+	result := engine.Execute("sudo hire mateo -s 151")
+
+	if result.Output != "when do i start?" {
+		t.Errorf("output = %q, want %q", result.Output, "when do i start?")
+	}
+	if result.ExitCode != command.ExitSuccess {
+		t.Errorf("exit code = %d, want %d", result.ExitCode, command.ExitSuccess)
+	}
+
+	result = engine.Execute("y")
+	if result.Output != "y: no pending counter-offer" {
+		t.Errorf("accept output = %q, want no pending counter-offer", result.Output)
+	}
+}
+
+func TestEngineSudoHireNegotiatesAtHighOfferBoundary(t *testing.T) {
+	result := New().Execute("sudo hire mateo -s 150")
+
+	if result.ExitCode != command.ExitSuccess {
+		t.Errorf("exit code = %d, want %d", result.ExitCode, command.ExitSuccess)
+	}
+	if !strings.Contains(result.Output, "counter-offer: 225.00") {
+		t.Errorf("output = %q, want boundary counter-offer", result.Output)
+	}
+}
+
 func TestEngineAcceptsCounterOfferOnce(t *testing.T) {
 	engine := New()
-	if result := engine.Execute("sudo hire mateo -s 100000"); result.ExitCode != command.ExitSuccess {
+	if result := engine.Execute("sudo hire mateo -s 100"); result.ExitCode != command.ExitSuccess {
 		t.Fatalf("sudo hire failed: %s", result.Output)
 	}
 
 	result := engine.Execute("y")
-	want := "counter-offer accepted: 150000.00\n" +
+	want := "counter-offer accepted: 150.00\n" +
 		"welcome aboard. paperwork has entered the chat."
 	if result.Output != want {
 		t.Errorf("accept output = %q, want %q", result.Output, want)
@@ -699,7 +777,7 @@ func TestEngineAcceptsCounterOfferOnce(t *testing.T) {
 func TestEngineCounterOfferIsSessionScoped(t *testing.T) {
 	first := New()
 	second := New()
-	first.Execute("sudo hire mateo -s 100000")
+	first.Execute("sudo hire mateo -s 100")
 
 	result := second.Execute("y")
 
@@ -712,22 +790,39 @@ func TestEngineCounterOfferIsSessionScoped(t *testing.T) {
 }
 
 func TestEngineSudoHireRequiresValidSalary(t *testing.T) {
-	tests := []string{
-		"sudo hire mateo",
-		"sudo hire mateo -s nope",
-		"sudo hire mateo -s 0",
+	tests := []struct {
+		line string
+		code int
+	}{
+		{line: "sudo hire mateo", code: command.ExitFailure},
+		{line: "sudo hire mateo -s nope", code: command.ExitUsage},
+		{line: "sudo hire mateo -s 0", code: command.ExitUsage},
 	}
 
-	for _, line := range tests {
-		t.Run(line, func(t *testing.T) {
-			result := New().Execute(line)
-			if result.ExitCode != command.ExitUsage {
+	for _, tt := range tests {
+		t.Run(tt.line, func(t *testing.T) {
+			result := New().Execute(tt.line)
+			if result.ExitCode != tt.code {
 				t.Errorf(
 					"exit code = %d, want %d",
 					result.ExitCode,
-					command.ExitUsage,
+					tt.code,
 				)
 			}
 		})
+	}
+}
+
+func TestEngineSudoAnythingShowsPrivilegedWorkflowHint(t *testing.T) {
+	result := New().Execute("sudo anything")
+	want := "sudo: access denied\n" +
+		"hint: only one privileged workflow is available\n" +
+		"hint: try: sudo hire mateo -s <yearly>"
+
+	if result.Output != want {
+		t.Errorf("output = %q, want %q", result.Output, want)
+	}
+	if result.ExitCode != command.ExitFailure {
+		t.Errorf("exit code = %d, want %d", result.ExitCode, command.ExitFailure)
 	}
 }

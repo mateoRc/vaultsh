@@ -8,7 +8,12 @@ import (
 	"github.com/mateom/vaultsh/internal/negotiation"
 )
 
-const salaryMultiplier = 1.5
+const (
+	salaryMultiplier = 1.5
+	minimumSalary    = 70
+	suggestedSalary  = 100
+	immediateHire    = 150
+)
 
 type Sudo struct {
 	negotiation *negotiation.State
@@ -35,7 +40,7 @@ func (s Sudo) Execute(args []string, _ Input) Result {
 		args[0] != "hire" ||
 		args[1] != "mateo" ||
 		args[2] != "-s" {
-		return sudoHireUsage()
+		return sudoAccessDenied()
 	}
 
 	salary, err := strconv.ParseFloat(args[3], 64)
@@ -43,6 +48,18 @@ func (s Sudo) Execute(args []string, _ Input) Result {
 		return Result{
 			Output:   fmt.Sprintf("sudo: invalid salary: %s", args[3]),
 			ExitCode: ExitUsage,
+		}
+	}
+	if salary < minimumSalary {
+		return Result{
+			Output:   fmt.Sprintf("did you mean %.0f?", float64(suggestedSalary)),
+			ExitCode: ExitFailure,
+		}
+	}
+	if salary > immediateHire {
+		return Result{
+			Output:   "when do i start?",
+			ExitCode: ExitSuccess,
 		}
 	}
 
@@ -62,9 +79,11 @@ func (s Sudo) Execute(args []string, _ Input) Result {
 	}
 }
 
-func sudoHireUsage() Result {
+func sudoAccessDenied() Result {
 	return Result{
-		Output:   "usage: sudo hire mateo -s <salary>",
-		ExitCode: ExitUsage,
+		Output: "sudo: access denied\n" +
+			"hint: only one privileged workflow is available\n" +
+			"hint: try: sudo hire mateo -s <yearly>",
+		ExitCode: ExitFailure,
 	}
 }
