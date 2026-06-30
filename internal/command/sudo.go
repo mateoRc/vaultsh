@@ -58,7 +58,7 @@ func (s Sudo) Execute(args []string, _ Input) Result {
 	}
 	if salary > immediateHire {
 		return Result{
-			Output:   "when do i start?",
+			Output:   "when do I start?",
 			ExitCode: ExitSuccess,
 		}
 	}

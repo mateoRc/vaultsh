@@ -48,7 +48,7 @@ func (a AcceptOffer) Execute(args []string, _ Input) Result {
 
 	return Result{
 		Output: fmt.Sprintf(
-			"counter-offer accepted: %.2f\nwelcome aboard. paperwork has entered the chat.",
+			"counter-offer accepted: %.2f\npaperwork has entered the chat.",
 			counterOffer,
 		),
 		ExitCode: ExitSuccess,

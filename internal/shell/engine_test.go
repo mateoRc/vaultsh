@@ -725,8 +725,8 @@ func TestEngineSudoHireAcceptsCrazyHighOfferImmediately(t *testing.T) {
 
 	result := engine.Execute("sudo hire mateo -s 100001")
 
-	if result.Output != "when do i start?" {
-		t.Errorf("output = %q, want %q", result.Output, "when do i start?")
+	if result.Output != "when do I start?" {
+		t.Errorf("output = %q, want %q", result.Output, "when do I start?")
 	}
 	if result.ExitCode != command.ExitSuccess {
 		t.Errorf("exit code = %d, want %d", result.ExitCode, command.ExitSuccess)
@@ -757,7 +757,7 @@ func TestEngineAcceptsCounterOfferOnce(t *testing.T) {
 
 	result := engine.Execute("y")
 	want := "counter-offer accepted: 150000.00\n" +
-		"welcome aboard. paperwork has entered the chat."
+		"paperwork has entered the chat."
 	if result.Output != want {
 		t.Errorf("accept output = %q, want %q", result.Output, want)
 	}
