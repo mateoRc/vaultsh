@@ -9,6 +9,10 @@ ls experience
 cat experience/reversinglabs.txt
 cat contact.txt
 
+Projects:
+cd ../projects
+cat vaultsh.txt
+
 Useful commands:
 help
 pwd
@@ -22,3 +26,6 @@ clear
 
 Example:
 cat skills.txt | grep backend
+
+Note:
+Employer details are intentionally high-level.
