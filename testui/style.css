@@ -15,6 +15,7 @@ body {
   min-height: 100vh;
   margin: 0;
   overflow-x: hidden;
+  user-select: none;
   background-color: #f6f1e4;
   background-image: radial-gradient(rgb(29 31 30 / 16%) 0.75px, transparent 0.75px);
   background-size: 18px 18px;
@@ -75,7 +76,7 @@ h1::after {
 
 .tiny-word {
   display: inline-block;
-  font-size: 0.68em;
+  font-size: 0.5em;
   font-weight: 750;
   letter-spacing: 0.02em;
   transform: translateY(-0.08em);
@@ -253,7 +254,6 @@ h1::after {
   gap: 0.65rem;
   min-height: 2.75rem;
   border-top: 1px dashed #535a55;
-  cursor: text;
   padding-top: 1rem;
 }
 
@@ -263,19 +263,42 @@ h1::after {
   font-weight: 750;
 }
 
-#command {
+.command-input {
+  display: flex;
   min-width: 0;
   flex: 1;
+  align-items: center;
+}
+
+#command {
+  width: calc((var(--command-length, 0) + 0.25) * 1ch);
+  min-width: 0.25ch;
+  max-width: calc(100% - 0.5rem);
   border: 0;
   outline: 0;
+  cursor: text;
+  user-select: text;
   background: transparent;
   color: #fffdf7;
-  caret-color: #f05a28;
+  caret-color: transparent;
   font: inherit;
 }
 
 #command:focus {
   text-shadow: 0 0 0.65rem rgb(247 200 67 / 28%);
+}
+
+.command-caret {
+  display: none;
+  width: 3px;
+  height: 1.45em;
+  flex: none;
+  background: #f05a28;
+}
+
+#command:focus + .command-caret {
+  display: block;
+  animation: command-caret-blink 1.1s steps(1) infinite;
 }
 
 .hint {
@@ -406,6 +429,12 @@ h1::after {
 }
 
 @keyframes blink {
+  50% {
+    opacity: 0;
+  }
+}
+
+@keyframes command-caret-blink {
   50% {
     opacity: 0;
   }

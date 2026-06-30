@@ -65,14 +65,17 @@ Type 'help' to begin.</pre>
 
         <form id="command-form">
           <label for="command">vault:~$</label>
-          <input
-            id="command"
-            name="command"
-            autocomplete="off"
-            autocapitalize="off"
-            spellcheck="false"
-            aria-label="Shell command"
-          >
+          <span class="command-input">
+            <input
+              id="command"
+              name="command"
+              autocomplete="off"
+              autocapitalize="off"
+              spellcheck="false"
+              aria-label="Shell command"
+            >
+            <span class="command-caret" aria-hidden="true"></span>
+          </span>
           <button class="visually-hidden" type="submit">Run command</button>
         </form>
       </div>
