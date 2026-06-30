@@ -4,7 +4,7 @@ import (
 	"strings"
 	"testing"
 
-	content "github.com/mateom/vaultsh/content/cv"
+	"github.com/mateom/vaultsh/content"
 	"github.com/mateom/vaultsh/internal/command"
 	"github.com/mateom/vaultsh/internal/shell"
 	"github.com/mateom/vaultsh/internal/storage"
@@ -26,12 +26,12 @@ func TestEmbeddedContentThroughShell(t *testing.T) {
 		{
 			name:       "root layout",
 			command:    "ls",
-			wantOutput: "about.txt\nexperience/\ninterests.txt\nprojects/\nskills.txt",
+			wantOutput: "cv/\ndocs/\nprojects/",
 		},
 		{
 			name:       "hidden message of the day",
 			command:    "ls -a",
-			wantOutput: ".motd\nabout.txt\nexperience/\ninterests.txt\nprojects/\nskills.txt",
+			wantOutput: ".motd\ncv/\ndocs/\nprojects/",
 		},
 		{
 			name:       "read message of the day",
@@ -40,12 +40,12 @@ func TestEmbeddedContentThroughShell(t *testing.T) {
 		},
 		{
 			name:       "experience layout",
-			command:    "ls experience",
+			command:    "ls cv/experience",
 			wantOutput: "a1.txt\narisglobal.txt\nintellexi.txt\nreversinglabs.txt",
 		},
 		{
 			name:    "cat embedded file",
-			command: "cat experience/reversinglabs.txt",
+			command: "cat cv/experience/reversinglabs.txt",
 			wantContain: []string{
 				"company: ReversingLabs",
 				"responsibility: mentoring",
@@ -53,7 +53,7 @@ func TestEmbeddedContentThroughShell(t *testing.T) {
 		},
 		{
 			name:        "grep embedded file",
-			command:     "grep '^technology:' experience/reversinglabs.txt",
+			command:     "grep '^technology:' cv/experience/reversinglabs.txt",
 			wantContain: []string{"technology: Python", "technology: Docker"},
 		},
 		{
@@ -62,7 +62,8 @@ func TestEmbeddedContentThroughShell(t *testing.T) {
 			wantContain: []string{
 				"about.txt",
 				"interests.txt",
-				"experience",
+				"cv",
+				"docs",
 				"projects",
 			},
 		},

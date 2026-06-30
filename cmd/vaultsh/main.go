@@ -9,7 +9,7 @@ import (
 	"syscall"
 	"time"
 
-	content "github.com/mateom/vaultsh/content/cv"
+	"github.com/mateom/vaultsh/content"
 	"github.com/mateom/vaultsh/internal/httpapi"
 	"github.com/mateom/vaultsh/internal/shell"
 	"github.com/mateom/vaultsh/internal/storage"
