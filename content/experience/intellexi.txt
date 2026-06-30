@@ -1,18 +1,25 @@
 company: Intellexi
 role: Software Developer
-period: 2023-2023
+period: 2023-02 to 2023-12
+location: Croatia, hybrid
+industry: financial services
 
-summary: backend delivery for financial and government services
-
-focus: backend services
-focus: system integration
-focus: secure data handling
+summary: backend development for a financial services platform
 
 technology: Java
-technology: Spring Boot
-technology: Kafka
+technology: Git
 technology: Docker
 
-responsibility: backend delivery
-responsibility: stakeholder collaboration
-responsibility: adapting to evolving requirements
+focus: backend services
+focus: financial services platform
+focus: evolving requirements
+focus: external dependencies
+focus: data protection
+focus: security requirements
+
+responsibility: backend implementation
+responsibility: delivery under tight deadlines
+responsibility: client stakeholder collaboration
+responsibility: collaboration with system architect
+responsibility: technical decision-making
+responsibility: core functionality delivery

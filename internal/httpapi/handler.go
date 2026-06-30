@@ -17,6 +17,7 @@ type execResponse struct {
 	Output    string         `json:"output"`
 	ExitCode  int            `json:"exit_code"`
 	Action    command.Action `json:"action,omitempty"`
+	Verbose   string         `json:"verbose,omitempty"`
 	SessionID string         `json:"session_id"`
 }
 
@@ -101,6 +102,7 @@ func exec(w http.ResponseWriter, r *http.Request, sessions *shell.SessionManager
 		Output:    result.Output,
 		ExitCode:  result.ExitCode,
 		Action:    result.Action,
+		Verbose:   result.Verbose,
 		SessionID: sessionID,
 	}
 

@@ -103,7 +103,7 @@
 - [x] `grep -i` and `grep -n`
 - [x] `head -n <count>` and `tail -n <count>`
 - [x] `sort -r`
-- [ ] Verbose output (`--verbose`) returned with command results
+- [x] Verbose output (`--verbose`) returned with command results
 
 ## v3
 
