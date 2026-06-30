@@ -271,8 +271,8 @@ h1::after {
 }
 
 #command {
-  width: calc((var(--command-length, 0) + 0.75) * 1ch);
-  min-width: 0.75ch;
+  width: calc((var(--command-length, 0) + 0.2) * 1ch);
+  min-width: 0.2ch;
   max-width: calc(100% - 0.5rem);
   border: 0;
   outline: 0;
