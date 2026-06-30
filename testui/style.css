@@ -263,17 +263,9 @@ h1::after {
   font-weight: 750;
 }
 
-.command-input {
-  display: flex;
+#command {
   min-width: 0;
   flex: 1;
-  align-items: center;
-}
-
-#command {
-  width: calc((var(--command-length, 0) + 0.2) * 1ch);
-  min-width: 0.2ch;
-  max-width: calc(100% - 0.5rem);
   border: 0;
   outline: 0;
   padding: 0;
@@ -281,26 +273,12 @@ h1::after {
   user-select: text;
   background: transparent;
   color: #fffdf7;
-  caret-color: transparent;
+  caret-color: #f05a28;
   font: inherit;
 }
 
 #command:focus {
   text-shadow: 0 0 0.65rem rgb(247 200 67 / 28%);
-}
-
-.command-caret {
-  display: none;
-  width: 3px;
-  height: 1.45em;
-  flex: none;
-  background: #f05a28;
-  transform: translateX(-0.3ch);
-}
-
-#command:focus + .command-caret {
-  display: block;
-  animation: command-caret-blink 1.1s steps(1) infinite;
 }
 
 .hint {
@@ -431,12 +409,6 @@ h1::after {
 }
 
 @keyframes blink {
-  50% {
-    opacity: 0;
-  }
-}
-
-@keyframes command-caret-blink {
   50% {
     opacity: 0;
   }
