@@ -120,6 +120,20 @@ func TestEngineDoesNotReturnVerboseDetailsByDefault(t *testing.T) {
 	}
 }
 
+func TestEngineWhoamiEasterEgg(t *testing.T) {
+	result := New().Execute("whoami")
+	want := "Mateo Mahmutović\n" +
+		"Senior Backend Engineer\n" +
+		"Currently building distributed backend systems."
+
+	if result.Output != want {
+		t.Errorf("output = %q, want %q", result.Output, want)
+	}
+	if result.ExitCode != command.ExitSuccess {
+		t.Errorf("exit code = %d, want %d", result.ExitCode, command.ExitSuccess)
+	}
+}
+
 func TestEngineListDirectory(t *testing.T) {
 	root := filesystem.NewDirectory("")
 	if err := root.Add(filesystem.NewDirectory("docs")); err != nil {
