@@ -1,0 +1,32 @@
+language: Python
+language: Java
+language: JavaScript
+language: TypeScript
+language: PHP
+language: Go
+language: C
+
+backend: Flask
+backend: Spring
+backend: Node.js
+backend: Django
+backend: Laravel
+
+frontend: Vue
+frontend: React
+frontend: Tailwind CSS
+
+cloud: AWS
+
+infrastructure: Docker
+infrastructure: Kubernetes
+infrastructure: OpenShift
+
+engineering: distributed systems
+engineering: event-driven systems
+engineering: APIs
+engineering: search
+engineering: reliability
+engineering: performance
+engineering: code review
+engineering: mentoring

@@ -1,8 +1,6 @@
 package content
 
-import _ "embed"
+import "embed"
 
-// Database is the read-only content database shipped with the binary.
-//
-//go:embed vaultsh.db
-var Database []byte
+//go:embed *.txt experience/*.txt projects/*.txt
+var Files embed.FS

@@ -1,33 +1,19 @@
 package storage
 
 import (
-	"context"
 	"testing"
+	"testing/fstest"
 
-	"github.com/mateom/vaultsh/internal/content"
 	"github.com/mateom/vaultsh/internal/filesystem"
 )
 
-type stubProvider struct {
-	catalog content.Catalog
-}
-
-func (p stubProvider) Load(context.Context) (content.Catalog, error) {
-	return p.catalog, nil
-}
-
 func TestLoad(t *testing.T) {
-	provider := stubProvider{catalog: content.Catalog{
-		About: content.About{Text: "about"},
-		Experiences: []content.Experience{
-			{Slug: "example", Text: "experience"},
-		},
-		Projects: []content.Project{
-			{Slug: "vaultsh", Text: "vaultsh"},
-		},
-	}}
+	source := fstest.MapFS{
+		"about.txt":            {Data: []byte("about")},
+		"projects/vaultsh.txt": {Data: []byte("vaultsh")},
+	}
 
-	root, err := Load(context.Background(), provider)
+	root, err := Load(source)
 	if err != nil {
 		t.Fatalf("Load(): %v", err)
 	}

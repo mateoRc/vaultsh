@@ -109,10 +109,6 @@
 ### Storage
 
 - [x] Embedded text content
-- [ ] Replace embedded text content with embedded SQLite
-  - [x] Step 1: introduce `ContentProvider`, embedded SQLite provider, and startup loading
-  - [ ] Step 2: move rendering from stored text into domain renderers
-  - [ ] Step 3: normalize domain fields where richer content queries require it
 - [ ] Session store abstraction
 - [ ] External session store
 - [ ] Filesystem abstraction
