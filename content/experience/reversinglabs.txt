@@ -1,20 +1,31 @@
 company: ReversingLabs
-role: Senior Backend Engineer
+role: Software Developer
 period: 2024-present
+location: Croatia, remote
+industry: cybersecurity
 
-summary: backend engineering in cybersecurity products
-
-focus: backend services
-focus: distributed systems
-focus: search infrastructure
-focus: internal frameworks
+summary: backend work on distributed event-driven production systems
 
 technology: Python
-technology: Go
-technology: Kafka
+technology: Flask
+technology: Git
 technology: Docker
 technology: Kubernetes
 
+focus: distributed systems
+focus: event-driven systems
+focus: backend services
+focus: processing pipelines
+focus: third-party integrations
+focus: internal frameworks
+focus: shared backend components
+focus: search functionality
+focus: query processing
+
+responsibility: planning
+responsibility: implementation
+responsibility: deployment
 responsibility: technical ownership
-responsibility: mentoring engineers
-responsibility: end-to-end delivery
+responsibility: code review
+responsibility: mentoring
+responsibility: cross-team collaboration

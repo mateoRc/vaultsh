@@ -1,32 +1,43 @@
+skill: backend services
+skill: distributed systems
+skill: API development
+skill: internal tools
+skill: shared libraries
+skill: production systems
+skill: code review
+skill: mentoring
+
 language: Python
 language: Java
 language: JavaScript
 language: TypeScript
-language: PHP
 language: Go
+language: C#
 language: C
+language: PHP
 
-backend: Flask
-backend: Spring
-backend: Node.js
-backend: Django
-backend: Laravel
-
-frontend: Vue
-frontend: React
-frontend: Tailwind CSS
-
-cloud: AWS
+framework: Flask
+framework: Django
+framework: Spring
+framework: Spring Boot
+framework: Laravel
 
 infrastructure: Docker
 infrastructure: Kubernetes
 infrastructure: OpenShift
+infrastructure: ArgoCD
+infrastructure: AWS
 
-engineering: distributed systems
-engineering: event-driven systems
-engineering: APIs
-engineering: search
-engineering: reliability
-engineering: performance
-engineering: code review
-engineering: mentoring
+database: OracleDB
+database: MongoDB
+database: PostgreSQL
+database: ClickHouse
+database: ScyllaDB
+database: Solr
+
+messaging: Kafka
+messaging: RabbitMQ
+
+tooling: Git
+tooling: Grafana
+tooling: Sentry
