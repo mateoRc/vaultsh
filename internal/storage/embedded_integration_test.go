@@ -67,6 +67,11 @@ func TestEmbeddedContentThroughShell(t *testing.T) {
 				"projects",
 			},
 		},
+		{
+			name:        "tree all embedded content",
+			command:     "tree -a",
+			wantContain: []string{".motd"},
+		},
 	}
 
 	for _, tt := range tests {
@@ -82,6 +87,9 @@ func TestEmbeddedContentThroughShell(t *testing.T) {
 				if !strings.Contains(result.Output, expected) {
 					t.Errorf("Execute(%q) output does not contain %q", tt.command, expected)
 				}
+			}
+			if tt.command == "tree" && strings.Contains(result.Output, ".motd") {
+				t.Error("tree output includes hidden .motd without -a")
 			}
 		})
 	}

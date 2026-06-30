@@ -23,7 +23,7 @@ func (Hire) Execute(args []string, _ Input) Result {
 	}
 
 	return Result{
-		Output:   "hire: permission denied\nhint: try sudo hire mateo -s <salary>",
+		Output:   "hire: permission denied\nhint: try sudo hire mateo -s <yearly>",
 		ExitCode: ExitFailure,
 	}
 }

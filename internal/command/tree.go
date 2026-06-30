@@ -27,11 +27,11 @@ func (Tree) Description() string {
 }
 
 func (Tree) Usage() string {
-	return "tree [-L depth] [path]"
+	return "tree [-a] [-L depth] [path]"
 }
 
 func (t Tree) Execute(args []string, _ Input) Result {
-	depth, target, result := parseTreeOptions(args)
+	depth, target, all, result := parseTreeOptions(args)
 	if result != nil {
 		return *result
 	}
@@ -52,7 +52,7 @@ func (t Tree) Execute(args []string, _ Input) Result {
 		label = "/"
 	}
 	output.WriteString(label)
-	writeChildren(&output, node, "", depth, 0)
+	writeChildren(&output, node, "", depth, 0, all)
 
 	return Result{
 		Output:   output.String(),
@@ -60,19 +60,24 @@ func (t Tree) Execute(args []string, _ Input) Result {
 	}
 }
 
-func parseTreeOptions(args []string) (int, string, *Result) {
+func parseTreeOptions(args []string) (int, string, bool, *Result) {
 	depth := unlimitedTreeDepth
 	target := "."
 	pathSet := false
+	all := false
 
 	for index := 0; index < len(args); index++ {
+		if args[index] == "-a" {
+			all = true
+			continue
+		}
 		if args[index] == "-L" {
 			if index+1 >= len(args) {
-				return 0, "", treeUsage()
+				return 0, "", false, treeUsage()
 			}
 			value, err := strconv.Atoi(args[index+1])
 			if err != nil || value < 1 {
-				return 0, "", &Result{
+				return 0, "", false, &Result{
 					Output:   fmt.Sprintf("tree: invalid depth: %s", args[index+1]),
 					ExitCode: ExitUsage,
 				}
@@ -82,24 +87,24 @@ func parseTreeOptions(args []string) (int, string, *Result) {
 			continue
 		}
 		if strings.HasPrefix(args[index], "-") && args[index] != "-" {
-			return 0, "", &Result{
+			return 0, "", false, &Result{
 				Output:   fmt.Sprintf("tree: unknown option: %s", args[index]),
 				ExitCode: ExitUsage,
 			}
 		}
 		if pathSet {
-			return 0, "", treeUsage()
+			return 0, "", false, treeUsage()
 		}
 		target = args[index]
 		pathSet = true
 	}
 
-	return depth, target, nil
+	return depth, target, all, nil
 }
 
 func treeUsage() *Result {
 	return &Result{
-		Output:   "usage: tree [-L depth] [path]",
+		Output:   "usage: tree [-a] [-L depth] [path]",
 		ExitCode: ExitUsage,
 	}
 }
@@ -110,6 +115,7 @@ func writeChildren(
 	prefix string,
 	maxDepth int,
 	depth int,
+	all bool,
 ) {
 	if maxDepth != unlimitedTreeDepth && depth >= maxDepth {
 		return
@@ -120,7 +126,7 @@ func writeChildren(
 		return
 	}
 
-	children := directory.Children()
+	children := treeChildren(directory, all)
 	for index, child := range children {
 		last := index == len(children)-1
 		connector := "├── "
@@ -131,6 +137,21 @@ func writeChildren(
 		}
 
 		fmt.Fprintf(output, "\n%s%s%s", prefix, connector, child.Name())
-		writeChildren(output, child, childPrefix, maxDepth, depth+1)
+		writeChildren(output, child, childPrefix, maxDepth, depth+1, all)
 	}
+}
+
+func treeChildren(directory *filesystem.Directory, all bool) []filesystem.Node {
+	children := directory.Children()
+	if all {
+		return children
+	}
+
+	visible := make([]filesystem.Node, 0, len(children))
+	for _, child := range children {
+		if !strings.HasPrefix(child.Name(), ".") {
+			visible = append(visible, child)
+		}
+	}
+	return visible
 }
