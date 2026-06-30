@@ -14,6 +14,7 @@ var contentLinePattern = regexp.MustCompile(`^[a-z][a-z0-9_]*: .+$`)
 
 func TestEmbeddedContentLayout(t *testing.T) {
 	want := []string{
+		".motd",
 		"about.txt",
 		"experience/a1.txt",
 		"experience/arisglobal.txt",
@@ -64,6 +65,12 @@ func TestEmbeddedContentFormat(t *testing.T) {
 		}
 		if strings.Contains(string(data), "\r") {
 			t.Errorf("%s uses CRLF; content files must use LF", path)
+		}
+		if path == ".motd" {
+			if string(data) != "Welcome to Vaultsh.\n" {
+				t.Errorf(".motd = %q, want %q", string(data), "Welcome to Vaultsh.\n")
+			}
+			return nil
 		}
 
 		for number, line := range strings.Split(string(data), "\n") {

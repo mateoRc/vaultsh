@@ -24,5 +24,4 @@ feature: static test UI
 
 goal: explore shell engine design
 goal: keep frontend minimal
-goal: build backend abstractions incrementally
-goal: avoid unnecessary dependencies
+goal: lean Go
