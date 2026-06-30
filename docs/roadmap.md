@@ -148,6 +148,7 @@
 
 ### Easter Eggs
 
+- [x] `.motd` hidden welcome message
 - [x] `whoami` prints Mateo's current role and focus
 - [ ] Single-command triggers
 - [ ] Command-sequence triggers

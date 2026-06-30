@@ -4,7 +4,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/mateom/vaultsh/content"
+	content "github.com/mateom/vaultsh/content/cv"
 	"github.com/mateom/vaultsh/internal/command"
 	"github.com/mateom/vaultsh/internal/shell"
 	"github.com/mateom/vaultsh/internal/storage"
@@ -27,6 +27,16 @@ func TestEmbeddedContentThroughShell(t *testing.T) {
 			name:       "root layout",
 			command:    "ls",
 			wantOutput: "about.txt\nexperience/\ninterests.txt\nprojects/\nskills.txt",
+		},
+		{
+			name:       "hidden message of the day",
+			command:    "ls -a",
+			wantOutput: ".motd\nabout.txt\nexperience/\ninterests.txt\nprojects/\nskills.txt",
+		},
+		{
+			name:       "read message of the day",
+			command:    "cat .motd",
+			wantOutput: "Welcome to Vaultsh.\n",
 		},
 		{
 			name:       "experience layout",
