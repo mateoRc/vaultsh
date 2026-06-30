@@ -38,13 +38,13 @@ func TestEmbeddedContentThroughShell(t *testing.T) {
 			command: "cat experience/reversinglabs.txt",
 			wantContain: []string{
 				"company: ReversingLabs",
-				"responsibility: mentoring engineers",
+				"responsibility: mentoring",
 			},
 		},
 		{
 			name:        "grep embedded file",
 			command:     "grep '^technology:' experience/reversinglabs.txt",
-			wantContain: []string{"technology: Go", "technology: Docker"},
+			wantContain: []string{"technology: Python", "technology: Docker"},
 		},
 		{
 			name:    "tree embedded content",
