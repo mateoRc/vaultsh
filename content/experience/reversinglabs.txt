@@ -1,0 +1,20 @@
+company: ReversingLabs
+role: Senior Backend Engineer
+period: 2024-present
+
+summary: backend engineering in cybersecurity products
+
+focus: backend services
+focus: distributed systems
+focus: search infrastructure
+focus: internal frameworks
+
+technology: Python
+technology: Go
+technology: Kafka
+technology: Docker
+technology: Kubernetes
+
+responsibility: technical ownership
+responsibility: mentoring engineers
+responsibility: end-to-end delivery

@@ -1,0 +1,16 @@
+name: Vaultsh
+type: personal project
+language: Go
+
+description: read-only virtual shell engine
+
+feature: HTTP execution API
+feature: extensible command system
+feature: session-ready execution contexts
+feature: virtual filesystem
+feature: path resolution
+
+practice: small iterative changes
+practice: automated tests
+
+runtime: Docker
