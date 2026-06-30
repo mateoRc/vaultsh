@@ -83,7 +83,7 @@ func sudoAccessDenied() Result {
 	return Result{
 		Output: "sudo: access denied\n" +
 			"hint: only one privileged workflow is available\n" +
-			"hint: try: sudo hire mateo -s <yearly>",
+			"hint: try: sudo hire mateo -s <yearly_salary>",
 		ExitCode: ExitFailure,
 	}
 }

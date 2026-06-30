@@ -667,7 +667,7 @@ func TestEngineHireEasterEgg(t *testing.T) {
 
 	result := engine.Execute("hire mateo")
 
-	want := "hire: permission denied\nhint: try sudo hire mateo -s <yearly>"
+	want := "hire: permission denied\nhint: try sudo hire mateo -s <yearly_salary>"
 	if result.Output != want {
 		t.Errorf("hire output = %q, want %q", result.Output, want)
 	}
@@ -817,7 +817,7 @@ func TestEngineSudoAnythingShowsPrivilegedWorkflowHint(t *testing.T) {
 	result := New().Execute("sudo anything")
 	want := "sudo: access denied\n" +
 		"hint: only one privileged workflow is available\n" +
-		"hint: try: sudo hire mateo -s <yearly>"
+		"hint: try: sudo hire mateo -s <yearly_salary>"
 
 	if result.Output != want {
 		t.Errorf("output = %q, want %q", result.Output, want)
