@@ -10,9 +10,9 @@ import (
 
 const (
 	salaryMultiplier = 1.5
-	minimumSalary    = 70
-	suggestedSalary  = 100
-	immediateHire    = 150
+	minimumSalary    = 70000
+	suggestedSalary  = 100000
+	immediateHire    = 100000
 )
 
 type Sudo struct {

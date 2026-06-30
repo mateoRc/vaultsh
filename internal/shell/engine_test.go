@@ -677,11 +677,11 @@ func TestEngineHireEasterEgg(t *testing.T) {
 }
 
 func TestEngineSudoHireEasterEgg(t *testing.T) {
-	result := New().Execute("sudo hire mateo -s 100")
+	result := New().Execute("sudo hire mateo -s 100000")
 
 	want := "sudo: access granted\n" +
-		"salary offered: 100.00\n" +
-		"counter-offer: 150.00\n" +
+		"salary offered: 100000.00\n" +
+		"counter-offer: 150000.00\n" +
 		"accept counter-offer? [Y/y]"
 	if result.Output != want {
 		t.Errorf("sudo hire output = %q, want %q", result.Output, want)
@@ -694,10 +694,10 @@ func TestEngineSudoHireEasterEgg(t *testing.T) {
 func TestEngineSudoHireQuestionsLowSalary(t *testing.T) {
 	engine := New()
 
-	result := engine.Execute("sudo hire mateo -s 69")
+	result := engine.Execute("sudo hire mateo -s 69999")
 
-	if result.Output != "did you mean 100?" {
-		t.Errorf("output = %q, want %q", result.Output, "did you mean 100?")
+	if result.Output != "did you mean 100000?" {
+		t.Errorf("output = %q, want %q", result.Output, "did you mean 100000?")
 	}
 	if result.ExitCode != command.ExitFailure {
 		t.Errorf("exit code = %d, want %d", result.ExitCode, command.ExitFailure)
@@ -710,12 +710,12 @@ func TestEngineSudoHireQuestionsLowSalary(t *testing.T) {
 }
 
 func TestEngineSudoHireAcceptsMinimumSalary(t *testing.T) {
-	result := New().Execute("sudo hire mateo -s 70")
+	result := New().Execute("sudo hire mateo -s 70000")
 
 	if result.ExitCode != command.ExitSuccess {
 		t.Errorf("exit code = %d, want %d", result.ExitCode, command.ExitSuccess)
 	}
-	if !strings.Contains(result.Output, "counter-offer: 105.00") {
+	if !strings.Contains(result.Output, "counter-offer: 105000.00") {
 		t.Errorf("output = %q, want minimum-salary counter-offer", result.Output)
 	}
 }
@@ -723,7 +723,7 @@ func TestEngineSudoHireAcceptsMinimumSalary(t *testing.T) {
 func TestEngineSudoHireAcceptsCrazyHighOfferImmediately(t *testing.T) {
 	engine := New()
 
-	result := engine.Execute("sudo hire mateo -s 151")
+	result := engine.Execute("sudo hire mateo -s 100001")
 
 	if result.Output != "when do i start?" {
 		t.Errorf("output = %q, want %q", result.Output, "when do i start?")
@@ -739,24 +739,24 @@ func TestEngineSudoHireAcceptsCrazyHighOfferImmediately(t *testing.T) {
 }
 
 func TestEngineSudoHireNegotiatesAtHighOfferBoundary(t *testing.T) {
-	result := New().Execute("sudo hire mateo -s 150")
+	result := New().Execute("sudo hire mateo -s 100000")
 
 	if result.ExitCode != command.ExitSuccess {
 		t.Errorf("exit code = %d, want %d", result.ExitCode, command.ExitSuccess)
 	}
-	if !strings.Contains(result.Output, "counter-offer: 225.00") {
+	if !strings.Contains(result.Output, "counter-offer: 150000.00") {
 		t.Errorf("output = %q, want boundary counter-offer", result.Output)
 	}
 }
 
 func TestEngineAcceptsCounterOfferOnce(t *testing.T) {
 	engine := New()
-	if result := engine.Execute("sudo hire mateo -s 100"); result.ExitCode != command.ExitSuccess {
+	if result := engine.Execute("sudo hire mateo -s 100000"); result.ExitCode != command.ExitSuccess {
 		t.Fatalf("sudo hire failed: %s", result.Output)
 	}
 
 	result := engine.Execute("y")
-	want := "counter-offer accepted: 150.00\n" +
+	want := "counter-offer accepted: 150000.00\n" +
 		"welcome aboard. paperwork has entered the chat."
 	if result.Output != want {
 		t.Errorf("accept output = %q, want %q", result.Output, want)
@@ -777,7 +777,7 @@ func TestEngineAcceptsCounterOfferOnce(t *testing.T) {
 func TestEngineCounterOfferIsSessionScoped(t *testing.T) {
 	first := New()
 	second := New()
-	first.Execute("sudo hire mateo -s 100")
+	first.Execute("sudo hire mateo -s 100000")
 
 	result := second.Execute("y")
 
