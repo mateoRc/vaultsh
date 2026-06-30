@@ -10,6 +10,7 @@ import (
 	"time"
 
 	"github.com/mateom/vaultsh/content"
+	contentsqlite "github.com/mateom/vaultsh/internal/content/sqlite"
 	"github.com/mateom/vaultsh/internal/httpapi"
 	"github.com/mateom/vaultsh/internal/shell"
 	"github.com/mateom/vaultsh/internal/storage"
@@ -18,7 +19,14 @@ import (
 func main() {
 	logger := slog.New(slog.NewJSONHandler(os.Stdout, nil))
 
-	root, err := storage.Load(content.Files)
+	provider, err := contentsqlite.Open(content.Database)
+	if err != nil {
+		logger.Error("content database opening failed", "error", err)
+		os.Exit(1)
+	}
+	defer provider.Close()
+
+	root, err := storage.Load(context.Background(), provider)
 	if err != nil {
 		logger.Error("content loading failed", "error", err)
 		os.Exit(1)
