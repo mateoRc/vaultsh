@@ -56,6 +56,16 @@ h1 {
   line-height: 0.95;
 }
 
+.product-name {
+  color: #1d1f1e;
+}
+
+.shell-suffix {
+  color: #f7c843;
+  -webkit-text-stroke: 1px #1d1f1e;
+  paint-order: stroke fill;
+}
+
 h1::after {
   color: #f05a28;
   content: "_";
