@@ -273,7 +273,8 @@ h1::after {
   user-select: text;
   background: transparent;
   color: #fffdf7;
-  caret-color: #f05a28;
+  caret-color: #ff6a33;
+  caret-animation: manual;
   font: inherit;
 }
 
