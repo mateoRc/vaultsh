@@ -13,14 +13,11 @@ language: JavaScript
 language: TypeScript
 language: Go
 language: C#
-language: C
-language: PHP
 
 framework: Flask
-framework: Django
 framework: Spring
 framework: Spring Boot
-framework: Laravel
+framework: JSP
 
 infrastructure: Docker
 infrastructure: Kubernetes

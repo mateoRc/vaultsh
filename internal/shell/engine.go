@@ -2,6 +2,7 @@ package shell
 
 import (
 	"fmt"
+	"strings"
 
 	"github.com/mateom/vaultsh/internal/command"
 	"github.com/mateom/vaultsh/internal/filesystem"
@@ -69,28 +70,64 @@ func (e *Engine) Execute(line string) command.Result {
 	if len(syntaxTree.Pipeline) == 0 {
 		return command.Result{}
 	}
+	verbose := takeVerboseFlag(&syntaxTree)
 	e.context.History().Add(line)
 
 	var result command.Result
 	input := command.Input{}
+	completed := 0
 	for _, current := range syntaxTree.Pipeline {
 		run, found := e.commands.Find(current.Name)
 		if !found {
-			return command.Result{
+			result = command.Result{
 				Output:   fmt.Sprintf("command not found: %s", current.Name),
 				ExitCode: command.ExitNotFound,
 			}
+			return withVerbose(result, syntaxTree, completed, verbose)
 		}
 
 		result = run.Execute(current.Args, input)
 		if result.ExitCode != command.ExitSuccess {
-			return result
+			return withVerbose(result, syntaxTree, completed, verbose)
 		}
+		completed++
 		input = command.Input{
 			Data:    result.Output,
 			Present: true,
 		}
 	}
 
+	return withVerbose(result, syntaxTree, completed, verbose)
+}
+
+func takeVerboseFlag(tree *parser.SyntaxTree) bool {
+	last := &tree.Pipeline[len(tree.Pipeline)-1]
+	if len(last.Args) == 0 || last.Args[len(last.Args)-1] != "--verbose" {
+		return false
+	}
+	last.Args = last.Args[:len(last.Args)-1]
+	return true
+}
+
+func withVerbose(
+	result command.Result,
+	tree parser.SyntaxTree,
+	completed int,
+	verbose bool,
+) command.Result {
+	if !verbose {
+		return result
+	}
+
+	names := make([]string, len(tree.Pipeline))
+	for index, current := range tree.Pipeline {
+		names[index] = current.Name
+	}
+	result.Verbose = fmt.Sprintf(
+		"pipeline=%s; stages=%d; completed=%d",
+		strings.Join(names, ","),
+		len(names),
+		completed,
+	)
 	return result
 }

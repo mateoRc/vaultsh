@@ -77,6 +77,52 @@ func TestExecReturnsClearAction(t *testing.T) {
 	}
 }
 
+func TestExecReturnsVerboseDetailsOnlyWhenRequested(t *testing.T) {
+	tests := []struct {
+		name        string
+		line        string
+		wantVerbose string
+	}{
+		{
+			name: "normal response",
+			line: "pwd",
+		},
+		{
+			name:        "verbose response",
+			line:        "pwd --verbose",
+			wantVerbose: "pipeline=pwd; stages=1; completed=1",
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			request := httptest.NewRequest(
+				http.MethodPost,
+				"/api/exec",
+				strings.NewReader(`{"line":"`+tt.line+`"}`),
+			)
+			response := httptest.NewRecorder()
+
+			newTestHandler().ServeHTTP(response, request)
+
+			var result map[string]any
+			if err := json.NewDecoder(response.Body).Decode(&result); err != nil {
+				t.Fatalf("decode response: %v", err)
+			}
+			got, present := result["verbose"]
+			if tt.wantVerbose == "" {
+				if present {
+					t.Errorf("verbose field = %q, want omitted", got)
+				}
+				return
+			}
+			if got != tt.wantVerbose {
+				t.Errorf("verbose field = %q, want %q", got, tt.wantVerbose)
+			}
+		})
+	}
+}
+
 func TestExecRejectsInvalidJSON(t *testing.T) {
 	request := httptest.NewRequest(
 		http.MethodPost,

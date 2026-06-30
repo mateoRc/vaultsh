@@ -71,6 +71,27 @@ Some commands return a frontend action:
 }
 ```
 
+Add `--verbose` as the final argument to return execution metadata without
+changing command output:
+
+```json
+{
+  "line": "cat skills.txt | grep Go --verbose"
+}
+```
+
+```json
+{
+  "output": "language: Go",
+  "exit_code": 0,
+  "verbose": "pipeline=cat,grep; stages=2; completed=2",
+  "session_id": "<session-id>"
+}
+```
+
+The `verbose` field is omitted from normal responses. Commands do not receive
+the global flag.
+
 ## Complete Input
 
 ```http

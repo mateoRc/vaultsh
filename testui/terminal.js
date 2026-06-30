@@ -123,7 +123,8 @@ function handleResult(line, result) {
     return;
   }
 
-  appendEntry(line, result.output);
+  const details = result.verbose ? `\n[verbose] ${result.verbose}` : "";
+  appendEntry(line, `${result.output}${details}`);
 }
 
 function appendEntry(line, result) {

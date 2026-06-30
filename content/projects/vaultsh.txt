@@ -1,16 +1,28 @@
-name: Vaultsh
+project: Vaultsh
 type: personal project
-language: Go
+status: active
 
-description: read-only virtual shell engine
+summary: read-only virtual shell engine
+summary: backend-first terminal interface for structured content
+
+technology: Go
+technology: Docker
+technology: JavaScript
+technology: HTML
+technology: CSS
 
 feature: HTTP execution API
-feature: extensible command system
-feature: session-ready execution contexts
+feature: session state
+feature: command registry
 feature: virtual filesystem
 feature: path resolution
+feature: command history
+feature: tokenizer
+feature: lexer
+feature: parser
+feature: static test UI
 
-practice: small iterative changes
-practice: automated tests
-
-runtime: Docker
+goal: explore shell engine design
+goal: keep frontend minimal
+goal: build backend abstractions incrementally
+goal: avoid unnecessary dependencies

@@ -88,6 +88,38 @@ func TestEngineExecute(t *testing.T) {
 	}
 }
 
+func TestEngineVerboseResult(t *testing.T) {
+	root := filesystem.NewDirectory("")
+	if err := root.Add(filesystem.NewFile("skills.txt", "language: Go\nlanguage: Java\n")); err != nil {
+		t.Fatalf("Add(skills.txt): %v", err)
+	}
+	engine := NewWithRoot(root)
+
+	result := engine.Execute("cat skills.txt | grep Go --verbose")
+
+	if result.Output != "language: Go" {
+		t.Errorf("output = %q, want %q", result.Output, "language: Go")
+	}
+	if result.ExitCode != command.ExitSuccess {
+		t.Errorf("exit code = %d, want %d", result.ExitCode, command.ExitSuccess)
+	}
+	if result.Verbose != "pipeline=cat,grep; stages=2; completed=2" {
+		t.Errorf(
+			"verbose = %q, want %q",
+			result.Verbose,
+			"pipeline=cat,grep; stages=2; completed=2",
+		)
+	}
+}
+
+func TestEngineDoesNotReturnVerboseDetailsByDefault(t *testing.T) {
+	result := New().Execute("pwd")
+
+	if result.Verbose != "" {
+		t.Errorf("verbose = %q, want empty", result.Verbose)
+	}
+}
+
 func TestEngineListDirectory(t *testing.T) {
 	root := filesystem.NewDirectory("")
 	if err := root.Add(filesystem.NewDirectory("docs")); err != nil {

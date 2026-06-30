@@ -19,6 +19,7 @@ type Result struct {
 	Output   string
 	ExitCode int
 	Action   Action
+	Verbose  string
 }
 
 type Input struct {

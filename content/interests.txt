@@ -1,7 +1,16 @@
-interest: backend architecture
+interest: backend systems
 interest: distributed systems
+interest: shell interfaces
 interest: developer tooling
-interest: search infrastructure
 interest: system reliability
-interest: performance engineering
-interest: coffee
+interest: code quality
+interest: maintainability
+
+learning: Go
+learning: shell internals
+learning: parsers
+learning: virtual filesystems
+
+outside: coffee
+outside: travel
+outside: fitness
