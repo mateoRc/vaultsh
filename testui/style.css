@@ -295,6 +295,7 @@ h1::after {
   height: 1.45em;
   flex: none;
   background: #f05a28;
+  transform: translateX(-0.5ch);
 }
 
 #command:focus + .command-caret {
