@@ -44,6 +44,7 @@ func NewWithContext(context *ExecutionContext) *Engine {
 	commands.Register(command.NewTail(workingDirectory))
 	commands.Register(command.NewTree(workingDirectory))
 	commands.Register(command.NewWc(workingDirectory))
+	commands.Register(command.Whoami{})
 	commands.Register(command.NewAcceptOffer("y", negotiation))
 
 	return &Engine{
