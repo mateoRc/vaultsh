@@ -155,7 +155,7 @@
 - [ ] Command-sequence triggers
 - [ ] Session-scoped progress
 - [x] `hire mateo` returns a sudo-access hint
-- [x] `sudo hire mateo -s <yearly>` requires a yearly amount
+- [x] `sudo hire mateo -s <yearly_salary>` requires a yearly amount
 - [x] Yearly amounts below `70000` suggest `100000`
 - [x] Yearly amounts from `70000` through `100000` receive a 1.5× counter-offer
 - [x] Yearly amounts above `100000` return an immediate start response
