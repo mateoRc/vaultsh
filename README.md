@@ -66,5 +66,6 @@ history | tail -n 5
 ## Documentation
 
 - [Command reference and examples](docs/commands.md)
+- [Content layout and format](docs/content.md)
 - [HTTP API](docs/api.md)
 - [Roadmap](docs/roadmap.md)

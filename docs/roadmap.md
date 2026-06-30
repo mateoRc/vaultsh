@@ -40,6 +40,7 @@
 - [x] Graceful shutdown
 - [x] Structured logging
 - [x] Basic tests
+- [x] Embedded content format validation
 - [x] GitHub Actions CI
 
 ## v1
