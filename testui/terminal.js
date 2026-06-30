@@ -4,6 +4,8 @@ const command = document.querySelector("#command");
 const output = document.querySelector("#output");
 let sessionId = sessionStorage.getItem("vaultsh-session") || "";
 
+syncCommandWidth();
+
 if (window.matchMedia("(pointer: fine)").matches) {
   focusCommand();
 }
@@ -27,6 +29,18 @@ function focusCommand() {
   command.setSelectionRange(end, end);
 }
 
+function syncCommandWidth() {
+  command.style.setProperty("--command-length", command.value.length);
+}
+
+form.addEventListener("click", (event) => {
+  if (event.target !== command) {
+    focusCommand();
+  }
+});
+
+command.addEventListener("input", syncCommandWidth);
+
 form.addEventListener("submit", async (event) => {
   event.preventDefault();
 
@@ -37,6 +51,7 @@ form.addEventListener("submit", async (event) => {
   }
 
   command.value = "";
+  syncCommandWidth();
   focusCommand();
 
   await execute(line);
@@ -78,6 +93,7 @@ async function complete() {
       line.slice(0, result.start) +
       result.replacement +
       line.slice(result.end);
+    syncCommandWidth();
     const nextCursor = result.start + result.replacement.length;
     command.setSelectionRange(nextCursor, nextCursor);
   } catch {
