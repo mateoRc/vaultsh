@@ -15,14 +15,18 @@ var contentLinePattern = regexp.MustCompile(`^[a-z][a-z0-9_]*: .+$`)
 func TestEmbeddedContentLayout(t *testing.T) {
 	want := []string{
 		".motd",
-		"about.txt",
-		"experience/a1.txt",
-		"experience/arisglobal.txt",
-		"experience/intellexi.txt",
-		"experience/reversinglabs.txt",
-		"interests.txt",
+		"cv/about.txt",
+		"cv/experience/a1.txt",
+		"cv/experience/arisglobal.txt",
+		"cv/experience/intellexi.txt",
+		"cv/experience/reversinglabs.txt",
+		"cv/interests.txt",
+		"cv/skills.txt",
+		"docs/api.md",
+		"docs/commands.md",
+		"docs/content.md",
+		"docs/roadmap.md",
 		"projects/vaultsh.txt",
-		"skills.txt",
 	}
 
 	var got []string
@@ -45,12 +49,12 @@ func TestEmbeddedContentLayout(t *testing.T) {
 	}
 }
 
-func TestEmbeddedContentFormat(t *testing.T) {
+func TestEmbeddedPlainTextFormat(t *testing.T) {
 	err := fs.WalkDir(Files, ".", func(path string, entry fs.DirEntry, err error) error {
 		if err != nil {
 			return err
 		}
-		if entry.IsDir() {
+		if entry.IsDir() || strings.HasSuffix(path, ".md") {
 			return nil
 		}
 
@@ -74,14 +78,7 @@ func TestEmbeddedContentFormat(t *testing.T) {
 		}
 
 		for number, line := range strings.Split(string(data), "\n") {
-			if line == "" {
-				continue
-			}
-			if strings.HasPrefix(line, "#") {
-				t.Errorf("%s:%d uses a Markdown heading", path, number+1)
-				continue
-			}
-			if !contentLinePattern.MatchString(line) {
+			if line != "" && !contentLinePattern.MatchString(line) {
 				t.Errorf("%s:%d is not a key-value line: %q", path, number+1, line)
 			}
 		}
