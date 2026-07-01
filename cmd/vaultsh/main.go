@@ -9,6 +9,7 @@ import (
 	"syscall"
 	"time"
 
+	"github.com/mateom/vaultsh/internal/external"
 	"github.com/mateom/vaultsh/internal/httpapi"
 	"github.com/mateom/vaultsh/internal/shell"
 	"github.com/mateom/vaultsh/internal/storage"
@@ -27,11 +28,16 @@ func main() {
 		logger.Error("content loading failed", "error", err)
 		os.Exit(1)
 	}
-	sessions := shell.NewSessionManager(root)
+	services := external.NewClient(os.Getenv("ATLAS_URL"), os.Getenv("FORGE_URL"))
+	sessions := shell.NewSessionManagerWithDependencies(root, shell.Dependencies{
+		Search:  services,
+		Metrics: services,
+		Events:  services,
+	})
 
 	server := &http.Server{
 		Addr:    ":8080",
-		Handler: httpapi.NewHandler(sessions),
+		Handler: httpapi.NewHandlerWithStatus(sessions, services),
 	}
 
 	logger.Info("server started", "address", server.Addr)

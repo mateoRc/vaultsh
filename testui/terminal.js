@@ -1,4 +1,6 @@
 const status = document.querySelector("#status");
+const atlasStatus = document.querySelector("#atlas-status");
+const forgeStatus = document.querySelector("#forge-status");
 const form = document.querySelector("#command-form");
 const command = document.querySelector("#command");
 const output = document.querySelector("#output");
@@ -16,9 +18,29 @@ fetch("/healthz")
     setStatus("unavailable");
   });
 
+refreshServiceStatus();
+setInterval(refreshServiceStatus, 10000);
+
 function setStatus(state) {
   status.textContent = state;
   status.dataset.state = state;
+}
+
+async function refreshServiceStatus() {
+  try {
+    const response = await fetch("/api/status");
+    const services = await response.json();
+    setServiceStatus(atlasStatus, services.atlas);
+    setServiceStatus(forgeStatus, services.forge);
+  } catch {
+    setServiceStatus(atlasStatus, false);
+    setServiceStatus(forgeStatus, false);
+  }
+}
+
+function setServiceStatus(element, available) {
+  element.dataset.state = available ? "online" : "unavailable";
+  element.title = available ? "available" : "unavailable";
 }
 
 function focusCommand() {

@@ -9,6 +9,7 @@ import (
 
 	"github.com/mateom/vaultsh/internal/command"
 	"github.com/mateom/vaultsh/internal/filesystem"
+	"github.com/mateom/vaultsh/internal/parser"
 )
 
 const (
@@ -33,15 +34,31 @@ type SessionManager struct {
 	sessions map[string]*session
 	ttl      time.Duration
 	now      func() time.Time
+	deps     Dependencies
 }
 
 func NewSessionManager(root *filesystem.Directory) *SessionManager {
-	return NewSessionManagerWithConfig(root, SessionConfig{})
+	return newSessionManager(root, SessionConfig{}, Dependencies{})
+}
+
+func NewSessionManagerWithDependencies(
+	root *filesystem.Directory,
+	dependencies Dependencies,
+) *SessionManager {
+	return newSessionManager(root, SessionConfig{}, dependencies)
 }
 
 func NewSessionManagerWithConfig(
 	root *filesystem.Directory,
 	config SessionConfig,
+) *SessionManager {
+	return newSessionManager(root, config, Dependencies{})
+}
+
+func newSessionManager(
+	root *filesystem.Directory,
+	config SessionConfig,
+	dependencies Dependencies,
 ) *SessionManager {
 	if config.TTL <= 0 {
 		config.TTL = DefaultSessionTTL
@@ -55,6 +72,7 @@ func NewSessionManagerWithConfig(
 		sessions: make(map[string]*session),
 		ttl:      config.TTL,
 		now:      config.Now,
+		deps:     dependencies,
 	}
 }
 
@@ -70,7 +88,18 @@ func (m *SessionManager) Execute(sessionID, line string) (command.Result, string
 		current.lastActive = m.now()
 	}()
 
-	return current.engine.Execute(line), sessionID, nil
+	started := time.Now()
+	result := current.engine.Execute(line)
+	if name := commandName(line); name != "" && m.deps.Events != nil {
+		_ = m.deps.Events.Record(
+			"vault",
+			"command.executed",
+			name,
+			time.Since(started).Milliseconds(),
+			result.ExitCode,
+		)
+	}
+	return result, sessionID, nil
 }
 
 func (m *SessionManager) Complete(
@@ -148,11 +177,22 @@ func (m *SessionManager) get(sessionID string) (*session, string, error) {
 	}
 
 	current := &session{
-		engine:     NewWithRoot(m.root),
+		engine: NewWithContextAndDependencies(
+			NewExecutionContext(m.root),
+			m.deps,
+		),
 		lastActive: m.now(),
 	}
 	m.sessions[newID] = current
 	return current, newID, nil
+}
+
+func commandName(line string) string {
+	tokens, err := parser.Tokenize(line)
+	if err != nil || len(tokens) == 0 {
+		return ""
+	}
+	return tokens[0]
 }
 
 func newSessionID() (string, error) {

@@ -214,7 +214,15 @@ h1::after {
   white-space: nowrap;
 }
 
-.status {
+.service-statuses {
+  display: flex;
+  justify-self: end;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.status,
+.service-status {
   justify-self: end;
   border: 1.5px solid #1d1f1e;
   border-radius: 999px;
@@ -222,7 +230,8 @@ h1::after {
   background: #fffdf7;
 }
 
-.status::before {
+.status::before,
+.service-status::before {
   display: inline-block;
   width: 0.45rem;
   height: 0.45rem;
@@ -233,11 +242,13 @@ h1::after {
   content: "";
 }
 
-.status[data-state="online"]::before {
+.status[data-state="online"]::before,
+.service-status[data-state="online"]::before {
   background: #73c991;
 }
 
-.status[data-state="unavailable"]::before {
+.status[data-state="unavailable"]::before,
+.service-status[data-state="unavailable"]::before {
   background: #f05a28;
 }
 
