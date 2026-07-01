@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"os"
 	"os/signal"
+	"strconv"
 	"syscall"
 	"time"
 
@@ -13,6 +14,7 @@ import (
 	"github.com/mateom/vaultsh/internal/httpapi"
 	"github.com/mateom/vaultsh/internal/shell"
 	"github.com/mateom/vaultsh/internal/storage"
+	"github.com/mateom/vaultsh/internal/telemetry"
 )
 
 func main() {
@@ -29,10 +31,16 @@ func main() {
 		os.Exit(1)
 	}
 	services := external.NewClient(os.Getenv("ATLAS_URL"), os.Getenv("FORGE_URL"))
+	events := telemetry.NewDispatcher(services, telemetryQueueSize(), logger)
+	defer func() {
+		ctx, cancel := context.WithTimeout(context.Background(), time.Second)
+		defer cancel()
+		events.Close(ctx)
+	}()
 	sessions := shell.NewSessionManagerWithDependencies(root, shell.Dependencies{
 		Search:  services,
 		Metrics: services,
-		Events:  services,
+		Events:  events,
 	})
 
 	server := &http.Server{
@@ -73,4 +81,12 @@ func main() {
 	if err := server.Shutdown(shutdownContext); err != nil {
 		logger.Error("graceful shutdown failed", "error", err)
 	}
+}
+
+func telemetryQueueSize() int {
+	value, err := strconv.Atoi(os.Getenv("TELEMETRY_QUEUE_SIZE"))
+	if err != nil || value <= 0 {
+		return 1000
+	}
+	return value
 }
