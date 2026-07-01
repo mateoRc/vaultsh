@@ -14,7 +14,7 @@ pipelines, HTTP APIs, testing, and container deployment.
 
 ## Features
 
-- Read-only virtual filesystem backed by embedded plain-text files
+- Read-only virtual filesystem backed by mounted plain-text files
 - Familiar commands including `ls`, `cd`, `cat`, `tree`, and `grep`
 - Multi-stage pipelines
 - Session-specific working directories and command history
@@ -35,40 +35,29 @@ Parser → Commands
              ↓
       Virtual filesystem
              ↓
-    Embedded text files
+    Mounted text files
 ```
 
-Commands interact only with the virtual filesystem. Content is embedded into
-the binary from `content/` at build time. Vaultsh exposes no commands that
-create, modify, or delete files.
+Commands interact only with the virtual filesystem. Content is loaded from
+`CONTENT_PATH`, which defaults to `/app/content`. Vaultsh exposes no commands
+that create, modify, or delete files.
 
 ## Quickstart
 
-Prerequisites:
-
-- Docker Engine or Docker Desktop
-- Docker Compose v2
+Run Vaultsh with Atlas and their shared content through the sibling `lab`
+repository:
 
 ```sh
+cd ../lab
 docker compose up --build
 ```
 
-Open:
-
-```text
-http://localhost:8080/testui/
-```
-
-Stop:
-
-```sh
-docker compose down
-```
+Open http://localhost:8080/testui/.
 
 For local development, install Go 1.24 or newer:
 
 ```sh
-go run ./cmd/vaultsh
+CONTENT_PATH=../lab/content go run ./cmd/vaultsh
 go test ./...
 ```
 
@@ -85,21 +74,9 @@ history | tail -n 5
 
 ## Content
 
-Portfolio content is stored as grep-friendly plain text:
-
-```text
-content/
-├── about.txt
-├── skills.txt
-├── interests.txt
-├── experience/
-│   ├── reversinglabs.txt
-│   ├── intellexi.txt
-│   ├── a1.txt
-│   └── arisglobal.txt
-└── projects/
-    └── vaultsh.txt
-```
+Portfolio content is stored in the sibling `lab` repository and mounted
+read-only at runtime. Vaultsh remains only the virtual filesystem and shell
+engine.
 
 Each non-empty line uses a lowercase `key: value` format. Keys may repeat and
 blank lines may separate sections.
@@ -112,26 +89,18 @@ technology: Go
 technology: Docker
 ```
 
-Run `go test ./...` after editing content. The test suite validates the
-embedded layout and file format.
-
 ## Project Structure
 
 ```text
 cmd/vaultsh/          application entry point
-content/              embedded portfolio content
 internal/command/     shell commands
 internal/filesystem/  read-only virtual filesystem
 internal/httpapi/     HTTP transport
 internal/parser/      tokenizer, lexer, and parser
 internal/shell/       execution engine and sessions
-internal/storage/     embedded-content loader
+internal/storage/     mounted-content loader
 testui/               browser terminal
 ```
 
-## Documentation
-
-- [Command reference and examples](docs/commands.md)
-- [Content layout and format](docs/content.md)
-- [HTTP API](docs/api.md)
-- [Roadmap](docs/roadmap.md)
+Shared content and local orchestration documentation live in the `lab`
+repository.

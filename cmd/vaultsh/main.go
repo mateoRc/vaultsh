@@ -9,7 +9,6 @@ import (
 	"syscall"
 	"time"
 
-	"github.com/mateom/vaultsh/content"
 	"github.com/mateom/vaultsh/internal/httpapi"
 	"github.com/mateom/vaultsh/internal/shell"
 	"github.com/mateom/vaultsh/internal/storage"
@@ -18,7 +17,12 @@ import (
 func main() {
 	logger := slog.New(slog.NewJSONHandler(os.Stdout, nil))
 
-	root, err := storage.Load(content.Files)
+	contentPath := os.Getenv("CONTENT_PATH")
+	if contentPath == "" {
+		contentPath = "/app/content"
+	}
+
+	root, err := storage.Load(os.DirFS(contentPath))
 	if err != nil {
 		logger.Error("content loading failed", "error", err)
 		os.Exit(1)
