@@ -14,6 +14,16 @@ type Engine struct {
 	context  *ExecutionContext
 }
 
+type Dependencies struct {
+	Search  command.SearchService
+	Metrics command.MetricsService
+	Events  EventRecorder
+}
+
+type EventRecorder interface {
+	Record(service, event, name string, durationMS int64, exitCode int) error
+}
+
 func New() *Engine {
 	return NewWithRoot(filesystem.NewDirectory(""))
 }
@@ -23,6 +33,13 @@ func NewWithRoot(root *filesystem.Directory) *Engine {
 }
 
 func NewWithContext(context *ExecutionContext) *Engine {
+	return NewWithContextAndDependencies(context, Dependencies{})
+}
+
+func NewWithContextAndDependencies(
+	context *ExecutionContext,
+	dependencies Dependencies,
+) *Engine {
 	commands := command.NewRegistry()
 	workingDirectory := context.WorkingDirectory()
 	negotiation := context.Negotiation()
@@ -46,6 +63,13 @@ func NewWithContext(context *ExecutionContext) *Engine {
 	commands.Register(command.NewWc(workingDirectory))
 	commands.Register(command.Whoami{})
 	commands.Register(command.NewAcceptOffer("y", negotiation))
+	if dependencies.Search != nil {
+		commands.Register(command.NewSearch(dependencies.Search))
+	}
+	if dependencies.Metrics != nil {
+		commands.Register(command.NewMetrics(dependencies.Metrics))
+		commands.Register(command.NewDashboard(dependencies.Metrics))
+	}
 
 	return &Engine{
 		commands: commands,

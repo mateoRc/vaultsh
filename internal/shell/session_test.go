@@ -5,8 +5,82 @@ import (
 	"testing"
 	"time"
 
+	"github.com/mateom/vaultsh/internal/command"
 	"github.com/mateom/vaultsh/internal/filesystem"
 )
+
+type eventRecorderStub struct {
+	service  string
+	event    string
+	name     string
+	exitCode int
+}
+
+func (r *eventRecorderStub) Record(
+	service string,
+	event string,
+	name string,
+	_ int64,
+	exitCode int,
+) error {
+	r.service = service
+	r.event = event
+	r.name = name
+	r.exitCode = exitCode
+	return nil
+}
+
+type unavailableServices struct{}
+
+func (unavailableServices) Search(string) ([]command.SearchResult, error) {
+	return nil, context.DeadlineExceeded
+}
+
+func (unavailableServices) Summary() (command.MetricsSummary, error) {
+	return command.MetricsSummary{}, context.DeadlineExceeded
+}
+
+func (unavailableServices) Dashboard() (string, error) {
+	return "", context.DeadlineExceeded
+}
+
+func TestSessionManagerRecordsCommandTelemetryWithoutChangingResult(t *testing.T) {
+	recorder := &eventRecorderStub{}
+	manager := NewSessionManagerWithDependencies(
+		filesystem.NewDirectory(""),
+		Dependencies{Events: recorder},
+	)
+
+	result, _, err := manager.Execute("", "about")
+
+	if err != nil || result.ExitCode != command.ExitSuccess {
+		t.Fatalf("Execute() result = %#v, error = %v", result, err)
+	}
+	if recorder.service != "vault" ||
+		recorder.event != "command.executed" ||
+		recorder.name != "about" ||
+		recorder.exitCode != command.ExitSuccess {
+		t.Errorf("recorded event = %#v", recorder)
+	}
+}
+
+func TestUnavailableIntegrationsDoNotBreakCoreCommands(t *testing.T) {
+	services := unavailableServices{}
+	manager := NewSessionManagerWithDependencies(
+		filesystem.NewDirectory(""),
+		Dependencies{Search: services, Metrics: services},
+	)
+
+	core, sessionID, err := manager.Execute("", "about")
+	if err != nil || core.ExitCode != command.ExitSuccess {
+		t.Fatalf("core command result = %#v, error = %v", core, err)
+	}
+
+	search, _, err := manager.Execute(sessionID, "search kafka")
+	if err != nil || search.Output != "search unavailable" {
+		t.Fatalf("search result = %#v, error = %v", search, err)
+	}
+}
 
 func TestSessionManagerKeepsWorkingDirectoriesIndependent(t *testing.T) {
 	root := filesystem.NewDirectory("")

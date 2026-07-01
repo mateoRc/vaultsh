@@ -20,6 +20,8 @@ pipelines, HTTP APIs, testing, and container deployment.
 - Session-specific working directories and command history
 - Command and path autocomplete
 - HTTP API and disposable browser terminal
+- Optional Atlas search and Forge telemetry integrations
+- Live Atlas and Forge availability indicators
 - Docker packaging and GitHub Actions CI
 
 ## Architecture

@@ -35,9 +35,31 @@ type completeResponse struct {
 	SessionID   string   `json:"session_id"`
 }
 
+type StatusProvider interface {
+	Availability() (atlas bool, forge bool)
+}
+
 func NewHandler(sessions *shell.SessionManager) http.Handler {
+	return NewHandlerWithStatus(sessions, nil)
+}
+
+func NewHandlerWithStatus(
+	sessions *shell.SessionManager,
+	status StatusProvider,
+) http.Handler {
 	mux := http.NewServeMux()
 	mux.HandleFunc("GET /healthz", health)
+	mux.HandleFunc("GET /api/status", func(w http.ResponseWriter, _ *http.Request) {
+		atlas, forge := false, false
+		if status != nil {
+			atlas, forge = status.Availability()
+		}
+		w.Header().Set("Content-Type", "application/json")
+		_ = json.NewEncoder(w).Encode(map[string]bool{
+			"atlas": atlas,
+			"forge": forge,
+		})
+	})
 	mux.Handle(
 		"GET /testui/",
 		http.StripPrefix("/testui/", http.FileServer(http.Dir("testui"))),

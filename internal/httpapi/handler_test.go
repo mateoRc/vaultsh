@@ -11,6 +11,31 @@ import (
 	"github.com/mateom/vaultsh/internal/shell"
 )
 
+type statusStub struct {
+	atlas bool
+	forge bool
+}
+
+func (s statusStub) Availability() (bool, bool) {
+	return s.atlas, s.forge
+}
+
+func TestStatusReportsExternalServices(t *testing.T) {
+	request := httptest.NewRequest(http.MethodGet, "/api/status", nil)
+	response := httptest.NewRecorder()
+	NewHandlerWithStatus(
+		shell.NewSessionManager(filesystem.NewDirectory("")),
+		statusStub{atlas: true, forge: false},
+	).ServeHTTP(response, request)
+
+	if response.Code != http.StatusOK {
+		t.Fatalf("status = %d", response.Code)
+	}
+	if response.Body.String() != "{\"atlas\":true,\"forge\":false}\n" {
+		t.Errorf("body = %q", response.Body.String())
+	}
+}
+
 func TestHealth(t *testing.T) {
 	request := httptest.NewRequest(http.MethodGet, "/healthz", nil)
 	response := httptest.NewRecorder()
