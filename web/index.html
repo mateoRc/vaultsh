@@ -18,7 +18,7 @@
   <link rel="canonical" href="/vault/">
   <link rel="icon" href="/vault/favicon.svg" type="image/svg+xml">
   <title>Vaultsh by Mateo Mahmutović</title>
-  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="style.css?v=20260702">
 </head>
 <body>
   <main class="page">
@@ -86,24 +86,6 @@ Analyze with Forge: metrics or dashboard
 
 Type 'help' for all commands.</pre>
 
-        <div class="quick-command-drawer">
-          <button
-            id="quick-command-toggle"
-            class="quick-command-toggle"
-            type="button"
-            aria-expanded="false"
-            aria-controls="quick-commands"
-          >
-            Quick commands <span aria-hidden="true">▾</span>
-          </button>
-          <div id="quick-commands" class="quick-commands" aria-label="Suggested commands" hidden>
-            <button type="button" data-command="tree /cv">Explore CV</button>
-            <button type="button" data-command="search distributed systems">Find distributed systems</button>
-            <button type="button" data-command="metrics">View analytics</button>
-            <button type="button" data-command="dashboard">Open dashboard</button>
-          </div>
-        </div>
-
         <form id="command-form">
           <label for="command">vault:~$</label>
           <input
@@ -121,11 +103,29 @@ Type 'help' for all commands.</pre>
           </div>
         </form>
         <p id="request-status" class="request-status" aria-live="polite"></p>
+
+        <div class="quick-command-drawer">
+          <button
+            id="quick-command-toggle"
+            class="quick-command-toggle"
+            type="button"
+            aria-expanded="false"
+            aria-controls="quick-commands"
+          >
+            Commands
+          </button>
+          <div id="quick-commands" class="quick-commands" aria-label="Suggested commands" hidden>
+            <button type="button" data-command="tree /cv">CV</button>
+            <button type="button" data-command="search backend services">Search</button>
+            <button type="button" data-command="metrics">Analytics</button>
+            <button type="button" data-command="dashboard">Dashboard</button>
+          </div>
+        </div>
       </div>
     </section>
 
     <p class="hint">Tap a suggestion or type a command · Tab completes · Ctrl+L clears</p>
   </main>
-  <script src="terminal.js"></script>
+  <script src="terminal.js?v=20260702"></script>
 </body>
 </html>
