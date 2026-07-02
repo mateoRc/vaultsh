@@ -30,7 +30,14 @@ func main() {
 		logger.Error("content loading failed", "error", err)
 		os.Exit(1)
 	}
-	services := external.NewClient(os.Getenv("ATLAS_URL"), os.Getenv("FORGE_URL"))
+	atlasURL := os.Getenv("ATLAS_URL")
+	forgeURL := os.Getenv("FORGE_URL")
+	services := external.NewClient(
+		atlasURL,
+		forgeURL,
+		serviceToken(atlasURL, "ATLAS_AUTH_TOKEN", logger),
+		serviceToken(forgeURL, "FORGE_AUTH_TOKEN", logger),
+	)
 	events := telemetry.NewDispatcher(services, telemetryQueueSize(), logger)
 	defer func() {
 		ctx, cancel := context.WithTimeout(context.Background(), time.Second)
@@ -81,6 +88,18 @@ func main() {
 	if err := server.Shutdown(shutdownContext); err != nil {
 		logger.Error("graceful shutdown failed", "error", err)
 	}
+}
+
+func serviceToken(serviceURL, name string, logger *slog.Logger) string {
+	if serviceURL == "" {
+		return ""
+	}
+	value := os.Getenv(name)
+	if value == "" {
+		logger.Error("required environment variable is missing", "name", name)
+		os.Exit(1)
+	}
+	return value
 }
 
 func telemetryQueueSize() int {

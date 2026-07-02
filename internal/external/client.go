@@ -13,9 +13,11 @@ import (
 )
 
 type Client struct {
-	atlasURL string
-	forgeURL string
-	http     *http.Client
+	atlasURL   string
+	forgeURL   string
+	atlasToken string
+	forgeToken string
+	http       *http.Client
 }
 
 type searchResponse struct {
@@ -30,11 +32,13 @@ type event struct {
 	ExitCode   int    `json:"exit_code"`
 }
 
-func NewClient(atlasURL, forgeURL string) *Client {
+func NewClient(atlasURL, forgeURL, atlasToken, forgeToken string) *Client {
 	return &Client{
-		atlasURL: strings.TrimRight(atlasURL, "/"),
-		forgeURL: strings.TrimRight(forgeURL, "/"),
-		http:     &http.Client{Timeout: 300 * time.Millisecond},
+		atlasURL:   strings.TrimRight(atlasURL, "/"),
+		forgeURL:   strings.TrimRight(forgeURL, "/"),
+		atlasToken: atlasToken,
+		forgeToken: forgeToken,
+		http:       &http.Client{Timeout: 300 * time.Millisecond},
 	}
 }
 
@@ -44,7 +48,7 @@ func (c *Client) Search(query string) ([]command.SearchResult, error) {
 	}
 
 	endpoint := c.atlasURL + "/search?" + url.Values{"q": {query}}.Encode()
-	response, err := c.http.Get(endpoint)
+	response, err := c.get(endpoint, c.atlasToken)
 	if err != nil {
 		return nil, err
 	}
@@ -72,7 +76,7 @@ func (c *Client) Dashboard() (string, error) {
 		return "", fmt.Errorf("Forge URL is not configured")
 	}
 
-	response, err := c.http.Get(c.forgeURL + "/dashboard")
+	response, err := c.get(c.forgeURL+"/dashboard", c.forgeToken)
 	if err != nil {
 		return "", err
 	}
@@ -110,11 +114,17 @@ func (c *Client) Record(
 		return err
 	}
 
-	response, err := c.http.Post(
+	request, err := http.NewRequest(
+		http.MethodPost,
 		c.forgeURL+"/events",
-		"application/json",
 		bytes.NewReader(body),
 	)
+	if err != nil {
+		return err
+	}
+	request.Header.Set("Content-Type", "application/json")
+	request.Header.Set("Authorization", "Bearer "+c.forgeToken)
+	response, err := c.http.Do(request)
 	if err != nil {
 		return err
 	}
@@ -133,7 +143,7 @@ func (c *Client) getJSON(baseURL, path string, target any) error {
 	if baseURL == "" {
 		return fmt.Errorf("service URL is not configured")
 	}
-	response, err := c.http.Get(baseURL + path)
+	response, err := c.get(baseURL+path, c.forgeToken)
 	if err != nil {
 		return err
 	}
@@ -142,6 +152,15 @@ func (c *Client) getJSON(baseURL, path string, target any) error {
 		return fmt.Errorf("service returned %s", response.Status)
 	}
 	return json.NewDecoder(response.Body).Decode(target)
+}
+
+func (c *Client) get(endpoint, token string) (*http.Response, error) {
+	request, err := http.NewRequest(http.MethodGet, endpoint, nil)
+	if err != nil {
+		return nil, err
+	}
+	request.Header.Set("Authorization", "Bearer "+token)
+	return c.http.Do(request)
 }
 
 func (c *Client) healthy(baseURL string) bool {

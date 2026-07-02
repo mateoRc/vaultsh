@@ -44,6 +44,10 @@ Commands interact only with the virtual filesystem. Content is loaded from
 `CONTENT_PATH`, which defaults to `/app/content`. Vaultsh exposes no commands
 that create, modify, or delete files.
 
+When Atlas or Forge URLs are configured, Vaultsh also requires
+`ATLAS_AUTH_TOKEN` or `FORGE_AUTH_TOKEN` respectively. It sends these values as
+bearer credentials to the private service APIs.
+
 ## Quickstart
 
 Run Vaultsh with Atlas and their shared content through the sibling `lab`
@@ -69,8 +73,8 @@ go test ./...
 help
 tree
 ls -la /
-cat about.txt
-cat skills.txt | grep "^language:" | sort
+cat /cv/about.txt
+cat /cv/skills.txt | grep "^language:" | sort
 history | tail -n 5
 pwd
 cd cv/experience
