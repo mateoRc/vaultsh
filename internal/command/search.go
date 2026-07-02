@@ -28,11 +28,15 @@ func (Search) Name() string {
 }
 
 func (Search) Description() string {
-	return "Search shared content through Atlas"
+	return "Search portfolio content with the Atlas search engine"
 }
 
 func (Search) Usage() string {
 	return "search <query>"
+}
+
+func (Search) Help() string {
+	return "Example: search distributed systems"
 }
 
 func (s Search) Execute(args []string, _ Input) Result {

@@ -46,9 +46,13 @@ func (h Help) Execute(args []string, _ Input) Result {
 		if provider, ok := current.(interface{ Usage() string }); ok {
 			usage = provider.Usage()
 		}
+		description := current.Description()
+		if provider, ok := current.(interface{ Help() string }); ok {
+			description += "\n" + provider.Help()
+		}
 
 		return Result{
-			Output:   fmt.Sprintf("Usage: %s\n%s", usage, current.Description()),
+			Output:   fmt.Sprintf("Usage: %s\n%s", usage, description),
 			ExitCode: ExitSuccess,
 		}
 	}

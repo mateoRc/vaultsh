@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-  <meta name="description" content="Explore Mateo Mahmutović's backend engineering portfolio through Vaultsh, Atlas search, and Forge telemetry.">
+  <meta name="description" content="Explore Mateo Mahmutović's backend engineering portfolio through Vaultsh, the Atlas search engine, and Forge analytics.">
   <meta property="og:type" content="website">
   <meta property="og:title" content="Vaultsh | Backend engineering portfolio">
   <meta property="og:description" content="Explore a backend engineering portfolio through a read-only virtual shell, search service, and telemetry dashboard.">
@@ -28,8 +28,8 @@
       <p class="byline">by Mateo Mahmutović</p>
       <p class="summary">
         Explore my portfolio through Vaultsh, a read-only virtual shell.
-        Search its shared content with Atlas. Analyze live service activity
-        with Forge.
+        Search its shared content with the Atlas search engine. Analyze live
+        service activity with Forge analytics.
       </p>
       <div class="tags" aria-label="Primary engineering focus">
         <span>Backend</span>
@@ -47,7 +47,7 @@
       </span>
       <nav class="profile-links" aria-label="Profile links">
         <a class="contact-action" href="mailto:mahmutovic.mateo@gmail.com">
-          Contact
+          Contact ↗
         </a>
         <a href="https://github.com/mateoRc/vaultsh" target="_blank" rel="noreferrer">
           GitHub ↗
@@ -81,16 +81,27 @@
         <pre id="output" aria-live="polite">Vaultsh v2.0.0
 
 Explore: tree /cv
-Search with Atlas: search kafka
+Search with Atlas: search distributed systems
 Analyze with Forge: metrics or dashboard
 
 Type 'help' for all commands.</pre>
 
-        <div class="quick-commands" aria-label="Suggested commands">
-          <button type="button" data-command="tree /cv">Explore CV</button>
-          <button type="button" data-command="search kafka">Search Kafka</button>
-          <button type="button" data-command="metrics">View metrics</button>
-          <button type="button" data-command="dashboard">Open dashboard</button>
+        <div class="quick-command-drawer">
+          <button
+            id="quick-command-toggle"
+            class="quick-command-toggle"
+            type="button"
+            aria-expanded="false"
+            aria-controls="quick-commands"
+          >
+            Quick commands <span aria-hidden="true">▾</span>
+          </button>
+          <div id="quick-commands" class="quick-commands" aria-label="Suggested commands" hidden>
+            <button type="button" data-command="tree /cv">Explore CV</button>
+            <button type="button" data-command="search distributed systems">Find distributed systems</button>
+            <button type="button" data-command="metrics">View analytics</button>
+            <button type="button" data-command="dashboard">Open dashboard</button>
+          </div>
         </div>
 
         <form id="command-form">

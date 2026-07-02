@@ -6,9 +6,11 @@ const command = document.querySelector("#command");
 const output = document.querySelector("#output");
 const requestStatus = document.querySelector("#request-status");
 const clearCommand = document.querySelector("#clear-command");
+const quickCommandToggle = document.querySelector("#quick-command-toggle");
+const quickCommands = document.querySelector("#quick-commands");
 const actionButtons = document.querySelectorAll("[data-command]");
 const submitButtons = document.querySelectorAll(
-  "#run-command, #clear-command, .quick-commands button, .contact-action",
+  "#run-command, #clear-command, .quick-commands button",
 );
 const maxOutputEntries = 100;
 let outputEntries = [output.textContent];
@@ -75,6 +77,10 @@ form.addEventListener("submit", async (event) => {
 
 clearCommand.addEventListener("click", () => execute("clear"));
 
+quickCommandToggle.addEventListener("click", () => {
+  setQuickCommandsExpanded(quickCommands.hidden);
+});
+
 for (const button of actionButtons) {
   button.addEventListener("click", async () => {
     document.querySelector(".terminal").scrollIntoView({
@@ -82,10 +88,17 @@ for (const button of actionButtons) {
       block: "start",
     });
     await execute(button.dataset.command);
+    setQuickCommandsExpanded(false);
   });
 }
 
 document.addEventListener("keydown", async (event) => {
+  if (event.key === "Escape" && !quickCommands.hidden) {
+    setQuickCommandsExpanded(false);
+    quickCommandToggle.focus();
+    return;
+  }
+
   if (event.ctrlKey && event.key.toLowerCase() === "l") {
     event.preventDefault();
     await execute("clear");
@@ -98,6 +111,11 @@ document.addEventListener("keydown", async (event) => {
     await complete();
   }
 });
+
+function setQuickCommandsExpanded(expanded) {
+  quickCommands.hidden = !expanded;
+  quickCommandToggle.setAttribute("aria-expanded", String(expanded));
+}
 
 async function complete() {
   const line = command.value;

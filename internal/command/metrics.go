@@ -32,7 +32,11 @@ func (Metrics) Name() string {
 }
 
 func (Metrics) Description() string {
-	return "Show telemetry summary from Forge"
+	return "Show service analytics from Forge"
+}
+
+func (Metrics) Help() string {
+	return "Shows request, error, latency, service, and command totals."
 }
 
 func (m Metrics) Execute(args []string, _ Input) Result {
@@ -67,7 +71,11 @@ func (Dashboard) Name() string {
 }
 
 func (Dashboard) Description() string {
-	return "Show ASCII telemetry dashboard from Forge"
+	return "Show the Forge analytics dashboard"
+}
+
+func (Dashboard) Help() string {
+	return "Renders live service activity as a terminal-friendly dashboard."
 }
 
 func (d Dashboard) Execute(args []string, _ Input) Result {
