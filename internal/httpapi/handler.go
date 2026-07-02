@@ -2,11 +2,21 @@ package httpapi
 
 import (
 	"encoding/json"
+	"errors"
 	"net/http"
 
 	"github.com/mateom/vaultsh/internal/command"
 	"github.com/mateom/vaultsh/internal/shell"
 )
+
+const (
+	maxRequestBodyBytes = 16 * 1024
+	maxCommandLength    = 4096
+)
+
+type HandlerConfig struct {
+	TrustProxyHeaders bool
+}
 
 type execRequest struct {
 	Line      string `json:"line"`
@@ -47,9 +57,23 @@ func NewHandlerWithStatus(
 	sessions *shell.SessionManager,
 	status StatusProvider,
 ) http.Handler {
+	return NewHandlerWithConfig(sessions, status, HandlerConfig{})
+}
+
+func NewHandlerWithConfig(
+	sessions *shell.SessionManager,
+	status StatusProvider,
+	config HandlerConfig,
+) http.Handler {
 	mux := http.NewServeMux()
+	limiter := newRateLimiter()
 	mux.HandleFunc("GET /healthz", health)
-	mux.HandleFunc("GET /api/status", func(w http.ResponseWriter, _ *http.Request) {
+	mux.HandleFunc("GET /api/status", func(w http.ResponseWriter, r *http.Request) {
+		if !limiter.allow("status:"+clientIP(r, config.TrustProxyHeaders), 120, 20) {
+			w.Header().Set("Retry-After", "1")
+			http.Error(w, "rate limit exceeded", http.StatusTooManyRequests)
+			return
+		}
 		atlas, forge := false, false
 		if status != nil {
 			atlas, forge = status.Availability()
@@ -65,19 +89,33 @@ func NewHandlerWithStatus(
 		http.StripPrefix("/testui/", http.FileServer(http.Dir("testui"))),
 	)
 	mux.HandleFunc("POST /api/exec", func(w http.ResponseWriter, r *http.Request) {
+		if !limiter.allow("exec:"+clientIP(r, config.TrustProxyHeaders), 30, 10) {
+			w.Header().Set("Retry-After", "2")
+			http.Error(w, "rate limit exceeded", http.StatusTooManyRequests)
+			return
+		}
 		exec(w, r, sessions)
 	})
 	mux.HandleFunc("POST /api/complete", func(w http.ResponseWriter, r *http.Request) {
+		if !limiter.allow("complete:"+clientIP(r, config.TrustProxyHeaders), 120, 20) {
+			w.Header().Set("Retry-After", "1")
+			http.Error(w, "rate limit exceeded", http.StatusTooManyRequests)
+			return
+		}
 		complete(w, r, sessions)
 	})
 
-	return mux
+	return securityHeaders(mux)
 }
 
 func complete(w http.ResponseWriter, r *http.Request, sessions *shell.SessionManager) {
+	r.Body = http.MaxBytesReader(w, r.Body, maxRequestBodyBytes)
 	var request completeRequest
-	if err := json.NewDecoder(r.Body).Decode(&request); err != nil {
-		http.Error(w, "invalid JSON", http.StatusBadRequest)
+	if !decodeRequest(w, r, &request) {
+		return
+	}
+	if len(request.Line) > maxCommandLength {
+		http.Error(w, "input is too long", http.StatusRequestEntityTooLarge)
 		return
 	}
 
@@ -87,7 +125,7 @@ func complete(w http.ResponseWriter, r *http.Request, sessions *shell.SessionMan
 		request.Cursor,
 	)
 	if err != nil {
-		http.Error(w, "session creation failed", http.StatusInternalServerError)
+		writeSessionError(w, err)
 		return
 	}
 
@@ -109,15 +147,19 @@ func health(w http.ResponseWriter, _ *http.Request) {
 }
 
 func exec(w http.ResponseWriter, r *http.Request, sessions *shell.SessionManager) {
+	r.Body = http.MaxBytesReader(w, r.Body, maxRequestBodyBytes)
 	var request execRequest
-	if err := json.NewDecoder(r.Body).Decode(&request); err != nil {
-		http.Error(w, "invalid JSON", http.StatusBadRequest)
+	if !decodeRequest(w, r, &request) {
+		return
+	}
+	if len(request.Line) > maxCommandLength {
+		http.Error(w, "command is too long", http.StatusRequestEntityTooLarge)
 		return
 	}
 
 	result, sessionID, err := sessions.Execute(request.SessionID, request.Line)
 	if err != nil {
-		http.Error(w, "session creation failed", http.StatusInternalServerError)
+		writeSessionError(w, err)
 		return
 	}
 	response := execResponse{
@@ -130,4 +172,40 @@ func exec(w http.ResponseWriter, r *http.Request, sessions *shell.SessionManager
 
 	w.Header().Set("Content-Type", "application/json")
 	_ = json.NewEncoder(w).Encode(response)
+}
+
+func decodeRequest(w http.ResponseWriter, r *http.Request, target any) bool {
+	if err := json.NewDecoder(r.Body).Decode(target); err != nil {
+		var tooLarge *http.MaxBytesError
+		if errors.As(err, &tooLarge) {
+			http.Error(w, "request body is too large", http.StatusRequestEntityTooLarge)
+			return false
+		}
+		http.Error(w, "invalid JSON", http.StatusBadRequest)
+		return false
+	}
+	return true
+}
+
+func writeSessionError(w http.ResponseWriter, err error) {
+	if errors.Is(err, shell.ErrSessionLimit) {
+		w.Header().Set("Retry-After", "60")
+		http.Error(w, "session capacity reached", http.StatusTooManyRequests)
+		return
+	}
+	http.Error(w, "session creation failed", http.StatusInternalServerError)
+}
+
+func securityHeaders(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set(
+			"Content-Security-Policy",
+			"default-src 'self'; base-uri 'none'; frame-ancestors 'none'; "+
+				"form-action 'self'; object-src 'none'",
+		)
+		w.Header().Set("Referrer-Policy", "no-referrer")
+		w.Header().Set("X-Content-Type-Options", "nosniff")
+		w.Header().Set("X-Frame-Options", "DENY")
+		next.ServeHTTP(w, r)
+	})
 }

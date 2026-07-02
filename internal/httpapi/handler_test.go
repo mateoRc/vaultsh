@@ -189,6 +189,71 @@ func TestComplete(t *testing.T) {
 	}
 }
 
+func TestExecRejectsOversizedBody(t *testing.T) {
+	request := httptest.NewRequest(
+		http.MethodPost,
+		"/api/exec",
+		strings.NewReader(`{"line":"`+strings.Repeat("x", maxRequestBodyBytes)+`"}`),
+	)
+	response := httptest.NewRecorder()
+
+	newTestHandler().ServeHTTP(response, request)
+
+	if response.Code != http.StatusRequestEntityTooLarge {
+		t.Errorf("status = %d, want %d", response.Code, http.StatusRequestEntityTooLarge)
+	}
+}
+
+func TestExecRejectsLongCommand(t *testing.T) {
+	request := httptest.NewRequest(
+		http.MethodPost,
+		"/api/exec",
+		strings.NewReader(`{"line":"`+strings.Repeat("x", maxCommandLength+1)+`"}`),
+	)
+	response := httptest.NewRecorder()
+
+	newTestHandler().ServeHTTP(response, request)
+
+	if response.Code != http.StatusRequestEntityTooLarge {
+		t.Errorf("status = %d, want %d", response.Code, http.StatusRequestEntityTooLarge)
+	}
+}
+
+func TestExecRateLimit(t *testing.T) {
+	handler := newTestHandler()
+	for index := 0; index < 11; index++ {
+		request := httptest.NewRequest(
+			http.MethodPost,
+			"/api/exec",
+			strings.NewReader(`{"line":"pwd"}`),
+		)
+		request.RemoteAddr = "192.0.2.1:1234"
+		response := httptest.NewRecorder()
+		handler.ServeHTTP(response, request)
+
+		if index < 10 && response.Code != http.StatusOK {
+			t.Fatalf("request %d status = %d", index+1, response.Code)
+		}
+		if index == 10 && response.Code != http.StatusTooManyRequests {
+			t.Errorf("request 11 status = %d, want %d", response.Code, http.StatusTooManyRequests)
+		}
+	}
+}
+
+func TestSecurityHeaders(t *testing.T) {
+	request := httptest.NewRequest(http.MethodGet, "/healthz", nil)
+	response := httptest.NewRecorder()
+
+	newTestHandler().ServeHTTP(response, request)
+
+	if response.Header().Get("Content-Security-Policy") == "" {
+		t.Error("Content-Security-Policy header is missing")
+	}
+	if response.Header().Get("X-Content-Type-Options") != "nosniff" {
+		t.Error("X-Content-Type-Options header is missing")
+	}
+}
+
 func newTestHandler() http.Handler {
 	root := filesystem.NewDirectory("")
 	return NewHandler(shell.NewSessionManager(root))

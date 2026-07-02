@@ -48,6 +48,22 @@ When Atlas or Forge URLs are configured, Vaultsh also requires
 `ATLAS_AUTH_TOKEN` or `FORGE_AUTH_TOKEN` respectively. It sends these values as
 bearer credentials to the private service APIs.
 
+## Production Safety
+
+Vaultsh limits public API request bodies to 16 KB and command input to 4,096
+bytes. It applies per-client token-bucket limits to execution and completion,
+caps active sessions, configures HTTP server timeouts, and returns defensive
+browser headers.
+
+Configuration:
+
+- `SESSION_LIMIT`: active session cap; defaults to `5000`
+- `TRUST_PROXY_HEADERS`: trust Caddy's `X-Forwarded-For`; enable only when
+  Vaultsh cannot be reached except through a trusted reverse proxy
+
+The sibling `lab` repository contains the Caddy-based HTTPS production stack.
+Do not expose Vaultsh directly when `TRUST_PROXY_HEADERS=true`.
+
 ## Quickstart
 
 Run Vaultsh with Atlas and their shared content through the sibling `lab`

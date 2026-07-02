@@ -44,15 +44,28 @@ func main() {
 		defer cancel()
 		events.Close(ctx)
 	}()
-	sessions := shell.NewSessionManagerWithDependencies(root, shell.Dependencies{
-		Search:  services,
-		Metrics: services,
-		Events:  events,
-	})
+	sessions := shell.NewSessionManagerWithConfigAndDependencies(
+		root,
+		shell.SessionConfig{MaxSessions: sessionLimit()},
+		shell.Dependencies{
+			Search:  services,
+			Metrics: services,
+			Events:  events,
+		},
+	)
 
 	server := &http.Server{
-		Addr:    ":8080",
-		Handler: httpapi.NewHandlerWithStatus(sessions, services),
+		Addr: ":8080",
+		Handler: httpapi.NewHandlerWithConfig(
+			sessions,
+			services,
+			httpapi.HandlerConfig{TrustProxyHeaders: trustProxyHeaders()},
+		),
+		ReadHeaderTimeout: 5 * time.Second,
+		ReadTimeout:       10 * time.Second,
+		WriteTimeout:      15 * time.Second,
+		IdleTimeout:       60 * time.Second,
+		MaxHeaderBytes:    16 * 1024,
 	}
 
 	logger.Info("server started", "address", server.Addr)
@@ -108,4 +121,17 @@ func telemetryQueueSize() int {
 		return 1000
 	}
 	return value
+}
+
+func sessionLimit() int {
+	value, err := strconv.Atoi(os.Getenv("SESSION_LIMIT"))
+	if err != nil || value <= 0 {
+		return shell.DefaultMaxSessions
+	}
+	return value
+}
+
+func trustProxyHeaders() bool {
+	value, err := strconv.ParseBool(os.Getenv("TRUST_PROXY_HEADERS"))
+	return err == nil && value
 }

@@ -247,6 +247,20 @@ func TestSessionManagerRejectsExpiredSessionBeforeCleanup(t *testing.T) {
 	}
 }
 
+func TestSessionManagerCapsActiveSessions(t *testing.T) {
+	manager := NewSessionManagerWithConfig(
+		filesystem.NewDirectory(""),
+		SessionConfig{MaxSessions: 1},
+	)
+
+	if _, _, err := manager.Execute("", "pwd"); err != nil {
+		t.Fatalf("first Execute(): %v", err)
+	}
+	if _, _, err := manager.Execute("", "pwd"); err != ErrSessionLimit {
+		t.Fatalf("second Execute() error = %v, want %v", err, ErrSessionLimit)
+	}
+}
+
 func TestSessionManagerCleanupStopsWithContext(t *testing.T) {
 	manager := NewSessionManager(filesystem.NewDirectory(""))
 	ctx, cancel := context.WithCancel(context.Background())

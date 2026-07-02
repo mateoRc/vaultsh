@@ -4,6 +4,7 @@ import (
 	"context"
 	"crypto/rand"
 	"encoding/hex"
+	"errors"
 	"sync"
 	"time"
 
@@ -15,11 +16,15 @@ import (
 const (
 	DefaultSessionTTL             = 30 * time.Minute
 	DefaultSessionCleanupInterval = 5 * time.Minute
+	DefaultMaxSessions            = 5000
 )
 
+var ErrSessionLimit = errors.New("session limit reached")
+
 type SessionConfig struct {
-	TTL time.Duration
-	Now func() time.Time
+	TTL         time.Duration
+	Now         func() time.Time
+	MaxSessions int
 }
 
 type session struct {
@@ -33,6 +38,7 @@ type SessionManager struct {
 	root     *filesystem.Directory
 	sessions map[string]*session
 	ttl      time.Duration
+	max      int
 	now      func() time.Time
 	deps     Dependencies
 }
@@ -55,6 +61,14 @@ func NewSessionManagerWithConfig(
 	return newSessionManager(root, config, Dependencies{})
 }
 
+func NewSessionManagerWithConfigAndDependencies(
+	root *filesystem.Directory,
+	config SessionConfig,
+	dependencies Dependencies,
+) *SessionManager {
+	return newSessionManager(root, config, dependencies)
+}
+
 func newSessionManager(
 	root *filesystem.Directory,
 	config SessionConfig,
@@ -66,11 +80,15 @@ func newSessionManager(
 	if config.Now == nil {
 		config.Now = time.Now
 	}
+	if config.MaxSessions <= 0 {
+		config.MaxSessions = DefaultMaxSessions
+	}
 
 	return &SessionManager{
 		root:     root,
 		sessions: make(map[string]*session),
 		ttl:      config.TTL,
+		max:      config.MaxSessions,
 		now:      config.Now,
 		deps:     dependencies,
 	}
@@ -169,6 +187,9 @@ func (m *SessionManager) get(sessionID string) (*session, string, error) {
 			return current, sessionID, nil
 		}
 		delete(m.sessions, sessionID)
+	}
+	if len(m.sessions) >= m.max {
+		return nil, "", ErrSessionLimit
 	}
 
 	newID, err := newSessionID()
