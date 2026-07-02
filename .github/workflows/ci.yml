@@ -30,5 +30,8 @@ jobs:
       - name: Run race tests
         run: go test -race ./...
 
-      - name: Build Docker image
-        run: docker build --tag vaultsh:test .
+      - name: Build and test Docker image
+        run: docker build --target test --tag vaultsh:test .
+
+      - name: Build runtime Docker image
+        run: docker build --tag vaultsh:${{ github.sha }} .

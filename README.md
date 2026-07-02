@@ -72,7 +72,41 @@ ls -la /
 cat about.txt
 cat skills.txt | grep "^language:" | sort
 history | tail -n 5
+pwd
+cd cv/experience
+ls -l
+cat reversinglabs.txt
+tree -L 2 /projects
+ls -Ra /
+cat -n /cv/skills.txt
+grep -in "backend" /cv/about.txt
+head -n 3 /cv/skills.txt
+tail -n 2 /cv/experience/a1.txt
+wc /cv/skills.txt
+sort -r /cv/interests.txt
+search kafka
+metrics
+dashboard
+whoami
 ```
+
+Commands can be combined into pipelines:
+
+```sh
+cat /cv/skills.txt | grep -i "go" | sort
+cat /cv/experience/reversinglabs.txt | grep -n "backend" | head -n 5
+tree -L 3 / | grep "projects"
+```
+
+Use `--verbose` at the end of a command line to return pipeline execution
+metadata from the HTTP API:
+
+```sh
+cat /cv/skills.txt | grep Go --verbose
+```
+
+The browser terminal supports `Tab` completion, `Up`/`Down` history, and
+`Ctrl+L` to clear the screen.
 
 ## Content
 

@@ -1,10 +1,14 @@
-FROM golang:1.24-alpine AS build
+FROM golang:1.24-alpine AS test
 
 WORKDIR /src
 
 COPY go.mod ./
 COPY cmd ./cmd
 COPY internal ./internal
+
+RUN go test ./...
+
+FROM test AS build
 
 RUN CGO_ENABLED=0 go build -o /vaultsh ./cmd/vaultsh
 
