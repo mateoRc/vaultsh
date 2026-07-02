@@ -74,7 +74,7 @@ cd ../lab
 docker compose up --build
 ```
 
-Open http://localhost:8080/testui/.
+Open http://localhost:8080/vault/. Requests to `/` redirect there.
 
 For local development, install Go 1.24 or newer:
 
@@ -155,7 +155,7 @@ internal/httpapi/     HTTP transport
 internal/parser/      tokenizer, lexer, and parser
 internal/shell/       execution engine and sessions
 internal/storage/     mounted-content loader
-testui/               browser terminal
+web/                  browser terminal
 ```
 
 Shared content and local orchestration documentation live in the `lab`

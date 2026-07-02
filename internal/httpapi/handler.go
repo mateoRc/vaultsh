@@ -67,6 +67,13 @@ func NewHandlerWithConfig(
 ) http.Handler {
 	mux := http.NewServeMux()
 	limiter := newRateLimiter()
+	mux.HandleFunc("GET /", func(w http.ResponseWriter, r *http.Request) {
+		if r.URL.Path != "/" {
+			http.NotFound(w, r)
+			return
+		}
+		http.Redirect(w, r, "/vault/", http.StatusTemporaryRedirect)
+	})
 	mux.HandleFunc("GET /healthz", health)
 	mux.HandleFunc("GET /api/status", func(w http.ResponseWriter, r *http.Request) {
 		if !limiter.allow("status:"+clientIP(r, config.TrustProxyHeaders), 120, 20) {
@@ -85,8 +92,8 @@ func NewHandlerWithConfig(
 		})
 	})
 	mux.Handle(
-		"GET /testui/",
-		http.StripPrefix("/testui/", http.FileServer(http.Dir("testui"))),
+		"GET /vault/",
+		http.StripPrefix("/vault/", http.FileServer(http.Dir("web"))),
 	)
 	mux.HandleFunc("POST /api/exec", func(w http.ResponseWriter, r *http.Request) {
 		if !limiter.allow("exec:"+clientIP(r, config.TrustProxyHeaders), 30, 10) {

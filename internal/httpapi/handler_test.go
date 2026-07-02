@@ -50,6 +50,20 @@ func TestHealth(t *testing.T) {
 	}
 }
 
+func TestRootRedirectsToVault(t *testing.T) {
+	request := httptest.NewRequest(http.MethodGet, "/", nil)
+	response := httptest.NewRecorder()
+
+	newTestHandler().ServeHTTP(response, request)
+
+	if response.Code != http.StatusTemporaryRedirect {
+		t.Errorf("status = %d, want %d", response.Code, http.StatusTemporaryRedirect)
+	}
+	if location := response.Header().Get("Location"); location != "/vault/" {
+		t.Errorf("Location = %q, want %q", location, "/vault/")
+	}
+}
+
 func TestExec(t *testing.T) {
 	request := httptest.NewRequest(
 		http.MethodPost,

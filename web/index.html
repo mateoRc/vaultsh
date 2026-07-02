@@ -3,7 +3,20 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-  <meta name="description" content="Vaultsh is a read-only virtual shell engine exposing Mateo Mahmutović's portfolio.">
+  <meta name="description" content="Explore Mateo Mahmutović's backend engineering portfolio through Vaultsh, Atlas search, and Forge telemetry.">
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="Vaultsh | Backend engineering portfolio">
+  <meta property="og:description" content="Explore a backend engineering portfolio through a read-only virtual shell, search service, and telemetry dashboard.">
+  <meta property="og:image" content="/vault/social-preview.png">
+  <meta property="og:image:width" content="1728">
+  <meta property="og:image:height" content="910">
+  <meta property="og:image:alt" content="Vaultsh backend engineering portfolio">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="Vaultsh | Backend engineering portfolio">
+  <meta name="twitter:description" content="Explore a backend engineering portfolio through Vaultsh, Atlas, and Forge.">
+  <meta name="twitter:image" content="/vault/social-preview.png">
+  <link rel="canonical" href="/vault/">
+  <link rel="icon" href="/vault/favicon.svg" type="image/svg+xml">
   <title>Vaultsh by Mateo Mahmutović</title>
   <link rel="stylesheet" href="style.css">
 </head>
@@ -33,6 +46,9 @@
         Read-only virtual shell engine
       </span>
       <nav class="profile-links" aria-label="Profile links">
+        <button class="contact-action" type="button" data-command="cat /cv/contact.txt">
+          Contact
+        </button>
         <a href="https://github.com/mateoRc/vaultsh" target="_blank" rel="noreferrer">
           GitHub ↗
         </a>
@@ -54,7 +70,7 @@
           <span></span>
         </div>
         <span class="terminal-title">mateo@vault — shell</span>
-        <div class="service-statuses" aria-label="Service status">
+        <div class="service-statuses" aria-label="Service status" aria-live="polite">
           <span id="status" class="status" data-state="checking">checking</span>
           <span id="atlas-status" class="service-status" data-state="checking">Atlas</span>
           <span id="forge-status" class="service-status" data-state="checking">Forge</span>
@@ -62,9 +78,20 @@
       </header>
 
       <div class="terminal-body">
-        <pre id="output" aria-live="polite">Vaultsh v0.1
+        <pre id="output" aria-live="polite">Vaultsh v2.0.0
 
-Type 'help' to begin.</pre>
+Explore: tree /cv
+Search with Atlas: search kafka
+Analyze with Forge: metrics or dashboard
+
+Type 'help' for all commands.</pre>
+
+        <div class="quick-commands" aria-label="Suggested commands">
+          <button type="button" data-command="tree /cv">Explore CV</button>
+          <button type="button" data-command="search kafka">Search Kafka</button>
+          <button type="button" data-command="metrics">View metrics</button>
+          <button type="button" data-command="dashboard">Open dashboard</button>
+        </div>
 
         <form id="command-form">
           <label for="command">vault:~$</label>
@@ -74,14 +101,19 @@ Type 'help' to begin.</pre>
             autocomplete="off"
             autocapitalize="off"
             spellcheck="false"
+            maxlength="4096"
             aria-label="Shell command"
           >
-          <button class="visually-hidden" type="submit">Run command</button>
+          <div class="touch-actions">
+            <button id="clear-command" type="button">Clear</button>
+            <button id="run-command" type="submit">Run</button>
+          </div>
         </form>
+        <p id="request-status" class="request-status" aria-live="polite"></p>
       </div>
     </section>
 
-    <p class="hint">Tab completes your thoughts · Ctrl+L deletes the evidence</p>
+    <p class="hint">Tap a suggestion or type a command · Tab completes · Ctrl+L clears</p>
   </main>
   <script src="terminal.js"></script>
 </body>

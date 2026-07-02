@@ -17,7 +17,7 @@ FROM alpine:3.21
 WORKDIR /app
 
 COPY --from=build /vaultsh /usr/local/bin/vaultsh
-COPY testui ./testui
+COPY web ./web
 
 EXPOSE 8080
 
