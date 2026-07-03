@@ -412,6 +412,13 @@ h1::after {
   font: 700 0.7rem/1.4 ui-monospace, SFMono-Regular, Consolas, monospace;
 }
 
+.touch-hint {
+  display: none;
+  margin: 1rem 0 0;
+  color: #59615b;
+  font: 700 0.72rem/1.4 ui-monospace, SFMono-Regular, Consolas, monospace;
+}
+
 .visually-hidden {
   position: absolute;
   width: 1px;
@@ -478,8 +485,18 @@ h1::after {
     display: flex;
   }
 
+  .quick-command-toggle,
+  .quick-commands button {
+    min-height: 2.75rem;
+    padding: 0.55rem 0.75rem;
+  }
+
   .hint {
     display: none;
+  }
+
+  .touch-hint {
+    display: block;
   }
 }
 
@@ -509,6 +526,10 @@ h1::after {
   .terminal-body {
     min-height: 23rem;
     padding: 0.85rem;
+  }
+
+  #status {
+    display: none;
   }
 
   #command-form {
