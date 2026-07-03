@@ -12,6 +12,7 @@ and pluggable commands.
 - Command and path autocomplete
 - HTTP API and disposable browser terminal
 - Optional Atlas search and Forge telemetry integrations
+- Sanitized deployment status from CI-published metadata
 - Live Atlas and Forge availability indicators
 - Docker packaging and GitHub Actions CI
 
@@ -51,6 +52,7 @@ Configuration:
 - `SESSION_LIMIT`: active session cap; defaults to `5000`
 - `TRUST_PROXY_HEADERS`: trust Caddy's `X-Forwarded-For`; enable only when
   Vaultsh cannot be reached except through a trusted reverse proxy
+- `DEPLOYMENT_METADATA_PATH`: optional path to CI-published deployment JSON
 
 The sibling `lab` repository contains the Caddy HTTPS production stack.
 Do not expose Vaultsh directly when `TRUST_PROXY_HEADERS=true`.
@@ -98,6 +100,7 @@ sort -r /cv/interests.txt
 search kafka
 metrics
 dashboard
+deployments
 whoami
 ```
 

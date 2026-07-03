@@ -59,11 +59,12 @@ func (m Metrics) Execute(args []string, _ Input) Result {
 }
 
 type Dashboard struct {
-	service MetricsService
+	metrics    MetricsService
+	deployment DeploymentService
 }
 
-func NewDashboard(service MetricsService) Dashboard {
-	return Dashboard{service: service}
+func NewDashboard(metrics MetricsService, deployment DeploymentService) Dashboard {
+	return Dashboard{metrics: metrics, deployment: deployment}
 }
 
 func (Dashboard) Name() string {
@@ -82,9 +83,15 @@ func (d Dashboard) Execute(args []string, _ Input) Result {
 	if len(args) != 0 {
 		return Result{Output: "usage: dashboard", ExitCode: ExitUsage}
 	}
-	output, err := d.service.Dashboard()
+	output, err := d.metrics.Dashboard()
 	if err != nil {
 		return Result{Output: "dashboard unavailable", ExitCode: ExitFailure}
+	}
+	if d.deployment != nil {
+		current, deploymentErr := d.deployment.CurrentDeployment()
+		if deploymentErr == nil {
+			output += "\n\n" + FormatDeployment(current)
+		}
 	}
 	return Result{Output: output, ExitCode: ExitSuccess}
 }

@@ -71,7 +71,7 @@ func TestMetricsAndDashboardFormatForgeResponses(t *testing.T) {
 		t.Errorf("metrics output = %q", metricsResult.Output)
 	}
 
-	dashboardResult := NewDashboard(service).Execute(nil, Input{})
+	dashboardResult := NewDashboard(service, nil).Execute(nil, Input{})
 	if dashboardResult.Output != "Forge dashboard" {
 		t.Errorf("dashboard output = %q", dashboardResult.Output)
 	}

@@ -10,6 +10,7 @@ import (
 	"syscall"
 	"time"
 
+	"github.com/mateom/vaultsh/internal/deployment"
 	"github.com/mateom/vaultsh/internal/external"
 	"github.com/mateom/vaultsh/internal/httpapi"
 	"github.com/mateom/vaultsh/internal/shell"
@@ -38,6 +39,10 @@ func main() {
 		serviceToken(atlasURL, "ATLAS_AUTH_TOKEN", logger),
 		serviceToken(forgeURL, "FORGE_AUTH_TOKEN", logger),
 	)
+	var deployments *deployment.FileReader
+	if path := os.Getenv("DEPLOYMENT_METADATA_PATH"); path != "" {
+		deployments = deployment.NewFileReader(path)
+	}
 	events := telemetry.NewDispatcher(services, telemetryQueueSize(), logger)
 	defer func() {
 		ctx, cancel := context.WithTimeout(context.Background(), time.Second)
@@ -48,9 +53,10 @@ func main() {
 		root,
 		shell.SessionConfig{MaxSessions: sessionLimit()},
 		shell.Dependencies{
-			Search:  services,
-			Metrics: services,
-			Events:  events,
+			Search:      services,
+			Metrics:     services,
+			Deployments: deployments,
+			Events:      events,
 		},
 	)
 

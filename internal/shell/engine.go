@@ -15,9 +15,10 @@ type Engine struct {
 }
 
 type Dependencies struct {
-	Search  command.SearchService
-	Metrics command.MetricsService
-	Events  EventRecorder
+	Search      command.SearchService
+	Metrics     command.MetricsService
+	Deployments command.DeploymentService
+	Events      EventRecorder
 }
 
 type EventRecorder interface {
@@ -68,7 +69,10 @@ func NewWithContextAndDependencies(
 	}
 	if dependencies.Metrics != nil {
 		commands.Register(command.NewMetrics(dependencies.Metrics))
-		commands.Register(command.NewDashboard(dependencies.Metrics))
+		commands.Register(command.NewDashboard(dependencies.Metrics, dependencies.Deployments))
+	}
+	if dependencies.Deployments != nil {
+		commands.Register(command.NewDeployments(dependencies.Deployments))
 	}
 
 	return &Engine{

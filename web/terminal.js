@@ -234,7 +234,8 @@ function suggestNext(line) {
     tree: ["Review skills", 'cat /cv/skills.txt | grep "^language:"'],
     cat: ["Inspect project stack", 'search "technology:" | grep "/projects/"'],
     metrics: ["Show dashboard", "dashboard"],
-    dashboard: ["Browse experience", "tree /cv/experience"],
+    dashboard: ["Show deployment status", "deployments"],
+    deployments: ["Browse experience", "tree /cv/experience"],
   };
   const [label, commandLine] = suggestions[commandName] || [
     "About Mateo",
