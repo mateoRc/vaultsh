@@ -387,6 +387,11 @@ h1::after {
   font: inherit;
 }
 
+#command::placeholder {
+  color: #89928b;
+  opacity: 0.75;
+}
+
 #command:focus {
   text-shadow: 0 0 0.65rem rgb(247 200 67 / 28%);
 }

@@ -98,6 +98,7 @@ Choose a suggestion below or type help.</pre>
             spellcheck="false"
             maxlength="4096"
             aria-label="Shell command"
+            placeholder="type a command..."
           >
           <div class="touch-actions">
             <button id="clear-command" type="button">Clear</button>
@@ -115,12 +116,17 @@ Choose a suggestion below or type help.</pre>
             id="quick-command-toggle"
             class="quick-command-toggle"
             type="button"
-            aria-expanded="true"
+            aria-expanded="false"
             aria-controls="quick-commands"
           >
             Commands
           </button>
-          <div id="quick-commands" class="quick-commands" aria-label="Suggested commands">
+          <div
+            id="quick-commands"
+            class="quick-commands"
+            aria-label="Suggested commands"
+            hidden
+          >
             <button
               type="button"
               data-command='search "technology:" | grep "/projects/"'
