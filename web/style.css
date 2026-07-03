@@ -528,6 +528,11 @@ h1::after {
     display: flex;
   }
 
+  #clear-command {
+    padding-inline: 0.35rem;
+    font-size: 0.65rem;
+  }
+
   .quick-command-toggle,
   .quick-commands button,
   .next-commands button {
