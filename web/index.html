@@ -117,7 +117,12 @@ Choose a suggestion below or type help.</pre>
             Commands
           </button>
           <div id="quick-commands" class="quick-commands" aria-label="Suggested commands">
-            <button type="button" data-command="cat /cv/about.txt">About me</button>
+            <button
+              type="button"
+              data-command='search "technology:" | grep "/projects/" | sort | head -n 12'
+            >
+              Project stack
+            </button>
             <button type="button" data-command="tree /cv/experience">Experience</button>
             <button type="button" data-command="cat /cv/skills.txt">Skills</button>
             <button type="button" data-command="search distributed systems">Search</button>
