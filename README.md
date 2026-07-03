@@ -3,15 +3,6 @@
 A read-only virtual shell engine with a virtual filesystem, sessions, pipelines,
 and pluggable commands.
 
-## Why
-
-Vaultsh started as a backend-first portfolio experiment.
-
-Instead of building a traditional static portfolio, the idea was to expose
-curated profile content through a small shell-like system. The project provides
-room to explore command parsing, virtual filesystems, stateful sessions,
-pipelines, HTTP APIs, testing, and container deployment.
-
 ## Features
 
 - Read-only virtual filesystem backed by mounted plain-text files
@@ -61,7 +52,7 @@ Configuration:
 - `TRUST_PROXY_HEADERS`: trust Caddy's `X-Forwarded-For`; enable only when
   Vaultsh cannot be reached except through a trusted reverse proxy
 
-The sibling `lab` repository contains the Caddy-based HTTPS production stack.
+The sibling `lab` repository contains the Caddy HTTPS production stack.
 Do not expose Vaultsh directly when `TRUST_PROXY_HEADERS=true`.
 
 ## Quickstart
@@ -131,8 +122,7 @@ The browser terminal supports `Tab` completion, `Up`/`Down` history, and
 ## Content
 
 Portfolio content is stored in the sibling `lab` repository and mounted
-read-only at runtime. Vaultsh remains only the virtual filesystem and shell
-engine.
+read-only at runtime.
 
 Each non-empty line uses a lowercase `key: value` format. Keys may repeat and
 blank lines may separate sections.
