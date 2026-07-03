@@ -402,6 +402,33 @@ h1::after {
   font: 0.72rem/1.4 ui-monospace, SFMono-Regular, Consolas, monospace;
 }
 
+.next-command {
+  min-height: 2rem;
+  border: 0;
+  padding: 0;
+  cursor: pointer;
+  background: transparent;
+  color: #f7c843;
+  font: 700 0.72rem/1.4 ui-monospace, SFMono-Regular, Consolas, monospace;
+  text-align: left;
+}
+
+.next-command:hover,
+.next-command:focus-visible {
+  color: #fff3a6;
+  text-decoration: underline;
+  text-underline-offset: 0.2rem;
+}
+
+.next-command:disabled {
+  cursor: wait;
+  opacity: 0.5;
+}
+
+.next-command[hidden] {
+  display: none;
+}
+
 .hint {
   display: table;
   margin: 1.2rem 0 0 auto;

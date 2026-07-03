@@ -5,12 +5,13 @@ const form = document.querySelector("#command-form");
 const command = document.querySelector("#command");
 const output = document.querySelector("#output");
 const requestStatus = document.querySelector("#request-status");
+const nextCommand = document.querySelector("#next-command");
 const clearCommand = document.querySelector("#clear-command");
 const quickCommandToggle = document.querySelector("#quick-command-toggle");
 const quickCommands = document.querySelector("#quick-commands");
 const actionButtons = document.querySelectorAll("[data-command]");
 const submitButtons = document.querySelectorAll(
-  "#run-command, #clear-command, .quick-commands button",
+  "#run-command, #clear-command, #next-command, .quick-commands button",
 );
 const maxOutputEntries = 100;
 let outputEntries = [output.textContent];
@@ -215,12 +216,33 @@ function setRequestStatus(message) {
 function handleResult(line, result) {
   if (result.action === "clear") {
     outputEntries = [];
+    nextCommand.hidden = true;
     renderOutput();
     return;
   }
 
   const details = result.verbose ? `\n[verbose] ${result.verbose}` : "";
   appendEntry(line, `${result.output}${details}`);
+  suggestNext(line);
+}
+
+function suggestNext(line) {
+  const commandName = line.trim().split(/\s+/, 1)[0];
+  const suggestions = {
+    search: ["Browse project files", "tree /projects"],
+    tree: ["Review core skills", 'cat /cv/skills.txt | grep "^language:"'],
+    cat: ["Search distributed systems", "search distributed systems"],
+    metrics: ["Open the full dashboard", "dashboard"],
+    dashboard: ["Inspect the project stack", 'search "technology:" | grep "/projects/"'],
+  };
+  const [label, commandLine] = suggestions[commandName] || [
+    "Browse experience",
+    "tree /cv/experience",
+  ];
+
+  nextCommand.textContent = `Next: ${label} →`;
+  nextCommand.dataset.command = commandLine;
+  nextCommand.hidden = false;
 }
 
 function appendEntry(line, result) {
