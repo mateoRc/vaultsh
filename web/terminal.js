@@ -14,9 +14,46 @@ const actionButtons = document.querySelectorAll("[data-command]");
 const submitButtons = document.querySelectorAll(
   "#run-command, #clear-command, .next-commands button, .quick-commands button",
 );
+const suggestions = [
+  ["About Mateo", "cat /cv/about.txt"],
+  ["Browse experience", "tree /cv/experience"],
+  ["Review skills", 'cat /cv/skills.txt | grep "^language:"'],
+  ["Search distributed systems", "search distributed systems"],
+  ["Inspect project stack", 'search "technology:" | grep "/projects/"'],
+  ["Show live dashboard", "dashboard"],
+  ["Show deployment status", "deployments"],
+  ["Show analytics", "metrics"],
+  ["Browse projects", "tree -L 2 /projects"],
+  ["Find backend experience", 'grep -in "backend" /cv/about.txt'],
+  [
+    "Review recent experience",
+    "cat /cv/experience/reversinglabs.txt | head -n 8",
+  ],
+  ["Show current role", "whoami"],
+  ["Inspect the vault root", "ls -la /"],
+  ["Show recent commands", "history | tail -n 5"],
+  ["Count documented skills", "wc /cv/skills.txt"],
+  [
+    "Review Vaultsh technologies",
+    'cat /projects/vaultsh.txt | grep "technology:"',
+  ],
+  ["Search for Go", "search Go"],
+  ["Explore available commands", "help"],
+];
 const maxOutputEntries = 100;
 let outputEntries = [output.textContent];
 let sessionId = sessionStorage.getItem("vaultsh-session") || "";
+let suggestionIndex = Number.parseInt(
+  sessionStorage.getItem("vaultsh-suggestion-index") || "0",
+  10,
+);
+if (
+  !Number.isInteger(suggestionIndex) ||
+  suggestionIndex < 0 ||
+  suggestionIndex >= suggestions.length
+) {
+  suggestionIndex = 0;
+}
 let running = false;
 
 if (window.matchMedia("(pointer: fine)").matches) {
@@ -224,23 +261,13 @@ function handleResult(line, result) {
 
   const details = result.verbose ? `\n[verbose] ${result.verbose}` : "";
   appendEntry(line, `${result.output}${details}`);
-  suggestNext(line);
+  suggestNext();
 }
 
-function suggestNext(line) {
-  const commandName = line.trim().split(/\s+/, 1)[0];
-  const suggestions = {
-    search: ["Browse projects", "tree /projects"],
-    tree: ["Review skills", 'cat /cv/skills.txt | grep "^language:"'],
-    cat: ["Inspect project stack", 'search "technology:" | grep "/projects/"'],
-    metrics: ["Show dashboard", "dashboard"],
-    dashboard: ["Show deployment status", "deployments"],
-    deployments: ["Browse experience", "tree /cv/experience"],
-  };
-  const [label, commandLine] = suggestions[commandName] || [
-    "About Mateo",
-    "cat /cv/about.txt",
-  ];
+function suggestNext() {
+  const [label, commandLine] = suggestions[suggestionIndex];
+  suggestionIndex = (suggestionIndex + 1) % suggestions.length;
+  sessionStorage.setItem("vaultsh-suggestion-index", String(suggestionIndex));
 
   nextCommandButton.textContent = label;
   nextCommandButton.dataset.command = commandLine;
