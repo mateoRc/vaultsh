@@ -5,13 +5,14 @@ const form = document.querySelector("#command-form");
 const command = document.querySelector("#command");
 const output = document.querySelector("#output");
 const requestStatus = document.querySelector("#request-status");
-const nextCommand = document.querySelector("#next-command");
+const nextCommands = document.querySelector("#next-commands");
+const nextCommandButtons = nextCommands.querySelectorAll("button");
 const clearCommand = document.querySelector("#clear-command");
 const quickCommandToggle = document.querySelector("#quick-command-toggle");
 const quickCommands = document.querySelector("#quick-commands");
 const actionButtons = document.querySelectorAll("[data-command]");
 const submitButtons = document.querySelectorAll(
-  "#run-command, #clear-command, #next-command, .quick-commands button",
+  "#run-command, #clear-command, .next-commands button, .quick-commands button",
 );
 const maxOutputEntries = 100;
 let outputEntries = [output.textContent];
@@ -216,7 +217,7 @@ function setRequestStatus(message) {
 function handleResult(line, result) {
   if (result.action === "clear") {
     outputEntries = [];
-    nextCommand.hidden = true;
+    nextCommands.hidden = true;
     renderOutput();
     return;
   }
@@ -229,20 +230,44 @@ function handleResult(line, result) {
 function suggestNext(line) {
   const commandName = line.trim().split(/\s+/, 1)[0];
   const suggestions = {
-    search: ["Browse project files", "tree /projects"],
-    tree: ["Review core skills", 'cat /cv/skills.txt | grep "^language:"'],
-    cat: ["Search distributed systems", "search distributed systems"],
-    metrics: ["Open the full dashboard", "dashboard"],
-    dashboard: ["Inspect the project stack", 'search "technology:" | grep "/projects/"'],
+    search: [
+      ["Browse projects", "tree /projects"],
+      ["Review skills", 'cat /cv/skills.txt | grep "^language:"'],
+      ["Show dashboard", "dashboard"],
+    ],
+    tree: [
+      ["Review skills", 'cat /cv/skills.txt | grep "^language:"'],
+      ["Search Go", "search Go"],
+      ["Show dashboard", "dashboard"],
+    ],
+    cat: [
+      ["Browse experience", "tree /cv/experience"],
+      ["Inspect project stack", 'search "technology:" | grep "/projects/"'],
+      ["Search distributed systems", "search distributed systems"],
+    ],
+    metrics: [
+      ["Show dashboard", "dashboard"],
+      ["Inspect project stack", 'search "technology:" | grep "/projects/"'],
+      ["Browse experience", "tree /cv/experience"],
+    ],
+    dashboard: [
+      ["Show metrics", "metrics"],
+      ["Browse projects", "tree /projects"],
+      ["Search backend", "search backend"],
+    ],
   };
-  const [label, commandLine] = suggestions[commandName] || [
-    "Browse experience",
-    "tree /cv/experience",
+  const next = suggestions[commandName] || [
+    ["About Mateo", "cat /cv/about.txt"],
+    ["Browse experience", "tree /cv/experience"],
+    ["Show dashboard", "dashboard"],
   ];
 
-  nextCommand.textContent = `Next: ${label} →`;
-  nextCommand.dataset.command = commandLine;
-  nextCommand.hidden = false;
+  nextCommandButtons.forEach((button, index) => {
+    const [label, commandLine] = next[index];
+    button.textContent = label;
+    button.dataset.command = commandLine;
+  });
+  nextCommands.hidden = false;
 }
 
 function appendEntry(line, result) {

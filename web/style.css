@@ -402,7 +402,17 @@ h1::after {
   font: 0.72rem/1.4 ui-monospace, SFMono-Regular, Consolas, monospace;
 }
 
-.next-command {
+.next-commands {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.65rem;
+  min-height: 2rem;
+  color: #aeb8b0;
+  font: 700 0.72rem/1.4 ui-monospace, SFMono-Regular, Consolas, monospace;
+}
+
+.next-commands button {
   min-height: 2rem;
   border: 0;
   padding: 0;
@@ -413,19 +423,19 @@ h1::after {
   text-align: left;
 }
 
-.next-command:hover,
-.next-command:focus-visible {
+.next-commands button:hover,
+.next-commands button:focus-visible {
   color: #fff3a6;
   text-decoration: underline;
   text-underline-offset: 0.2rem;
 }
 
-.next-command:disabled {
+.next-commands button:disabled {
   cursor: wait;
   opacity: 0.5;
 }
 
-.next-command[hidden] {
+.next-commands[hidden] {
   display: none;
 }
 
@@ -513,7 +523,8 @@ h1::after {
   }
 
   .quick-command-toggle,
-  .quick-commands button {
+  .quick-commands button,
+  .next-commands button {
     min-height: 2.75rem;
     padding: 0.55rem 0.75rem;
   }
