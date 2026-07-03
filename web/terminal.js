@@ -6,7 +6,7 @@ const command = document.querySelector("#command");
 const output = document.querySelector("#output");
 const requestStatus = document.querySelector("#request-status");
 const nextCommands = document.querySelector("#next-commands");
-const nextCommandButtons = nextCommands.querySelectorAll("button");
+const nextCommandButton = nextCommands.querySelector("button");
 const clearCommand = document.querySelector("#clear-command");
 const quickCommandToggle = document.querySelector("#quick-command-toggle");
 const quickCommands = document.querySelector("#quick-commands");
@@ -230,43 +230,19 @@ function handleResult(line, result) {
 function suggestNext(line) {
   const commandName = line.trim().split(/\s+/, 1)[0];
   const suggestions = {
-    search: [
-      ["Browse projects", "tree /projects"],
-      ["Review skills", 'cat /cv/skills.txt | grep "^language:"'],
-      ["Show dashboard", "dashboard"],
-    ],
-    tree: [
-      ["Review skills", 'cat /cv/skills.txt | grep "^language:"'],
-      ["Search Go", "search Go"],
-      ["Show dashboard", "dashboard"],
-    ],
-    cat: [
-      ["Browse experience", "tree /cv/experience"],
-      ["Inspect project stack", 'search "technology:" | grep "/projects/"'],
-      ["Search distributed systems", "search distributed systems"],
-    ],
-    metrics: [
-      ["Show dashboard", "dashboard"],
-      ["Inspect project stack", 'search "technology:" | grep "/projects/"'],
-      ["Browse experience", "tree /cv/experience"],
-    ],
-    dashboard: [
-      ["Show metrics", "metrics"],
-      ["Browse projects", "tree /projects"],
-      ["Search backend", "search backend"],
-    ],
+    search: ["Browse projects", "tree /projects"],
+    tree: ["Review skills", 'cat /cv/skills.txt | grep "^language:"'],
+    cat: ["Inspect project stack", 'search "technology:" | grep "/projects/"'],
+    metrics: ["Show dashboard", "dashboard"],
+    dashboard: ["Browse experience", "tree /cv/experience"],
   };
-  const next = suggestions[commandName] || [
-    ["About Mateo", "cat /cv/about.txt"],
-    ["Browse experience", "tree /cv/experience"],
-    ["Show dashboard", "dashboard"],
+  const [label, commandLine] = suggestions[commandName] || [
+    "About Mateo",
+    "cat /cv/about.txt",
   ];
 
-  nextCommandButtons.forEach((button, index) => {
-    const [label, commandLine] = next[index];
-    button.textContent = label;
-    button.dataset.command = commandLine;
-  });
+  nextCommandButton.textContent = label;
+  nextCommandButton.dataset.command = commandLine;
   nextCommands.hidden = false;
 }
 
