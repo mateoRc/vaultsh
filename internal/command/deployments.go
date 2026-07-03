@@ -50,6 +50,7 @@ func (d Deployments) Execute(args []string, _ Input) Result {
 func FormatDeployment(deployment Deployment) string {
 	return strings.Join([]string{
 		"DEPLOYMENT",
+		"==========",
 		fmt.Sprintf("  status:  %s", deployment.Status),
 		fmt.Sprintf("  version: %s", deployment.Version),
 		fmt.Sprintf(

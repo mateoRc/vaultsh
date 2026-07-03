@@ -56,6 +56,7 @@ func main() {
 			Search:      services,
 			Metrics:     services,
 			Deployments: deployments,
+			System:      services,
 			Events:      events,
 		},
 	)

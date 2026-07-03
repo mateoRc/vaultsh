@@ -18,6 +18,7 @@ type Dependencies struct {
 	Search      command.SearchService
 	Metrics     command.MetricsService
 	Deployments command.DeploymentService
+	System      command.SystemService
 	Events      EventRecorder
 }
 
@@ -69,7 +70,11 @@ func NewWithContextAndDependencies(
 	}
 	if dependencies.Metrics != nil {
 		commands.Register(command.NewMetrics(dependencies.Metrics))
-		commands.Register(command.NewDashboard(dependencies.Metrics, dependencies.Deployments))
+		commands.Register(command.NewDashboard(
+			dependencies.Metrics,
+			dependencies.Deployments,
+			dependencies.System,
+		))
 	}
 	if dependencies.Deployments != nil {
 		commands.Register(command.NewDeployments(dependencies.Deployments))

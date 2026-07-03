@@ -12,7 +12,8 @@ and pluggable commands.
 - Command and path autocomplete
 - HTTP API and disposable browser terminal
 - Optional Atlas search and Forge telemetry integrations
-- Sanitized deployment status from CI-published metadata
+- Terminal dashboard with analytics, service health, uptime, and deployment status
+- Sanitized deployment metadata published by CI
 - Live Atlas and Forge availability indicators
 - Docker packaging and GitHub Actions CI
 

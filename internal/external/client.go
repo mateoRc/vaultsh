@@ -18,6 +18,7 @@ type Client struct {
 	atlasToken string
 	forgeToken string
 	http       *http.Client
+	startedAt  time.Time
 }
 
 type searchResponse struct {
@@ -39,6 +40,7 @@ func NewClient(atlasURL, forgeURL, atlasToken, forgeToken string) *Client {
 		atlasToken: atlasToken,
 		forgeToken: forgeToken,
 		http:       &http.Client{Timeout: 300 * time.Millisecond},
+		startedAt:  time.Now(),
 	}
 }
 
@@ -136,7 +138,22 @@ func (c *Client) Record(
 }
 
 func (c *Client) Availability() (bool, bool) {
-	return c.healthy(c.atlasURL), c.healthy(c.forgeURL)
+	atlas, _ := c.probe(c.atlasURL)
+	forge, _ := c.probe(c.forgeURL)
+	return atlas, forge
+}
+
+func (c *Client) SystemStatus() command.SystemStatus {
+	atlasOnline, atlasLatency := c.probe(c.atlasURL)
+	forgeOnline, forgeLatency := c.probe(c.forgeURL)
+	return command.SystemStatus{
+		Uptime: time.Since(c.startedAt),
+		Services: []command.ServiceHealth{
+			{Name: "vaultsh", Online: true},
+			{Name: "atlas", Online: atlasOnline, LatencyMS: atlasLatency.Milliseconds()},
+			{Name: "forge", Online: forgeOnline, LatencyMS: forgeLatency.Milliseconds()},
+		},
+	}
 }
 
 func (c *Client) getJSON(baseURL, path string, target any) error {
@@ -163,14 +180,15 @@ func (c *Client) get(endpoint, token string) (*http.Response, error) {
 	return c.http.Do(request)
 }
 
-func (c *Client) healthy(baseURL string) bool {
+func (c *Client) probe(baseURL string) (bool, time.Duration) {
 	if baseURL == "" {
-		return false
+		return false, 0
 	}
+	startedAt := time.Now()
 	response, err := c.http.Get(baseURL + "/healthz")
 	if err != nil {
-		return false
+		return false, time.Since(startedAt)
 	}
 	defer response.Body.Close()
-	return response.StatusCode == http.StatusOK
+	return response.StatusCode == http.StatusOK, time.Since(startedAt)
 }

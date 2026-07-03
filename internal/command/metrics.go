@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"sort"
 	"strings"
+	"time"
 )
 
 type MetricsSummary struct {
@@ -17,6 +18,21 @@ type MetricsSummary struct {
 type MetricsService interface {
 	Summary() (MetricsSummary, error)
 	Dashboard() (string, error)
+}
+
+type ServiceHealth struct {
+	Name      string
+	Online    bool
+	LatencyMS int64
+}
+
+type SystemStatus struct {
+	Uptime   time.Duration
+	Services []ServiceHealth
+}
+
+type SystemService interface {
+	SystemStatus() SystemStatus
 }
 
 type Metrics struct {
@@ -61,10 +77,15 @@ func (m Metrics) Execute(args []string, _ Input) Result {
 type Dashboard struct {
 	metrics    MetricsService
 	deployment DeploymentService
+	system     SystemService
 }
 
-func NewDashboard(metrics MetricsService, deployment DeploymentService) Dashboard {
-	return Dashboard{metrics: metrics, deployment: deployment}
+func NewDashboard(
+	metrics MetricsService,
+	deployment DeploymentService,
+	system SystemService,
+) Dashboard {
+	return Dashboard{metrics: metrics, deployment: deployment, system: system}
 }
 
 func (Dashboard) Name() string {
@@ -87,6 +108,9 @@ func (d Dashboard) Execute(args []string, _ Input) Result {
 	if err != nil {
 		return Result{Output: "dashboard unavailable", ExitCode: ExitFailure}
 	}
+	if d.system != nil {
+		output += "\n\n" + formatSystemStatus(d.system.SystemStatus())
+	}
 	if d.deployment != nil {
 		current, deploymentErr := d.deployment.CurrentDeployment()
 		if deploymentErr == nil {
@@ -94,6 +118,38 @@ func (d Dashboard) Execute(args []string, _ Input) Result {
 		}
 	}
 	return Result{Output: output, ExitCode: ExitSuccess}
+}
+
+func formatSystemStatus(status SystemStatus) string {
+	lines := []string{"SERVICES", "========"}
+	for _, service := range status.Services {
+		state := "offline"
+		detail := ""
+		if service.Online {
+			state = "online"
+			if service.Name == "vaultsh" {
+				detail = "uptime " + formatUptime(status.Uptime)
+			} else {
+				detail = fmt.Sprintf("latency %d ms", service.LatencyMS)
+			}
+		}
+		line := fmt.Sprintf("  %-8s %s", service.Name, state)
+		if detail != "" {
+			line += "  " + detail
+		}
+		lines = append(lines, line)
+	}
+	return strings.Join(lines, "\n")
+}
+
+func formatUptime(duration time.Duration) string {
+	duration = duration.Truncate(time.Second)
+	days := duration / (24 * time.Hour)
+	duration %= 24 * time.Hour
+	if days > 0 {
+		return fmt.Sprintf("%dd %s", days, duration)
+	}
+	return duration.String()
 }
 
 func formatCounts(counts map[string]int) []string {
