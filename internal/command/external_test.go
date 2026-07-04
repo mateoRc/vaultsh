@@ -58,6 +58,7 @@ func TestMetricsAndDashboardFormatForgeResponses(t *testing.T) {
 			Requests: 3,
 			Errors:   1,
 			Average:  6,
+			Median:   4,
 			Services: map[string]int{"vault": 2, "atlas": 1},
 		},
 		dashboard: "Forge dashboard",
@@ -67,7 +68,7 @@ func TestMetricsAndDashboardFormatForgeResponses(t *testing.T) {
 	if metricsResult.ExitCode != ExitSuccess {
 		t.Fatalf("metrics exit code = %d", metricsResult.ExitCode)
 	}
-	if metricsResult.Output != "requests: 3\nerrors: 1\navg ms: 6\nservices:\n  atlas: 1\n  vault: 2" {
+	if metricsResult.Output != "requests: 3\nerrors: 1\navg ms: 6\nmedian ms: 4\nservices:\n  atlas: 1\n  vault: 2" {
 		t.Errorf("metrics output = %q", metricsResult.Output)
 	}
 

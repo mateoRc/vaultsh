@@ -11,6 +11,7 @@ type MetricsSummary struct {
 	Requests int            `json:"requests"`
 	Errors   int            `json:"errors"`
 	Average  float64        `json:"avg_ms"`
+	Median   float64        `json:"median_ms"`
 	Services map[string]int `json:"services"`
 	Commands map[string]int `json:"commands"`
 }
@@ -68,6 +69,7 @@ func (m Metrics) Execute(args []string, _ Input) Result {
 		fmt.Sprintf("requests: %d", summary.Requests),
 		fmt.Sprintf("errors: %d", summary.Errors),
 		fmt.Sprintf("avg ms: %g", summary.Average),
+		fmt.Sprintf("median ms: %g", summary.Median),
 		"services:",
 	}
 	lines = append(lines, formatCounts(summary.Services)...)
