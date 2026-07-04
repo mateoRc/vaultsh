@@ -19,18 +19,17 @@ and pluggable commands.
 
 ## Architecture
 
-```text
-Browser terminal
-      ↓
-HTTP API
-      ↓
-Shell engine
-      ↓
-Parser → Commands
-             ↓
-      Virtual filesystem
-             ↓
-    Mounted text files
+```mermaid
+flowchart LR
+    Browser[Browser terminal] -->|HTTPS| Caddy[Caddy ingress]
+    Caddy -->|HTTP| Vaultsh[Vaultsh · Go<br/>HTTP API · parser · shell · VFS]
+
+    Content[(Shared content<br/>read-only)] -.->|Read-only mount| Vaultsh
+    Content -.->|Read-only mount| Atlas[Atlas · Java<br/>search service]
+
+    Vaultsh -->|Search · bearer token| Atlas
+    Vaultsh -->|Events and analytics · bearer token| Forge[Forge · Python<br/>telemetry]
+    Atlas -->|Search events · bearer token| Forge
 ```
 
 Commands interact only with the virtual filesystem. Content is loaded from
@@ -40,6 +39,16 @@ that create, modify, or delete files.
 When Atlas or Forge URLs are configured, Vaultsh also requires
 `ATLAS_AUTH_TOKEN` or `FORGE_AUTH_TOKEN` respectively. It sends these values as
 bearer credentials to the private service APIs.
+
+## Testing
+
+| Layer | Coverage |
+| --- | --- |
+| Unit | Tokenizer, lexer, parser, commands, paths, history, and negotiation state |
+| Integration | Pipelines, sessions, autocomplete, HTTP handlers, service clients, and telemetry dispatch |
+| Service | Atlas search/authentication and Forge aggregation/API/dashboard tests |
+| Container | Multi-stage images run service test suites before creating runtime images |
+| Deployment | Compose health checks plus public HTTPS verification in GitHub Actions |
 
 ## Production Safety
 
