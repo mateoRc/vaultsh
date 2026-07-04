@@ -85,6 +85,11 @@ h1::after {
   line-height: 1.6;
 }
 
+.release-summary {
+  display: block;
+  margin-top: 0.65rem;
+}
+
 .tags {
   display: flex;
   flex-wrap: wrap;
