@@ -12,6 +12,7 @@ func TestFileReaderLoadsAssessment(t *testing.T) {
 		"commit":"abcdef123456",
 		"analyzed_at":"2026-07-04T12:00:00Z",
 		"risk":"low",
+		"decision":"advisory",
 		"checks":[{"name":"tests","status":"passed"}],
 		"summary":"All checks passed.",
 		"provider":"mock"

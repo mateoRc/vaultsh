@@ -104,6 +104,7 @@ func TestDashboardIncludesSentinelAssessment(t *testing.T) {
 		Commit:     "abcdef123456",
 		AnalyzedAt: time.Date(2026, 7, 4, 12, 0, 0, 0, time.UTC),
 		Risk:       "low",
+		Decision:   "advisory",
 		Checks: []AssessmentCheck{
 			{Name: "tests", Status: "passed"},
 			{Name: "security", Status: "warning"},
@@ -115,7 +116,7 @@ func TestDashboardIncludesSentinelAssessment(t *testing.T) {
 	result := NewDashboard(metrics, nil, nil, assessment).Execute(nil, Input{})
 
 	want := "Forge dashboard\n\nSENTINEL\n========\n" +
-		"  mode:     advisory\n" +
+		"  decision: advisory\n" +
 		"  risk:     low\n" +
 		"  checks:   1 passed, 1 warning, 0 failed\n" +
 		"  provider: mock\n" +

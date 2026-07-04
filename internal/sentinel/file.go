@@ -28,6 +28,7 @@ func (r *FileReader) CurrentAssessment() (command.Assessment, error) {
 	if assessment.Commit == "" ||
 		assessment.AnalyzedAt.IsZero() ||
 		assessment.Risk == "" ||
+		assessment.Decision == "" ||
 		assessment.Provider == "" ||
 		len(assessment.Checks) == 0 {
 		return assessment, fmt.Errorf("Sentinel metadata is incomplete")

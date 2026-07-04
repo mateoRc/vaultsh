@@ -15,6 +15,7 @@ type Assessment struct {
 	Commit     string            `json:"commit"`
 	AnalyzedAt time.Time         `json:"analyzed_at"`
 	Risk       string            `json:"risk"`
+	Decision   string            `json:"decision"`
 	Checks     []AssessmentCheck `json:"checks"`
 	Summary    string            `json:"summary"`
 	Provider   string            `json:"provider"`
@@ -36,7 +37,7 @@ func FormatAssessment(assessment Assessment) string {
 	return strings.Join([]string{
 		"SENTINEL",
 		"========",
-		"  mode:     advisory",
+		fmt.Sprintf("  decision: %s", assessment.Decision),
 		fmt.Sprintf("  risk:     %s", assessment.Risk),
 		fmt.Sprintf(
 			"  checks:   %d passed, %d warning, %d failed",
