@@ -84,7 +84,7 @@ help
 tree
 ls -la /
 cat /cv/about.txt
-cat /cv/skills.txt | grep "^language:" | sort
+cat /cv/skills.txt | grep "^Languages"
 history | tail -n 5
 pwd
 cd cv/experience
@@ -128,15 +128,14 @@ The browser terminal supports `Tab` completion, `Up`/`Down` history, and
 Portfolio content is stored in the sibling `lab` repository and mounted
 read-only at runtime.
 
-Each non-empty line uses a lowercase `key: value` format. Keys may repeat and
-blank lines may separate sections.
+Text files use terminal-friendly headings, short prose, aligned metadata, and
+compact category lines that remain useful with `grep` and Atlas search.
 
 ```text
-focus: backend services
-focus: distributed systems
-
-technology: Go
-technology: Docker
+DETAILS
+-------
+Focus       Backend services | Distributed systems
+Technology  Go | Docker
 ```
 
 ## Project Structure

@@ -17,9 +17,9 @@ const submitButtons = document.querySelectorAll(
 const suggestions = [
   ["About Mateo", "cat /cv/about.txt"],
   ["Browse experience", "tree /cv/experience"],
-  ["Review skills", 'cat /cv/skills.txt | grep "^language:"'],
+  ["Review skills", 'cat /cv/skills.txt | grep "^Languages"'],
   ["Search distributed systems", "search distributed systems"],
-  ["Inspect project stack", 'search "technology:" | grep "/projects/"'],
+  ["Inspect project stack", 'search "Technology" | grep "/projects/"'],
   ["Show live dashboard", "dashboard"],
   ["Show deployment status", "deployments"],
   ["Show analytics", "metrics"],
@@ -35,9 +35,9 @@ const suggestions = [
   ["Count documented skills", "wc /cv/skills.txt"],
   [
     "Review Vaultsh technologies",
-    'cat /projects/vaultsh.txt | grep "technology:"',
+    'cat /projects/vaultsh.txt | grep "^Technology"',
   ],
-  ["Search for Go", "search Go"],
+  ["Search languages", 'search "Languages"'],
   ["Explore available commands", "help"],
 ];
 const maxOutputEntries = 100;
