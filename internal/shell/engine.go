@@ -19,6 +19,7 @@ type Dependencies struct {
 	Metrics     command.MetricsService
 	Deployments command.DeploymentService
 	System      command.SystemService
+	Assessment  command.AssessmentService
 	Events      EventRecorder
 }
 
@@ -74,6 +75,7 @@ func NewWithContextAndDependencies(
 			dependencies.Metrics,
 			dependencies.Deployments,
 			dependencies.System,
+			dependencies.Assessment,
 		))
 	}
 	if dependencies.Deployments != nil {

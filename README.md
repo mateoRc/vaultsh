@@ -63,6 +63,7 @@ Configuration:
 - `TRUST_PROXY_HEADERS`: trust Caddy's `X-Forwarded-For`; enable only when
   Vaultsh cannot be reached except through a trusted reverse proxy
 - `DEPLOYMENT_METADATA_PATH`: optional path to CI-published deployment JSON
+- `SENTINEL_METADATA_PATH`: optional path to CI-published Sentinel assessment JSON
 
 The sibling `lab` repository contains the Caddy HTTPS production stack.
 Do not expose Vaultsh directly when `TRUST_PROXY_HEADERS=true`.

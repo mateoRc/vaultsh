@@ -78,14 +78,21 @@ type Dashboard struct {
 	metrics    MetricsService
 	deployment DeploymentService
 	system     SystemService
+	assessment AssessmentService
 }
 
 func NewDashboard(
 	metrics MetricsService,
 	deployment DeploymentService,
 	system SystemService,
+	assessment AssessmentService,
 ) Dashboard {
-	return Dashboard{metrics: metrics, deployment: deployment, system: system}
+	return Dashboard{
+		metrics:    metrics,
+		deployment: deployment,
+		system:     system,
+		assessment: assessment,
+	}
 }
 
 func (Dashboard) Name() string {
@@ -115,6 +122,12 @@ func (d Dashboard) Execute(args []string, _ Input) Result {
 		current, deploymentErr := d.deployment.CurrentDeployment()
 		if deploymentErr == nil {
 			output += "\n\n" + FormatDeployment(current)
+		}
+	}
+	if d.assessment != nil {
+		current, assessmentErr := d.assessment.CurrentAssessment()
+		if assessmentErr == nil {
+			output += "\n\n" + FormatAssessment(current)
 		}
 	}
 	return Result{Output: output, ExitCode: ExitSuccess}

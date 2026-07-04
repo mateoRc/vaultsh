@@ -13,6 +13,7 @@ import (
 	"github.com/mateom/vaultsh/internal/deployment"
 	"github.com/mateom/vaultsh/internal/external"
 	"github.com/mateom/vaultsh/internal/httpapi"
+	"github.com/mateom/vaultsh/internal/sentinel"
 	"github.com/mateom/vaultsh/internal/shell"
 	"github.com/mateom/vaultsh/internal/storage"
 	"github.com/mateom/vaultsh/internal/telemetry"
@@ -43,6 +44,10 @@ func main() {
 	if path := os.Getenv("DEPLOYMENT_METADATA_PATH"); path != "" {
 		deployments = deployment.NewFileReader(path)
 	}
+	var assessments *sentinel.FileReader
+	if path := os.Getenv("SENTINEL_METADATA_PATH"); path != "" {
+		assessments = sentinel.NewFileReader(path)
+	}
 	events := telemetry.NewDispatcher(services, telemetryQueueSize(), logger)
 	defer func() {
 		ctx, cancel := context.WithTimeout(context.Background(), time.Second)
@@ -57,6 +62,7 @@ func main() {
 			Metrics:     services,
 			Deployments: deployments,
 			System:      services,
+			Assessment:  assessments,
 			Events:      events,
 		},
 	)
