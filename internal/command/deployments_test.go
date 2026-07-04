@@ -103,13 +103,21 @@ func TestDashboardIncludesSentinelAssessment(t *testing.T) {
 	assessment := assessmentStub{assessment: Assessment{
 		Commit:     "abcdef123456",
 		AnalyzedAt: time.Date(2026, 7, 4, 12, 0, 0, 0, time.UTC),
-		Risk:       "low",
+		Risk:       "high",
 		Decision:   "advisory",
 		Checks: []AssessmentCheck{
 			{Name: "tests", Status: "passed"},
-			{Name: "security", Status: "warning"},
+			{
+				Name:     "vaultsh-image-security",
+				Status:   "failed",
+				Source:   "Trivy",
+				Evidence: "1 high vulnerability; CVE-1 lib 1.0 -> 1.1",
+			},
 		},
-		Summary:  "Backend Lab passed with warnings.",
+		Summary: "1 of 2 checks failed: vaultsh image security.",
+		Actions: []string{
+			"Update affected packages to listed fixed versions.",
+		},
 		Provider: "mock",
 	}}
 
@@ -117,12 +125,17 @@ func TestDashboardIncludesSentinelAssessment(t *testing.T) {
 
 	want := "Forge dashboard\n\nSENTINEL\n========\n" +
 		"  decision: advisory\n" +
-		"  risk:     low\n" +
-		"  checks:   1 passed, 1 warning, 0 failed\n" +
+		"  risk:     high\n" +
+		"  checks:   1 passed, 0 warning, 1 failed\n" +
 		"  provider: mock\n" +
 		"  commit:   abcdef1\n" +
 		"  updated:  2026-07-04 12:00:00 UTC\n" +
-		"  summary:  Backend Lab passed with warnings."
+		"  summary:  1 of 2 checks failed: vaultsh image security.\n" +
+		"  findings:\n" +
+		"    - [failed] vaultsh image security (Trivy): " +
+		"1 high vulnerability; CVE-1 lib 1.0 -> 1.1\n" +
+		"  next actions:\n" +
+		"    - Update affected packages to listed fixed versions."
 	if result.ExitCode != ExitSuccess || result.Output != want {
 		t.Errorf("result = %#v", result)
 	}

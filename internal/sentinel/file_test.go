@@ -13,8 +13,9 @@ func TestFileReaderLoadsAssessment(t *testing.T) {
 		"analyzed_at":"2026-07-04T12:00:00Z",
 		"risk":"low",
 		"decision":"advisory",
-		"checks":[{"name":"tests","status":"passed"}],
+		"checks":[{"name":"tests","status":"passed","source":"Docker","evidence":"ok"}],
 		"summary":"All checks passed.",
+		"actions":[],
 		"provider":"mock"
 	}`
 	if err := os.WriteFile(path, []byte(data), 0o600); err != nil {

@@ -7,8 +7,10 @@ import (
 )
 
 type AssessmentCheck struct {
-	Name   string `json:"name"`
-	Status string `json:"status"`
+	Name     string `json:"name"`
+	Status   string `json:"status"`
+	Source   string `json:"source"`
+	Evidence string `json:"evidence"`
 }
 
 type Assessment struct {
@@ -18,6 +20,7 @@ type Assessment struct {
 	Decision   string            `json:"decision"`
 	Checks     []AssessmentCheck `json:"checks"`
 	Summary    string            `json:"summary"`
+	Actions    []string          `json:"actions"`
 	Provider   string            `json:"provider"`
 }
 
@@ -34,7 +37,7 @@ func FormatAssessment(assessment Assessment) string {
 	if len(commit) > 7 {
 		commit = commit[:7]
 	}
-	return strings.Join([]string{
+	lines := []string{
 		"SENTINEL",
 		"========",
 		fmt.Sprintf("  decision: %s", assessment.Decision),
@@ -52,5 +55,34 @@ func FormatAssessment(assessment Assessment) string {
 			assessment.AnalyzedAt.UTC().Format("2006-01-02 15:04:05 UTC"),
 		),
 		fmt.Sprintf("  summary:  %s", assessment.Summary),
-	}, "\n")
+	}
+	findings := make([]AssessmentCheck, 0)
+	for _, check := range assessment.Checks {
+		if check.Status != "passed" {
+			findings = append(findings, check)
+		}
+	}
+	if len(findings) > 0 {
+		lines = append(lines, "  findings:")
+		for _, finding := range findings {
+			label := strings.ReplaceAll(finding.Name, "-", " ")
+			lines = append(
+				lines,
+				fmt.Sprintf(
+					"    - [%s] %s (%s): %s",
+					finding.Status,
+					label,
+					finding.Source,
+					finding.Evidence,
+				),
+			)
+		}
+	}
+	if len(assessment.Actions) > 0 {
+		lines = append(lines, "  next actions:")
+		for _, action := range assessment.Actions {
+			lines = append(lines, "    - "+action)
+		}
+	}
+	return strings.Join(lines, "\n")
 }
