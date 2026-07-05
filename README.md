@@ -5,7 +5,7 @@ and pluggable commands.
 
 ## Features
 
-- Read-only virtual filesystem backed by mounted plain-text files
+- Read-only virtual filesystem backed by mounted raw Markdown files
 - Familiar commands including `ls`, `cd`, `cat`, `tree`, and `grep`
 - Multi-stage pipelines
 - Session-specific working directories and command history
