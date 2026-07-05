@@ -492,6 +492,10 @@ h1::after {
     transform: translateX(-2px);
   }
 
+  h1::after {
+    top: 0;
+  }
+
   .summary {
     line-height: 1.5;
   }
