@@ -53,7 +53,13 @@ jobs:
 
       - name: Publish immutable runtime image
         if: github.event_name == 'push'
-        run: docker push "ghcr.io/mateorc/vaultsh:${GITHUB_SHA}"
+        run: |
+          image="ghcr.io/mateorc/vaultsh:${GITHUB_SHA}"
+          if docker manifest inspect "$image" >/dev/null 2>&1; then
+            echo "Immutable image already exists: $image"
+            exit 0
+          fi
+          docker push "$image"
 
       - name: Trigger Backend Lab assessment
         if: github.event_name == 'push' && github.ref == 'refs/heads/main'
