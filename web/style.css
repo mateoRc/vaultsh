@@ -486,6 +486,7 @@ h1::after {
   h1 {
     font-size: clamp(2.35rem, 13vw, 3.4rem);
     overflow-wrap: anywhere;
+    transform: translateX(-2px);
   }
 
   .summary {
