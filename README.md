@@ -93,21 +93,21 @@ go test ./...
 help
 tree
 ls -la /
-cat /cv/about.txt
-cat /cv/skills.txt | grep "^Languages"
+cat /cv/about.md
+cat /cv/skills.md | grep "Languages"
 history | tail -n 5
 pwd
 cd cv/experience
 ls -l
-cat reversinglabs.txt
+cat reversinglabs.md
 tree -L 2 /projects
 ls -Ra /
-cat -n /cv/skills.txt
-grep -in "backend" /cv/about.txt
-head -n 3 /cv/skills.txt
-tail -n 2 /cv/experience/a1.txt
-wc /cv/skills.txt
-sort -r /cv/interests.txt
+cat -n /cv/skills.md
+grep -in "backend" /cv/about.md
+head -n 3 /cv/skills.md
+tail -n 2 /cv/experience/a1.md
+wc /cv/skills.md
+sort -r /cv/interests.md
 search kafka
 metrics
 dashboard
@@ -118,8 +118,8 @@ whoami
 Commands can be combined into pipelines:
 
 ```sh
-cat /cv/skills.txt | grep -i "go" | sort
-cat /cv/experience/reversinglabs.txt | grep -n "backend" | head -n 5
+cat /cv/skills.md | grep -i "go" | sort
+cat /cv/experience/reversinglabs.md | grep -n "backend" | head -n 5
 tree -L 3 / | grep "projects"
 ```
 
@@ -127,7 +127,7 @@ Use `--verbose` at the end of a command line to return pipeline execution
 metadata from the HTTP API:
 
 ```sh
-cat /cv/skills.txt | grep Go --verbose
+cat /cv/skills.md | grep Go --verbose
 ```
 
 The browser terminal supports `Tab` completion, `Up`/`Down` history, and
@@ -138,14 +138,14 @@ The browser terminal supports `Tab` completion, `Up`/`Down` history, and
 Portfolio content is stored in the sibling `lab` repository and mounted
 read-only at runtime.
 
-Text files use terminal-friendly headings, short prose, aligned metadata, and
-compact category lines that remain useful with `grep` and Atlas search.
+Markdown files use terminal-friendly headings, short prose, and labeled bullets
+that remain useful with `grep`, Atlas search, and later document export.
 
-```text
-DETAILS
--------
-Focus       Backend services | Distributed systems
-Technology  Go | Docker
+```markdown
+## Details
+
+- **Focus:** Backend services and distributed systems
+- **Technology:** Go and Docker
 ```
 
 ## Project Structure

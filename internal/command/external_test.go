@@ -27,7 +27,7 @@ func (s externalStub) Dashboard() (string, error) {
 
 func TestSearchFormatsAtlasResults(t *testing.T) {
 	search := NewSearch(externalStub{searchResults: []SearchResult{{
-		Path:       "/cv/skills.txt",
+		Path:       "/cv/skills.md",
 		LineNumber: 12,
 		Line:       "messaging: Kafka",
 	}}})
@@ -37,7 +37,7 @@ func TestSearchFormatsAtlasResults(t *testing.T) {
 	if result.ExitCode != ExitSuccess {
 		t.Fatalf("exit code = %d, want %d", result.ExitCode, ExitSuccess)
 	}
-	if result.Output != "/cv/skills.txt:12: messaging: Kafka" {
+	if result.Output != "/cv/skills.md:12: messaging: Kafka" {
 		t.Errorf("output = %q", result.Output)
 	}
 }

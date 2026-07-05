@@ -9,8 +9,8 @@ import (
 
 func TestLoad(t *testing.T) {
 	source := fstest.MapFS{
-		"about.txt":            {Data: []byte("about")},
-		"projects/vaultsh.txt": {Data: []byte("vaultsh")},
+		"about.md":            {Data: []byte("about")},
+		"projects/vaultsh.md": {Data: []byte("vaultsh")},
 	}
 
 	root, err := Load(source)
@@ -19,7 +19,7 @@ func TestLoad(t *testing.T) {
 	}
 
 	resolver := filesystem.NewResolver(root)
-	node, _, err := resolver.Resolve("/", "/projects/vaultsh.txt")
+	node, _, err := resolver.Resolve("/", "/projects/vaultsh.md")
 	if err != nil {
 		t.Fatalf("Resolve(): %v", err)
 	}

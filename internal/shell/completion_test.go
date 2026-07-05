@@ -64,8 +64,8 @@ func TestCompletePathUsesWorkingDirectory(t *testing.T) {
 	if err := root.Add(experience); err != nil {
 		t.Fatalf("Add(experience): %v", err)
 	}
-	if err := experience.Add(filesystem.NewFile("reversinglabs.txt", "")); err != nil {
-		t.Fatalf("Add(reversinglabs.txt): %v", err)
+	if err := experience.Add(filesystem.NewFile("reversinglabs.md", "")); err != nil {
+		t.Fatalf("Add(reversinglabs.md): %v", err)
 	}
 	engine := NewWithRoot(root)
 	if result := engine.Execute("cd experience"); result.ExitCode != 0 {
@@ -74,11 +74,11 @@ func TestCompletePathUsesWorkingDirectory(t *testing.T) {
 
 	result := engine.Complete("cat rev", len("cat rev"))
 
-	if result.Replacement != "reversinglabs.txt " {
+	if result.Replacement != "reversinglabs.md " {
 		t.Errorf(
 			"replacement = %q, want %q",
 			result.Replacement,
-			"reversinglabs.txt ",
+			"reversinglabs.md ",
 		)
 	}
 }
