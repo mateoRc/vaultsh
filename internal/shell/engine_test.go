@@ -267,11 +267,14 @@ func TestEngineListRecursive(t *testing.T) {
 func TestEngineCommandHelp(t *testing.T) {
 	result := New().Execute("help cat")
 
-	if result.Output != "Usage: cat [-n] [file]\nPrint file contents" {
+	want := "Usage: cat [-n] [file]\n" +
+		"Print file contents\n" +
+		"Example: cat /cv/about.md"
+	if result.Output != want {
 		t.Errorf(
 			"help output = %q, want %q",
 			result.Output,
-			"Usage: cat [-n] [file]\nPrint file contents",
+			want,
 		)
 	}
 	if result.ExitCode != 0 {
