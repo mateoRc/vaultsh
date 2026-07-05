@@ -36,7 +36,7 @@ func (Search) Usage() string {
 }
 
 func (Search) Help() string {
-	return "Example: search distributed systems"
+	return `Example: search "distributed systems"`
 }
 
 func (s Search) Execute(args []string, _ Input) Result {

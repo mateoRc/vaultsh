@@ -30,6 +30,10 @@ func (Tree) Usage() string {
 	return "tree [-a] [-L depth] [path]"
 }
 
+func (Tree) Help() string {
+	return "Example: tree -L 2 /projects"
+}
+
 func (t Tree) Execute(args []string, _ Input) Result {
 	depth, target, all, result := parseTreeOptions(args)
 	if result != nil {

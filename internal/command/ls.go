@@ -42,6 +42,10 @@ func (Ls) Usage() string {
 	return "ls [-alR] [path]"
 }
 
+func (Ls) Help() string {
+	return "Example: ls -la /"
+}
+
 func (l Ls) Execute(args []string, _ Input) Result {
 	options, result := parseLsOptions(args)
 	if result != nil {

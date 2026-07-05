@@ -35,6 +35,10 @@ func (Grep) Usage() string {
 	return "grep [-in] <pattern> [file]"
 }
 
+func (Grep) Help() string {
+	return `Example: grep -in "backend" /cv/about.md`
+}
+
 func (g Grep) Execute(args []string, input Input) Result {
 	options, result := parseGrepOptions(args)
 	if result != nil {

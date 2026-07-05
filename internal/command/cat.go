@@ -27,6 +27,10 @@ func (Cat) Usage() string {
 	return "cat [-n] [file]"
 }
 
+func (Cat) Help() string {
+	return "Example: cat /cv/about.md"
+}
+
 func (c Cat) Execute(args []string, input Input) Result {
 	numberLines, path, result := parseCatOptions(args)
 	if result != nil {
