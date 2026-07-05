@@ -67,6 +67,9 @@ h1 {
 }
 
 h1::after {
+  position: relative;
+  top: -0.06em;
+  display: inline-block;
   margin-left: 6px;
   color: #f05a28;
   content: "_";

@@ -37,6 +37,11 @@ func TestDeploymentsFormatsSanitizedMetadata(t *testing.T) {
 		Status:     "success",
 		Version:    "deploy-42",
 		DeployedAt: time.Date(2026, 7, 3, 15, 20, 0, 0, time.UTC),
+		Services: map[string]string{
+			"vault": "111111111111",
+			"atlas": "222222222222",
+			"forge": "333333333333",
+		},
 	}}
 
 	result := NewDeployments(service).Execute(nil, Input{})
@@ -45,6 +50,9 @@ func TestDeploymentsFormatsSanitizedMetadata(t *testing.T) {
 		"==========\n" +
 		"  status:  success\n" +
 		"  version: deploy-42\n" +
+		"  vault:   1111111\n" +
+		"  atlas:   2222222\n" +
+		"  forge:   3333333\n" +
 		"  updated: 2026-07-03 15:20:00 UTC"
 	if result.ExitCode != ExitSuccess || result.Output != want {
 		t.Errorf("result = %#v", result)
@@ -66,6 +74,11 @@ func TestDashboardIncludesDeployment(t *testing.T) {
 		Status:     "success",
 		Version:    "deploy-42",
 		DeployedAt: time.Date(2026, 7, 3, 15, 20, 0, 0, time.UTC),
+		Services: map[string]string{
+			"vault": "1111111",
+			"atlas": "2222222",
+			"forge": "3333333",
+		},
 	}}
 
 	result := NewDashboard(metrics, deployments, nil, nil).Execute(nil, Input{})

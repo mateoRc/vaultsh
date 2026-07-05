@@ -9,7 +9,9 @@ import (
 func TestFileReaderReadsDeployment(t *testing.T) {
 	path := filepath.Join(t.TempDir(), "deployment.json")
 	data := []byte(
-		`{"status":"success","version":"deploy-42","deployed_at":"2026-07-03T15:20:00Z"}`,
+		`{"status":"success","version":"deploy-42",` +
+			`"deployed_at":"2026-07-03T15:20:00Z",` +
+			`"services":{"vault":"1111111","atlas":"2222222","forge":"3333333"}}`,
 	)
 	if err := os.WriteFile(path, data, 0o600); err != nil {
 		t.Fatal(err)

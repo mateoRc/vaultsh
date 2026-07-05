@@ -25,7 +25,12 @@ func (r *FileReader) CurrentDeployment() (command.Deployment, error) {
 	if err := json.Unmarshal(data, &deployment); err != nil {
 		return deployment, fmt.Errorf("decode deployment metadata: %w", err)
 	}
-	if deployment.Status == "" || deployment.Version == "" || deployment.DeployedAt.IsZero() {
+	if deployment.Status == "" ||
+		deployment.Version == "" ||
+		deployment.DeployedAt.IsZero() ||
+		deployment.Services["vault"] == "" ||
+		deployment.Services["atlas"] == "" ||
+		deployment.Services["forge"] == "" {
 		return deployment, fmt.Errorf("deployment metadata is incomplete")
 	}
 	return deployment, nil

@@ -10,6 +10,7 @@ type Deployment struct {
 	Status     string    `json:"status"`
 	Version    string    `json:"version"`
 	DeployedAt time.Time `json:"deployed_at"`
+	Services   map[string]string `json:"services"`
 }
 
 type DeploymentService interface {
@@ -53,9 +54,19 @@ func FormatDeployment(deployment Deployment) string {
 		"==========",
 		fmt.Sprintf("  status:  %s", deployment.Status),
 		fmt.Sprintf("  version: %s", deployment.Version),
+		fmt.Sprintf("  vault:   %s", shortVersion(deployment.Services["vault"])),
+		fmt.Sprintf("  atlas:   %s", shortVersion(deployment.Services["atlas"])),
+		fmt.Sprintf("  forge:   %s", shortVersion(deployment.Services["forge"])),
 		fmt.Sprintf(
 			"  updated: %s",
 			deployment.DeployedAt.UTC().Format("2006-01-02 15:04:05 UTC"),
 		),
 	}, "\n")
+}
+
+func shortVersion(version string) string {
+	if len(version) > 7 {
+		return version[:7]
+	}
+	return version
 }
