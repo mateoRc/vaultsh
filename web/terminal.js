@@ -60,7 +60,6 @@ if (
 }
 let running = false;
 
-formatQuickCommands();
 updatePrompt();
 renderOutput();
 
@@ -115,13 +114,6 @@ function shellPrompt(path = currentDirectory) {
 
 function updatePrompt() {
   prompt.textContent = shellPrompt();
-}
-
-function formatQuickCommands() {
-  for (const button of document.querySelectorAll(".quick-commands [data-command]")) {
-    const explanation = button.textContent.trim();
-    button.textContent = `${button.dataset.command} (${explanation.toLowerCase()})`;
-  }
 }
 
 form.addEventListener("submit", async (event) => {
@@ -305,7 +297,7 @@ function suggestNext() {
   suggestionIndex = (suggestionIndex + 1) % suggestions.length;
   sessionStorage.setItem("vaultsh-suggestion-index", String(suggestionIndex));
 
-  nextCommandButton.textContent = `${commandLine} (${label.toLowerCase()})`;
+  nextCommandButton.textContent = label;
   nextCommandButton.dataset.command = commandLine;
   nextCommands.hidden = false;
 }
