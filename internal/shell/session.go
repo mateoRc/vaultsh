@@ -94,10 +94,13 @@ func newSessionManager(
 	}
 }
 
-func (m *SessionManager) Execute(sessionID, line string) (command.Result, string, error) {
+func (m *SessionManager) Execute(
+	sessionID,
+	line string,
+) (command.Result, string, string, error) {
 	current, sessionID, err := m.get(sessionID)
 	if err != nil {
-		return command.Result{}, "", err
+		return command.Result{}, "", "", err
 	}
 
 	current.mu.Lock()
@@ -117,17 +120,17 @@ func (m *SessionManager) Execute(sessionID, line string) (command.Result, string
 			result.ExitCode,
 		)
 	}
-	return result, sessionID, nil
+	return result, sessionID, current.engine.context.WorkingDirectory().Path(), nil
 }
 
 func (m *SessionManager) Complete(
 	sessionID string,
 	line string,
 	cursor int,
-) (Completion, string, error) {
+) (Completion, string, string, error) {
 	current, sessionID, err := m.get(sessionID)
 	if err != nil {
-		return Completion{}, "", err
+		return Completion{}, "", "", err
 	}
 
 	current.mu.Lock()
@@ -136,7 +139,10 @@ func (m *SessionManager) Complete(
 		current.lastActive = m.now()
 	}()
 
-	return current.engine.Complete(line, cursor), sessionID, nil
+	return current.engine.Complete(line, cursor),
+		sessionID,
+		current.engine.context.WorkingDirectory().Path(),
+		nil
 }
 
 func (m *SessionManager) CleanupExpired() int {

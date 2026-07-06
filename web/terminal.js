@@ -3,6 +3,7 @@ const atlasStatus = document.querySelector("#atlas-status");
 const forgeStatus = document.querySelector("#forge-status");
 const form = document.querySelector("#command-form");
 const command = document.querySelector("#command");
+const prompt = document.querySelector("#prompt");
 const output = document.querySelector("#output");
 const requestStatus = document.querySelector("#request-status");
 const nextCommands = document.querySelector("#next-commands");
@@ -41,8 +42,11 @@ const suggestions = [
   ["Explore available commands", "help"],
 ];
 const maxOutputEntries = 100;
-let outputEntries = [output.textContent];
+let outputEntries = [{ welcome: output.textContent }];
 let sessionId = sessionStorage.getItem("vaultsh-session") || "";
+let currentDirectory = sessionId
+  ? sessionStorage.getItem("vaultsh-current-directory") || "/"
+  : "/";
 let suggestionIndex = Number.parseInt(
   sessionStorage.getItem("vaultsh-suggestion-index") || "0",
   10,
@@ -55,6 +59,10 @@ if (
   suggestionIndex = 0;
 }
 let running = false;
+
+formatQuickCommands();
+updatePrompt();
+renderOutput();
 
 if (window.matchMedia("(pointer: fine)").matches) {
   focusCommand();
@@ -99,6 +107,21 @@ function focusCommand() {
   command.focus();
   const end = command.value.length;
   command.setSelectionRange(end, end);
+}
+
+function shellPrompt(path = currentDirectory) {
+  return `mateo@vault:${path}$`;
+}
+
+function updatePrompt() {
+  prompt.textContent = shellPrompt();
+}
+
+function formatQuickCommands() {
+  for (const button of document.querySelectorAll(".quick-commands [data-command]")) {
+    const explanation = button.textContent.trim();
+    button.textContent = `${button.dataset.command} (${explanation.toLowerCase()})`;
+  }
 }
 
 form.addEventListener("submit", async (event) => {
@@ -173,6 +196,9 @@ async function complete() {
     const result = await response.json();
     sessionId = result.session_id;
     sessionStorage.setItem("vaultsh-session", sessionId);
+    currentDirectory = result.current_directory || currentDirectory;
+    sessionStorage.setItem("vaultsh-current-directory", currentDirectory);
+    updatePrompt();
 
     if (result.replacement) {
       command.value =
@@ -194,6 +220,7 @@ async function execute(line) {
   }
 
   setRunning(true);
+  const submittedFrom = currentDirectory;
   setRequestStatus("Running…");
   const slowMessage = window.setTimeout(() => {
     setRequestStatus(
@@ -215,10 +242,15 @@ async function execute(line) {
     const result = await response.json();
     sessionId = result.session_id;
     sessionStorage.setItem("vaultsh-session", sessionId);
-    handleResult(line, result);
+    handleResult(line, result, submittedFrom);
     setRequestStatus("");
   } catch (error) {
-    appendEntry(line, error.message || "Request failed. Check your connection.");
+    appendEntry(
+      line,
+      error.message || "Request failed. Check your connection.",
+      submittedFrom,
+      1,
+    );
     setRequestStatus("");
   } finally {
     window.clearTimeout(slowMessage);
@@ -251,7 +283,11 @@ function setRequestStatus(message) {
   requestStatus.textContent = message;
 }
 
-function handleResult(line, result) {
+function handleResult(line, result, submittedFrom) {
+  currentDirectory = result.current_directory || currentDirectory;
+  sessionStorage.setItem("vaultsh-current-directory", currentDirectory);
+  updatePrompt();
+
   if (result.action === "clear") {
     outputEntries = [];
     nextCommands.hidden = true;
@@ -260,7 +296,7 @@ function handleResult(line, result) {
   }
 
   const details = result.verbose ? `\n[verbose] ${result.verbose}` : "";
-  appendEntry(line, `${result.output}${details}`);
+  appendEntry(line, `${result.output}${details}`, submittedFrom, result.exit_code);
   suggestNext();
 }
 
@@ -269,18 +305,41 @@ function suggestNext() {
   suggestionIndex = (suggestionIndex + 1) % suggestions.length;
   sessionStorage.setItem("vaultsh-suggestion-index", String(suggestionIndex));
 
-  nextCommandButton.textContent = label;
+  nextCommandButton.textContent = `${commandLine} (${label.toLowerCase()})`;
   nextCommandButton.dataset.command = commandLine;
   nextCommands.hidden = false;
 }
 
-function appendEntry(line, result) {
-  outputEntries.push(`$ ${line}\n${result}`);
+function appendEntry(line, result, path, exitCode) {
+  outputEntries.push({ line, result, path, exitCode });
   outputEntries = outputEntries.slice(-maxOutputEntries);
   renderOutput();
 }
 
 function renderOutput() {
-  output.textContent = outputEntries.join("\n\n");
+  output.replaceChildren();
+  for (const entry of outputEntries) {
+    if (entry.welcome !== undefined) {
+      output.append(document.createTextNode(entry.welcome));
+      continue;
+    }
+
+    const container = document.createElement("div");
+    container.className = "output-entry";
+
+    const commandLine = document.createElement("div");
+    commandLine.className = "output-command";
+    const entryPrompt = document.createElement("span");
+    entryPrompt.className = "output-prompt";
+    entryPrompt.textContent = `${shellPrompt(entry.path)} `;
+    commandLine.append(entryPrompt, document.createTextNode(entry.line));
+
+    const result = document.createElement("div");
+    result.className = "output-result";
+    result.dataset.exitCode = String(entry.exitCode);
+    result.textContent = entry.result;
+    container.append(commandLine, result);
+    output.append(container);
+  }
   output.scrollTop = output.scrollHeight;
 }

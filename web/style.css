@@ -284,6 +284,27 @@ h1::after {
   user-select: text;
 }
 
+.output-entry {
+  margin-top: 1.25rem;
+}
+
+.output-command {
+  color: #fff3a6;
+  font-weight: 700;
+}
+
+.output-prompt {
+  color: #aeb8b0;
+}
+
+.output-result {
+  color: #dfe7df;
+}
+
+.output-result[data-exit-code]:not([data-exit-code="0"]) {
+  color: #ff8a70;
+}
+
 .quick-command-drawer {
   display: flex;
   align-items: center;
@@ -342,6 +363,8 @@ h1::after {
   background: #252927;
   color: #e9eee9;
   font: 700 0.65rem/1 ui-monospace, SFMono-Regular, Consolas, monospace;
+  line-height: 1.35;
+  text-align: left;
 }
 
 .quick-commands button:hover,
@@ -376,8 +399,9 @@ h1::after {
 
 #command-form label {
   flex: none;
-  color: #f7c843;
+  color: #aeb8b0;
   font-weight: 750;
+  white-space: nowrap;
 }
 
 #command {

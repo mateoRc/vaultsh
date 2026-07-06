@@ -78,20 +78,20 @@
       </header>
 
       <div class="terminal-body">
-        <pre id="output" aria-live="polite">I decided to build a portfolio, so naturally I built a shell first.
+        <div id="output" role="log" aria-live="polite">I decided to build a portfolio, so naturally I built a shell first.
 
 Welcome to Vaultsh.
 
 Explore Mateo's backend work &amp; project docs:
-  about       Project overview
-  tree /cv    Browse experience and skills
-  search "Languages"  Search the portfolio
-  dashboard   View live service activity
+  about (project overview)
+  tree /cv (browse experience and skills)
+  search "Languages" (search the portfolio)
+  dashboard (view live service activity)
 
-Choose a suggestion below or type help.</pre>
+Choose a suggestion below or type help.</div>
 
         <form id="command-form">
-          <label for="command">vault:~$</label>
+          <label id="prompt" for="command">mateo@vault:/$</label>
           <input
             id="command"
             name="command"
@@ -155,6 +155,6 @@ Choose a suggestion below or type help.</pre>
     <p class="hint">Tap a suggestion or type a command · Tab completes · Ctrl+L clears</p>
     <p class="touch-hint">Tap a suggestion or enter a command.</p>
   </main>
-  <script src="terminal.js?v=20260705"></script>
+  <script src="terminal.js?v=20260707"></script>
 </body>
 </html>

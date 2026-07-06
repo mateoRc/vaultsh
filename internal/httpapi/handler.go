@@ -24,11 +24,12 @@ type execRequest struct {
 }
 
 type execResponse struct {
-	Output    string         `json:"output"`
-	ExitCode  int            `json:"exit_code"`
-	Action    command.Action `json:"action,omitempty"`
-	Verbose   string         `json:"verbose,omitempty"`
-	SessionID string         `json:"session_id"`
+	Output           string         `json:"output"`
+	ExitCode         int            `json:"exit_code"`
+	Action           command.Action `json:"action,omitempty"`
+	Verbose          string         `json:"verbose,omitempty"`
+	SessionID        string         `json:"session_id"`
+	CurrentDirectory string         `json:"current_directory"`
 }
 
 type completeRequest struct {
@@ -38,11 +39,12 @@ type completeRequest struct {
 }
 
 type completeResponse struct {
-	Start       int      `json:"start"`
-	End         int      `json:"end"`
-	Replacement string   `json:"replacement"`
-	Candidates  []string `json:"candidates"`
-	SessionID   string   `json:"session_id"`
+	Start            int      `json:"start"`
+	End              int      `json:"end"`
+	Replacement      string   `json:"replacement"`
+	Candidates       []string `json:"candidates"`
+	SessionID        string   `json:"session_id"`
+	CurrentDirectory string   `json:"current_directory"`
 }
 
 type StatusProvider interface {
@@ -126,7 +128,7 @@ func complete(w http.ResponseWriter, r *http.Request, sessions *shell.SessionMan
 		return
 	}
 
-	result, sessionID, err := sessions.Complete(
+	result, sessionID, currentDirectory, err := sessions.Complete(
 		request.SessionID,
 		request.Line,
 		request.Cursor,
@@ -137,11 +139,12 @@ func complete(w http.ResponseWriter, r *http.Request, sessions *shell.SessionMan
 	}
 
 	response := completeResponse{
-		Start:       result.Start,
-		End:         result.End,
-		Replacement: result.Replacement,
-		Candidates:  result.Candidates,
-		SessionID:   sessionID,
+		Start:            result.Start,
+		End:              result.End,
+		Replacement:      result.Replacement,
+		Candidates:       result.Candidates,
+		SessionID:        sessionID,
+		CurrentDirectory: currentDirectory,
 	}
 
 	w.Header().Set("Content-Type", "application/json")
@@ -164,17 +167,21 @@ func exec(w http.ResponseWriter, r *http.Request, sessions *shell.SessionManager
 		return
 	}
 
-	result, sessionID, err := sessions.Execute(request.SessionID, request.Line)
+	result, sessionID, currentDirectory, err := sessions.Execute(
+		request.SessionID,
+		request.Line,
+	)
 	if err != nil {
 		writeSessionError(w, err)
 		return
 	}
 	response := execResponse{
-		Output:    result.Output,
-		ExitCode:  result.ExitCode,
-		Action:    result.Action,
-		Verbose:   result.Verbose,
-		SessionID: sessionID,
+		Output:           result.Output,
+		ExitCode:         result.ExitCode,
+		Action:           result.Action,
+		Verbose:          result.Verbose,
+		SessionID:        sessionID,
+		CurrentDirectory: currentDirectory,
 	}
 
 	w.Header().Set("Content-Type", "application/json")

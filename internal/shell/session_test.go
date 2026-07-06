@@ -51,7 +51,7 @@ func TestSessionManagerRecordsCommandTelemetryWithoutChangingResult(t *testing.T
 		Dependencies{Events: recorder},
 	)
 
-	result, _, err := manager.Execute("", "about")
+	result, _, _, err := manager.Execute("", "about")
 
 	if err != nil || result.ExitCode != command.ExitSuccess {
 		t.Fatalf("Execute() result = %#v, error = %v", result, err)
@@ -71,12 +71,12 @@ func TestUnavailableIntegrationsDoNotBreakCoreCommands(t *testing.T) {
 		Dependencies{Search: services, Metrics: services},
 	)
 
-	core, sessionID, err := manager.Execute("", "about")
+	core, sessionID, _, err := manager.Execute("", "about")
 	if err != nil || core.ExitCode != command.ExitSuccess {
 		t.Fatalf("core command result = %#v, error = %v", core, err)
 	}
 
-	search, _, err := manager.Execute(sessionID, "search kafka")
+	search, _, _, err := manager.Execute(sessionID, "search kafka")
 	if err != nil || search.Output != "search unavailable" {
 		t.Fatalf("search result = %#v, error = %v", search, err)
 	}
@@ -89,7 +89,7 @@ func TestSessionManagerKeepsWorkingDirectoriesIndependent(t *testing.T) {
 	}
 	manager := NewSessionManager(root)
 
-	result, firstID, err := manager.Execute("", "cd docs")
+	result, firstID, _, err := manager.Execute("", "cd docs")
 	if err != nil {
 		t.Fatalf("first Execute(): %v", err)
 	}
@@ -97,7 +97,7 @@ func TestSessionManagerKeepsWorkingDirectoriesIndependent(t *testing.T) {
 		t.Fatalf("cd exit code = %d, output = %q", result.ExitCode, result.Output)
 	}
 
-	result, returnedID, err := manager.Execute(firstID, "pwd")
+	result, returnedID, _, err := manager.Execute(firstID, "pwd")
 	if err != nil {
 		t.Fatalf("first session pwd: %v", err)
 	}
@@ -108,7 +108,7 @@ func TestSessionManagerKeepsWorkingDirectoriesIndependent(t *testing.T) {
 		t.Errorf("first session pwd = %q, want /docs", result.Output)
 	}
 
-	result, secondID, err := manager.Execute("", "pwd")
+	result, secondID, _, err := manager.Execute("", "pwd")
 	if err != nil {
 		t.Fatalf("second session pwd: %v", err)
 	}
@@ -123,20 +123,20 @@ func TestSessionManagerKeepsWorkingDirectoriesIndependent(t *testing.T) {
 func TestSessionManagerKeepsHistoriesIndependent(t *testing.T) {
 	manager := NewSessionManager(filesystem.NewDirectory(""))
 
-	_, firstID, err := manager.Execute("", "pwd")
+	_, firstID, _, err := manager.Execute("", "pwd")
 	if err != nil {
 		t.Fatalf("first Execute(): %v", err)
 	}
-	_, secondID, err := manager.Execute("", "about")
+	_, secondID, _, err := manager.Execute("", "about")
 	if err != nil {
 		t.Fatalf("second Execute(): %v", err)
 	}
 
-	firstHistory, _, err := manager.Execute(firstID, "history")
+	firstHistory, _, _, err := manager.Execute(firstID, "history")
 	if err != nil {
 		t.Fatalf("first history: %v", err)
 	}
-	secondHistory, _, err := manager.Execute(secondID, "history")
+	secondHistory, _, _, err := manager.Execute(secondID, "history")
 	if err != nil {
 		t.Fatalf("second history: %v", err)
 	}
@@ -152,7 +152,7 @@ func TestSessionManagerKeepsHistoriesIndependent(t *testing.T) {
 func TestSessionManagerReplacesUnknownSessionID(t *testing.T) {
 	manager := NewSessionManager(filesystem.NewDirectory(""))
 
-	_, sessionID, err := manager.Execute("unknown", "pwd")
+	_, sessionID, _, err := manager.Execute("unknown", "pwd")
 
 	if err != nil {
 		t.Fatalf("Execute(): %v", err)
@@ -174,7 +174,7 @@ func TestSessionManagerCleansUpExpiredSessions(t *testing.T) {
 		},
 	)
 
-	_, sessionID, err := manager.Execute("", "pwd")
+	_, sessionID, _, err := manager.Execute("", "pwd")
 	if err != nil {
 		t.Fatalf("Execute(): %v", err)
 	}
@@ -184,7 +184,7 @@ func TestSessionManagerCleansUpExpiredSessions(t *testing.T) {
 		t.Errorf("CleanupExpired() = %d, want 1", removed)
 	}
 
-	_, replacementID, err := manager.Execute(sessionID, "pwd")
+	_, replacementID, _, err := manager.Execute(sessionID, "pwd")
 	if err != nil {
 		t.Fatalf("Execute(expired): %v", err)
 	}
@@ -205,12 +205,12 @@ func TestSessionManagerRefreshesActivity(t *testing.T) {
 		},
 	)
 
-	_, sessionID, err := manager.Execute("", "pwd")
+	_, sessionID, _, err := manager.Execute("", "pwd")
 	if err != nil {
 		t.Fatalf("first Execute(): %v", err)
 	}
 	now = now.Add(50 * time.Minute)
-	if _, _, err := manager.Complete(sessionID, "c", 1); err != nil {
+	if _, _, _, err := manager.Complete(sessionID, "c", 1); err != nil {
 		t.Fatalf("Complete(): %v", err)
 	}
 	now = now.Add(20 * time.Minute)
@@ -232,13 +232,13 @@ func TestSessionManagerRejectsExpiredSessionBeforeCleanup(t *testing.T) {
 		},
 	)
 
-	_, sessionID, err := manager.Execute("", "pwd")
+	_, sessionID, _, err := manager.Execute("", "pwd")
 	if err != nil {
 		t.Fatalf("first Execute(): %v", err)
 	}
 	now = now.Add(time.Hour)
 
-	_, replacementID, err := manager.Execute(sessionID, "pwd")
+	_, replacementID, _, err := manager.Execute(sessionID, "pwd")
 	if err != nil {
 		t.Fatalf("second Execute(): %v", err)
 	}
@@ -253,10 +253,10 @@ func TestSessionManagerCapsActiveSessions(t *testing.T) {
 		SessionConfig{MaxSessions: 1},
 	)
 
-	if _, _, err := manager.Execute("", "pwd"); err != nil {
+	if _, _, _, err := manager.Execute("", "pwd"); err != nil {
 		t.Fatalf("first Execute(): %v", err)
 	}
-	if _, _, err := manager.Execute("", "pwd"); err != ErrSessionLimit {
+	if _, _, _, err := manager.Execute("", "pwd"); err != ErrSessionLimit {
 		t.Fatalf("second Execute() error = %v, want %v", err, ErrSessionLimit)
 	}
 }

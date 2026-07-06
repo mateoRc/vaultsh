@@ -91,6 +91,32 @@ func TestExec(t *testing.T) {
 	if result.SessionID == "" {
 		t.Error("session ID is empty")
 	}
+	if result.CurrentDirectory != "/" {
+		t.Errorf("current directory = %q, want /", result.CurrentDirectory)
+	}
+}
+
+func TestExecReturnsUpdatedCurrentDirectory(t *testing.T) {
+	root := filesystem.NewDirectory("")
+	if err := root.Add(filesystem.NewDirectory("docs")); err != nil {
+		t.Fatal(err)
+	}
+	handler := NewHandler(shell.NewSessionManager(root))
+	request := httptest.NewRequest(
+		http.MethodPost,
+		"/api/exec",
+		strings.NewReader(`{"line":"cd /docs"}`),
+	)
+	response := httptest.NewRecorder()
+	handler.ServeHTTP(response, request)
+
+	var result execResponse
+	if err := json.NewDecoder(response.Body).Decode(&result); err != nil {
+		t.Fatalf("decode response: %v", err)
+	}
+	if result.CurrentDirectory != "/docs" {
+		t.Errorf("current directory = %q, want /docs", result.CurrentDirectory)
+	}
 }
 
 func TestExecReturnsClearAction(t *testing.T) {
@@ -200,6 +226,9 @@ func TestComplete(t *testing.T) {
 	}
 	if result.SessionID == "" {
 		t.Error("session ID is empty")
+	}
+	if result.CurrentDirectory != "/" {
+		t.Errorf("current directory = %q, want /", result.CurrentDirectory)
 	}
 }
 
