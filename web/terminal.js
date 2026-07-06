@@ -66,17 +66,31 @@ if (window.matchMedia("(pointer: fine)").matches) {
   focusCommand();
 }
 
-fetch("/healthz")
-  .then((response) => setStatus(response.ok ? "online" : "unavailable"))
-  .catch(() => setStatus("unavailable"));
-
+refreshVaultStatus();
 refreshServiceStatus();
+setInterval(refreshVaultStatus, 10000);
 setInterval(refreshServiceStatus, 10000);
+window.addEventListener("offline", () => setStatus("unavailable"));
+window.addEventListener("online", refreshVaultStatus);
 
 function setStatus(state) {
   status.textContent = state;
   status.dataset.state = state;
   status.setAttribute("aria-label", `Vaultsh ${state}`);
+}
+
+async function refreshVaultStatus() {
+  if (!navigator.onLine) {
+    setStatus("unavailable");
+    return;
+  }
+
+  try {
+    const response = await fetch("/healthz", { cache: "no-store" });
+    setStatus(response.ok ? "online" : "unavailable");
+  } catch {
+    setStatus("unavailable");
+  }
 }
 
 async function refreshServiceStatus() {
