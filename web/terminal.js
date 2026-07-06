@@ -20,7 +20,8 @@ const suggestions = [
   ["Browse experience", "tree /cv/experience"],
   ["Review skills", 'cat /cv/skills.md | grep "Languages"'],
   ["Search distributed systems", "search distributed systems"],
-  ["Inspect project stack", 'search "Technology" | grep "/projects/"'],
+  ["Browse technologies", "search Technology"],
+  ["Find Java experience", 'search Java | grep "/cv/experience/"'],
   ["Show live dashboard", "dashboard"],
   ["Show deployment status", "deployments"],
   ["Show analytics", "metrics"],
@@ -32,8 +33,6 @@ const suggestions = [
   ],
   ["Show current role", "whoami"],
   ["Inspect the vault root", "ls -la /"],
-  ["Show recent commands", "history | tail -n 5"],
-  ["Count documented skills", "wc /cv/skills.md"],
   [
     "Review Vaultsh technologies",
     'cat /projects/vaultsh.md | grep "Technology"',
