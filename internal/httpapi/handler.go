@@ -12,6 +12,35 @@ import (
 const (
 	maxRequestBodyBytes = 16 * 1024
 	maxCommandLength    = 4096
+	jsonContentType     = "application/json"
+)
+
+type routeLimit struct {
+	keyPrefix string
+	perMinute int
+	burst     int
+	retry     string
+}
+
+var (
+	statusLimit = routeLimit{
+		keyPrefix: "status",
+		perMinute: 120,
+		burst:     20,
+		retry:     "1",
+	}
+	execLimit = routeLimit{
+		keyPrefix: "exec",
+		perMinute: 30,
+		burst:     10,
+		retry:     "2",
+	}
+	completeLimit = routeLimit{
+		keyPrefix: "complete",
+		perMinute: 120,
+		burst:     20,
+		retry:     "1",
+	}
 )
 
 type HandlerConfig struct {
@@ -69,52 +98,60 @@ func NewHandlerWithConfig(
 ) http.Handler {
 	mux := http.NewServeMux()
 	limiter := newRateLimiter()
-	mux.HandleFunc("GET /", func(w http.ResponseWriter, r *http.Request) {
-		if r.URL.Path != "/" {
-			http.NotFound(w, r)
-			return
-		}
-		http.Redirect(w, r, "/vault/", http.StatusTemporaryRedirect)
-	})
+	limited := func(limit routeLimit, next http.HandlerFunc) http.HandlerFunc {
+		return withRateLimit(limiter, config.TrustProxyHeaders, limit, next)
+	}
+
+	mux.HandleFunc("GET /", redirectToVault)
 	mux.HandleFunc("GET /healthz", health)
-	mux.HandleFunc("GET /api/status", func(w http.ResponseWriter, r *http.Request) {
-		if !limiter.allow("status:"+clientIP(r, config.TrustProxyHeaders), 120, 20) {
-			w.Header().Set("Retry-After", "1")
-			http.Error(w, "rate limit exceeded", http.StatusTooManyRequests)
-			return
-		}
-		atlas, forge := false, false
-		if status != nil {
-			atlas, forge = status.Availability()
-		}
-		w.Header().Set("Content-Type", "application/json")
-		_ = json.NewEncoder(w).Encode(map[string]bool{
-			"atlas": atlas,
-			"forge": forge,
-		})
-	})
+	mux.HandleFunc("GET /api/status", limited(statusLimit, statusHandler(status)))
 	mux.Handle(
 		"GET /vault/",
 		http.StripPrefix("/vault/", http.FileServer(http.Dir("web"))),
 	)
-	mux.HandleFunc("POST /api/exec", func(w http.ResponseWriter, r *http.Request) {
-		if !limiter.allow("exec:"+clientIP(r, config.TrustProxyHeaders), 30, 10) {
-			w.Header().Set("Retry-After", "2")
-			http.Error(w, "rate limit exceeded", http.StatusTooManyRequests)
-			return
-		}
+	mux.HandleFunc("POST /api/exec", limited(execLimit, func(w http.ResponseWriter, r *http.Request) {
 		exec(w, r, sessions)
-	})
-	mux.HandleFunc("POST /api/complete", func(w http.ResponseWriter, r *http.Request) {
-		if !limiter.allow("complete:"+clientIP(r, config.TrustProxyHeaders), 120, 20) {
-			w.Header().Set("Retry-After", "1")
-			http.Error(w, "rate limit exceeded", http.StatusTooManyRequests)
-			return
-		}
+	}))
+	mux.HandleFunc("POST /api/complete", limited(completeLimit, func(w http.ResponseWriter, r *http.Request) {
 		complete(w, r, sessions)
-	})
+	}))
 
 	return securityHeaders(mux)
+}
+
+func redirectToVault(w http.ResponseWriter, r *http.Request) {
+	if r.URL.Path != "/" {
+		http.NotFound(w, r)
+		return
+	}
+	http.Redirect(w, r, "/vault/", http.StatusTemporaryRedirect)
+}
+
+func statusHandler(status StatusProvider) http.HandlerFunc {
+	return func(w http.ResponseWriter, _ *http.Request) {
+		atlas, forge := false, false
+		if status != nil {
+			atlas, forge = status.Availability()
+		}
+		writeJSON(w, map[string]bool{"atlas": atlas, "forge": forge})
+	}
+}
+
+func withRateLimit(
+	limiter *rateLimiter,
+	trustProxyHeaders bool,
+	limit routeLimit,
+	next http.HandlerFunc,
+) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		key := limit.keyPrefix + ":" + clientIP(r, trustProxyHeaders)
+		if limiter.allow(key, limit.perMinute, limit.burst) {
+			next(w, r)
+			return
+		}
+		w.Header().Set("Retry-After", limit.retry)
+		http.Error(w, "rate limit exceeded", http.StatusTooManyRequests)
+	}
 }
 
 func complete(w http.ResponseWriter, r *http.Request, sessions *shell.SessionManager) {
@@ -147,8 +184,7 @@ func complete(w http.ResponseWriter, r *http.Request, sessions *shell.SessionMan
 		CurrentDirectory: currentDirectory,
 	}
 
-	w.Header().Set("Content-Type", "application/json")
-	_ = json.NewEncoder(w).Encode(response)
+	writeJSON(w, response)
 }
 
 func health(w http.ResponseWriter, _ *http.Request) {
@@ -184,8 +220,12 @@ func exec(w http.ResponseWriter, r *http.Request, sessions *shell.SessionManager
 		CurrentDirectory: currentDirectory,
 	}
 
-	w.Header().Set("Content-Type", "application/json")
-	_ = json.NewEncoder(w).Encode(response)
+	writeJSON(w, response)
+}
+
+func writeJSON(w http.ResponseWriter, value any) {
+	w.Header().Set("Content-Type", jsonContentType)
+	_ = json.NewEncoder(w).Encode(value)
 }
 
 func decodeRequest(w http.ResponseWriter, r *http.Request, target any) bool {

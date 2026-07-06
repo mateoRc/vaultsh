@@ -15,6 +15,22 @@ const actionButtons = document.querySelectorAll("[data-command]");
 const submitButtons = document.querySelectorAll(
   "#run-command, #clear-command, .next-commands button, .quick-commands button",
 );
+const endpoints = Object.freeze({
+  health: "/healthz",
+  status: "/api/status",
+  execute: "/api/exec",
+  complete: "/api/complete",
+});
+const storageKeys = Object.freeze({
+  session: "vaultsh-session",
+  currentDirectory: "vaultsh-current-directory",
+  suggestionIndex: "vaultsh-suggestion-index",
+});
+const serviceStates = Object.freeze({
+  online: "online",
+  unavailable: "unavailable",
+});
+const statusRefreshMilliseconds = 10000;
 const suggestions = [
   ["About Mateo", "cat /cv/about.md"],
   ["Browse experience", "tree /cv/experience"],
@@ -42,12 +58,12 @@ const suggestions = [
 ];
 const maxOutputEntries = 100;
 let outputEntries = [{ welcome: output.textContent }];
-let sessionId = sessionStorage.getItem("vaultsh-session") || "";
+let sessionId = sessionStorage.getItem(storageKeys.session) || "";
 let currentDirectory = sessionId
-  ? sessionStorage.getItem("vaultsh-current-directory") || "/"
+  ? sessionStorage.getItem(storageKeys.currentDirectory) || "/"
   : "/";
 let suggestionIndex = Number.parseInt(
-  sessionStorage.getItem("vaultsh-suggestion-index") || "0",
+  sessionStorage.getItem(storageKeys.suggestionIndex) || "0",
   10,
 );
 if (
@@ -68,9 +84,9 @@ if (window.matchMedia("(pointer: fine)").matches) {
 
 refreshVaultStatus();
 refreshServiceStatus();
-setInterval(refreshVaultStatus, 10000);
-setInterval(refreshServiceStatus, 10000);
-window.addEventListener("offline", () => setStatus("unavailable"));
+setInterval(refreshVaultStatus, statusRefreshMilliseconds);
+setInterval(refreshServiceStatus, statusRefreshMilliseconds);
+window.addEventListener("offline", () => setStatus(serviceStates.unavailable));
 window.addEventListener("online", refreshVaultStatus);
 
 function setStatus(state) {
@@ -81,21 +97,23 @@ function setStatus(state) {
 
 async function refreshVaultStatus() {
   if (!navigator.onLine) {
-    setStatus("unavailable");
+    setStatus(serviceStates.unavailable);
     return;
   }
 
   try {
-    const response = await fetch("/healthz", { cache: "no-store" });
-    setStatus(response.ok ? "online" : "unavailable");
+    const response = await fetch(endpoints.health, { cache: "no-store" });
+    setStatus(
+      response.ok ? serviceStates.online : serviceStates.unavailable,
+    );
   } catch {
-    setStatus("unavailable");
+    setStatus(serviceStates.unavailable);
   }
 }
 
 async function refreshServiceStatus() {
   try {
-    const response = await fetch("/api/status");
+    const response = await fetch(endpoints.status);
     if (!response.ok) {
       throw new Error("status unavailable");
     }
@@ -110,7 +128,9 @@ async function refreshServiceStatus() {
 
 function setServiceStatus(element, name, available) {
   const state = available ? "available" : "unavailable";
-  element.dataset.state = available ? "online" : "unavailable";
+  element.dataset.state = available
+    ? serviceStates.online
+    : serviceStates.unavailable;
   element.title = state;
   element.setAttribute("aria-label", `${name} ${state}`);
 }
@@ -190,7 +210,7 @@ async function complete() {
   setRequestStatus("Completing…");
 
   try {
-    const response = await fetch("/api/complete", {
+    const response = await fetch(endpoints.complete, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ line, cursor, session_id: sessionId }),
@@ -199,11 +219,7 @@ async function complete() {
       throw new Error(await friendlyError(response));
     }
     const result = await response.json();
-    sessionId = result.session_id;
-    sessionStorage.setItem("vaultsh-session", sessionId);
-    currentDirectory = result.current_directory || currentDirectory;
-    sessionStorage.setItem("vaultsh-current-directory", currentDirectory);
-    updatePrompt();
+    updateSession(result);
 
     if (result.replacement) {
       command.value =
@@ -236,7 +252,7 @@ async function execute(line) {
   }, 1200);
 
   try {
-    const response = await fetch("/api/exec", {
+    const response = await fetch(endpoints.execute, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ line, session_id: sessionId }),
@@ -245,8 +261,6 @@ async function execute(line) {
       throw new Error(await friendlyError(response));
     }
     const result = await response.json();
-    sessionId = result.session_id;
-    sessionStorage.setItem("vaultsh-session", sessionId);
     handleResult(line, result, submittedFrom);
     setRequestStatus("");
   } catch (error) {
@@ -289,9 +303,7 @@ function setRequestStatus(message) {
 }
 
 function handleResult(line, result, submittedFrom) {
-  currentDirectory = result.current_directory || currentDirectory;
-  sessionStorage.setItem("vaultsh-current-directory", currentDirectory);
-  updatePrompt();
+  updateSession(result);
 
   if (result.action === "clear") {
     outputEntries = [];
@@ -308,11 +320,19 @@ function handleResult(line, result, submittedFrom) {
 function suggestNext() {
   const [label, commandLine] = suggestions[suggestionIndex];
   suggestionIndex = (suggestionIndex + 1) % suggestions.length;
-  sessionStorage.setItem("vaultsh-suggestion-index", String(suggestionIndex));
+  sessionStorage.setItem(storageKeys.suggestionIndex, String(suggestionIndex));
 
   nextCommandButton.textContent = label;
   nextCommandButton.dataset.command = commandLine;
   nextCommands.hidden = false;
+}
+
+function updateSession(result) {
+  sessionId = result.session_id;
+  currentDirectory = result.current_directory || currentDirectory;
+  sessionStorage.setItem(storageKeys.session, sessionId);
+  sessionStorage.setItem(storageKeys.currentDirectory, currentDirectory);
+  updatePrompt();
 }
 
 function appendEntry(line, result, path, exitCode) {
