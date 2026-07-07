@@ -58,8 +58,8 @@ function initTerminal() {
   });
   const terminalLinkPattern = /\[([^\]\n]+)\]\((https?:\/\/[^\s)]+|mailto:[^\s)]+)\)/g;
   const autoWelcomeCommand = "welcome";
-  const autoWelcomeDelayMilliseconds = 350;
-  const autoWelcomeKeystrokeMilliseconds = 75;
+  const autoWelcomeDelayMilliseconds = 400;
+  const autoWelcomeKeystrokeMilliseconds = 100;
   const statusTimeoutMilliseconds = 3000;
   const statusRefreshMilliseconds = 10000;
   const suggestions = [
