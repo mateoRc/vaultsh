@@ -50,7 +50,6 @@ function initTerminal() {
   const storageKeys = Object.freeze({
     session: "vaultsh-session",
     currentDirectory: "vaultsh-current-directory",
-    suggestionIndex: "vaultsh-suggestion-index",
   });
   const serviceStates = Object.freeze({
     online: "online",
@@ -90,17 +89,7 @@ function initTerminal() {
   let currentDirectory = sessionId
     ? storageGet(storageKeys.currentDirectory) || "/"
     : "/";
-  let suggestionIndex = Number.parseInt(
-    storageGet(storageKeys.suggestionIndex) || "0",
-    10,
-  );
-  if (
-    !Number.isInteger(suggestionIndex) ||
-    suggestionIndex < 0 ||
-    suggestionIndex >= suggestions.length
-  ) {
-    suggestionIndex = 0;
-  }
+  let suggestionIndex = 0;
   let running = false;
 
   updatePrompt();
@@ -452,7 +441,6 @@ function initTerminal() {
   function suggestNext() {
     const [label, commandLine] = suggestions[suggestionIndex];
     suggestionIndex = (suggestionIndex + 1) % suggestions.length;
-    storageSet(storageKeys.suggestionIndex, String(suggestionIndex));
 
     nextCommandButton.textContent = label;
     nextCommandButton.dataset.command = commandLine;
