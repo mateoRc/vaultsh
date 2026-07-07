@@ -22,10 +22,9 @@ type MetricsService interface {
 }
 
 type ServiceHealth struct {
-	Name      string
-	Online    bool
-	LatencyMS int64
-	Uptime    time.Duration
+	Name   string
+	Online bool
+	Uptime time.Duration
 }
 
 type SystemStatus struct {
