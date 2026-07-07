@@ -111,14 +111,20 @@ async function refreshVaultStatus() {
     return;
   }
 
+  const fallback = window.setTimeout(
+    () => setStatus(serviceStates.unavailable),
+    statusTimeoutMilliseconds,
+  );
   try {
     const response = await fetchWithTimeout(endpoints.health, {
       cache: "no-store",
     });
+    window.clearTimeout(fallback);
     setStatus(
       response.ok ? serviceStates.online : serviceStates.unavailable,
     );
   } catch {
+    window.clearTimeout(fallback);
     setStatus(serviceStates.unavailable);
   }
 }
@@ -129,15 +135,21 @@ async function refreshServiceStatus() {
     return;
   }
 
+  const fallback = window.setTimeout(() => {
+    setServiceStatus(atlasStatus, "Atlas", false);
+    setServiceStatus(forgeStatus, "Forge", false);
+  }, statusTimeoutMilliseconds);
   try {
     const response = await fetchWithTimeout(endpoints.status);
     if (!response.ok) {
       throw new Error("status unavailable");
     }
     const services = await response.json();
+    window.clearTimeout(fallback);
     setServiceStatus(atlasStatus, "Atlas", services.atlas);
     setServiceStatus(forgeStatus, "Forge", services.forge);
   } catch {
+    window.clearTimeout(fallback);
     setServiceStatus(atlasStatus, "Atlas", false);
     setServiceStatus(forgeStatus, "Forge", false);
   }
@@ -185,7 +197,7 @@ function typeWelcomeCommand() {
 
   if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
     command.value = autoWelcomeCommand;
-    form.requestSubmit();
+    submitCommandForm();
     return;
   }
 
@@ -198,9 +210,15 @@ function typeWelcomeCommand() {
     if (nextIndex >= autoWelcomeCommand.length) {
       window.clearInterval(typing);
       command.readOnly = false;
-      form.requestSubmit();
+      submitCommandForm();
     }
   }, autoWelcomeKeystrokeMilliseconds);
+}
+
+function submitCommandForm() {
+  form.dispatchEvent(
+    new Event("submit", { bubbles: true, cancelable: true }),
+  );
 }
 
 function shellPrompt(path = currentDirectory) {
