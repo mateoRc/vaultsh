@@ -522,18 +522,19 @@ h1::after {
 @media (max-width: 36rem) {
   html,
   body {
-    min-height: 100dvh;
+    min-height: 100%;
   }
 
   body {
-    overflow: hidden;
+    min-height: 100dvh;
+    overflow-x: hidden;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
   }
 
   .page {
-    display: flex;
     width: 100%;
     min-height: 100dvh;
-    flex-direction: column;
     padding-top: calc(1rem + env(safe-area-inset-top));
     padding-bottom: 0;
   }
@@ -566,11 +567,7 @@ h1::after {
   }
 
   .terminal {
-    display: flex;
     width: 100vw;
-    min-height: 0;
-    flex: 1;
-    flex-direction: column;
     margin-left: 0;
     border-inline: 0;
     border-bottom: 0;
@@ -578,17 +575,15 @@ h1::after {
   }
 
   .terminal-body {
-    min-height: 0;
-    flex: 1;
+    min-height: auto;
     padding-bottom: calc(1rem + env(safe-area-inset-bottom));
     font-size: 0.82rem;
   }
 
   #output {
-    flex: 1;
-    min-height: 0;
-    overscroll-behavior: contain;
-    -webkit-overflow-scrolling: touch;
+    flex: none;
+    min-height: 18rem;
+    overflow-y: visible;
   }
 
   #command {
