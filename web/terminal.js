@@ -82,6 +82,8 @@ if (
 let running = false;
 
 updatePrompt();
+refreshVaultStatus();
+refreshServiceStatus();
 renderOutput();
 
 if (window.matchMedia("(pointer: fine)").matches) {
@@ -89,8 +91,6 @@ if (window.matchMedia("(pointer: fine)").matches) {
 }
 window.setTimeout(typeWelcomeCommand, autoWelcomeDelayMilliseconds);
 
-refreshVaultStatus();
-refreshServiceStatus();
 setInterval(refreshVaultStatus, statusRefreshMilliseconds);
 setInterval(refreshServiceStatus, statusRefreshMilliseconds);
 window.addEventListener("offline", setUnavailableStatus);
@@ -434,11 +434,13 @@ function renderOutput() {
 function appendTerminalText(parent, text) {
   let offset = 0;
   terminalLinkPattern.lastIndex = 0;
+  let match = terminalLinkPattern.exec(text);
 
-  for (const match of text.matchAll(terminalLinkPattern)) {
+  while (match !== null) {
     parent.append(document.createTextNode(text.slice(offset, match.index)));
     parent.append(createTerminalLink(match[1], match[2]));
     offset = match.index + match[0].length;
+    match = terminalLinkPattern.exec(text);
   }
 
   parent.append(document.createTextNode(text.slice(offset)));
