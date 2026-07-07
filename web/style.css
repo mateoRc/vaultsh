@@ -261,6 +261,11 @@ h1::after {
   background: #73c991;
 }
 
+.status[data-state="checking"]::before,
+.service-status[data-state="checking"]::before {
+  background: #fff3a6;
+}
+
 .status[data-state="unavailable"]::before,
 .service-status[data-state="unavailable"]::before {
   background: #f05a28;

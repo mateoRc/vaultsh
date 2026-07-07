@@ -34,6 +34,7 @@ const terminalLinkPattern = /\[([^\]\n]+)\]\((https?:\/\/[^\s)]+|mailto:[^\s)]+)
 const autoWelcomeCommand = "welcome";
 const autoWelcomeDelayMilliseconds = 350;
 const autoWelcomeKeystrokeMilliseconds = 75;
+const statusTimeoutMilliseconds = 3000;
 const statusRefreshMilliseconds = 10000;
 const suggestions = [
   ["About Mateo", "cat /cv/about.md"],
@@ -92,7 +93,7 @@ refreshVaultStatus();
 refreshServiceStatus();
 setInterval(refreshVaultStatus, statusRefreshMilliseconds);
 setInterval(refreshServiceStatus, statusRefreshMilliseconds);
-window.addEventListener("offline", () => setStatus(serviceStates.unavailable));
+window.addEventListener("offline", setUnavailableStatus);
 window.addEventListener("online", refreshVaultStatus);
 
 function setStatus(state) {
@@ -103,12 +104,14 @@ function setStatus(state) {
 
 async function refreshVaultStatus() {
   if (!navigator.onLine) {
-    setStatus(serviceStates.unavailable);
+    setUnavailableStatus();
     return;
   }
 
   try {
-    const response = await fetch(endpoints.health, { cache: "no-store" });
+    const response = await fetchWithTimeout(endpoints.health, {
+      cache: "no-store",
+    });
     setStatus(
       response.ok ? serviceStates.online : serviceStates.unavailable,
     );
@@ -118,8 +121,13 @@ async function refreshVaultStatus() {
 }
 
 async function refreshServiceStatus() {
+  if (!navigator.onLine) {
+    setUnavailableStatus();
+    return;
+  }
+
   try {
-    const response = await fetch(endpoints.status);
+    const response = await fetchWithTimeout(endpoints.status);
     if (!response.ok) {
       throw new Error("status unavailable");
     }
@@ -130,6 +138,26 @@ async function refreshServiceStatus() {
     setServiceStatus(atlasStatus, "Atlas", false);
     setServiceStatus(forgeStatus, "Forge", false);
   }
+}
+
+async function fetchWithTimeout(url, options = {}) {
+  const controller = new AbortController();
+  const timeout = window.setTimeout(
+    () => controller.abort(),
+    statusTimeoutMilliseconds,
+  );
+
+  try {
+    return await fetch(url, { ...options, signal: controller.signal });
+  } finally {
+    window.clearTimeout(timeout);
+  }
+}
+
+function setUnavailableStatus() {
+  setStatus(serviceStates.unavailable);
+  setServiceStatus(atlasStatus, "Atlas", false);
+  setServiceStatus(forgeStatus, "Forge", false);
 }
 
 function setServiceStatus(element, name, available) {
