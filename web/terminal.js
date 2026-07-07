@@ -57,7 +57,7 @@ function initTerminal() {
     unavailable: "unavailable",
   });
   const terminalLinkPattern = /\[([^\]\n]+)\]\((https?:\/\/[^\s)]+|mailto:[^\s)]+)\)/g;
-  const autoWelcomeCommand = "welcome";
+  const autoWelcomeCommand = "welcome  ";
   const autoWelcomeDelayMilliseconds = 400;
   const autoWelcomeKeystrokeMilliseconds = 100;
   const statusTimeoutMilliseconds = 3000;
