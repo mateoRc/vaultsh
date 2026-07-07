@@ -569,7 +569,7 @@ h1::after {
   }
 
   .hint {
-    margin-left: 0;
+    display: none;
   }
 
   .engine-note {
