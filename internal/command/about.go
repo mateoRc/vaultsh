@@ -12,7 +12,10 @@ func (About) Description() string {
 
 func (About) Execute([]string, Input) Result {
 	return Result{
-		Output:   "Vaultsh is a read-only virtual shell engine.",
+		Output: "Vaultsh is a read-only virtual shell for exploring Mateo's " +
+			"CV, projects, and live backend services.\n\n" +
+			"It is the portfolio and the demo: a small Go shell backed by " +
+			"Atlas search, Forge telemetry, and Lab deployment docs.",
 		ExitCode: ExitSuccess,
 	}
 }
