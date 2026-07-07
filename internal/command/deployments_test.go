@@ -95,8 +95,8 @@ func TestDashboardIncludesServiceHealthAndUptime(t *testing.T) {
 		Uptime: 26*time.Hour + 3*time.Minute,
 		Services: []ServiceHealth{
 			{Name: "vaultsh", Online: true},
-			{Name: "atlas", Online: true, LatencyMS: 12},
-			{Name: "forge", Online: false},
+			{Name: "atlas", Online: true, Uptime: time.Hour},
+			{Name: "forge", Online: true, Uptime: 2 * time.Hour},
 		},
 	}}
 
@@ -104,8 +104,8 @@ func TestDashboardIncludesServiceHealthAndUptime(t *testing.T) {
 
 	want := "Forge dashboard\n\nSERVICES\n========\n" +
 		"  vaultsh  online  uptime 1d 2h3m0s\n" +
-		"  atlas    online  latency 12 ms\n" +
-		"  forge    offline"
+		"  atlas    online  uptime 1h0m0s\n" +
+		"  forge    online  uptime 2h0m0s"
 	if result.ExitCode != ExitSuccess || result.Output != want {
 		t.Errorf("result = %#v", result)
 	}

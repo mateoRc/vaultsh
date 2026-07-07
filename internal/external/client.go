@@ -33,6 +33,10 @@ type event struct {
 	ExitCode   int    `json:"exit_code"`
 }
 
+type serviceStatusResponse struct {
+	UptimeSeconds int64 `json:"uptime_seconds"`
+}
+
 func NewClient(atlasURL, forgeURL, atlasToken, forgeToken string) *Client {
 	return &Client{
 		atlasURL:   strings.TrimRight(atlasURL, "/"),
@@ -144,14 +148,15 @@ func (c *Client) Availability() (bool, bool) {
 }
 
 func (c *Client) SystemStatus() command.SystemStatus {
-	atlasOnline, atlasLatency := c.probe(c.atlasURL)
-	forgeOnline, forgeLatency := c.probe(c.forgeURL)
+	vaultUptime := time.Since(c.startedAt)
+	atlasOnline, atlasUptime := c.serviceStatus(c.atlasURL)
+	forgeOnline, forgeUptime := c.serviceStatus(c.forgeURL)
 	return command.SystemStatus{
-		Uptime: time.Since(c.startedAt),
+		Uptime: vaultUptime,
 		Services: []command.ServiceHealth{
-			{Name: "vaultsh", Online: true},
-			{Name: "atlas", Online: atlasOnline, LatencyMS: atlasLatency.Milliseconds()},
-			{Name: "forge", Online: forgeOnline, LatencyMS: forgeLatency.Milliseconds()},
+			{Name: "vaultsh", Online: true, Uptime: vaultUptime},
+			{Name: "atlas", Online: atlasOnline, Uptime: atlasUptime},
+			{Name: "forge", Online: forgeOnline, Uptime: forgeUptime},
 		},
 	}
 }
@@ -191,4 +196,27 @@ func (c *Client) probe(baseURL string) (bool, time.Duration) {
 	}
 	defer response.Body.Close()
 	return response.StatusCode == http.StatusOK, time.Since(startedAt)
+}
+
+func (c *Client) serviceStatus(baseURL string) (bool, time.Duration) {
+	if baseURL == "" {
+		return false, 0
+	}
+
+	response, err := c.http.Get(baseURL + "/status")
+	if err != nil {
+		return false, 0
+	}
+	defer response.Body.Close()
+	if response.StatusCode != http.StatusOK {
+		online, _ := c.probe(baseURL)
+		return online, 0
+	}
+
+	var status serviceStatusResponse
+	if err := json.NewDecoder(response.Body).Decode(&status); err != nil {
+		online, _ := c.probe(baseURL)
+		return online, 0
+	}
+	return true, time.Duration(status.UptimeSeconds) * time.Second
 }

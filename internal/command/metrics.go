@@ -25,6 +25,7 @@ type ServiceHealth struct {
 	Name      string
 	Online    bool
 	LatencyMS int64
+	Uptime    time.Duration
 }
 
 type SystemStatus struct {
@@ -53,7 +54,7 @@ func (Metrics) Description() string {
 }
 
 func (Metrics) Help() string {
-	return "Shows request, error, latency, service, and command totals."
+	return "Shows request, error, response time, service, and command totals."
 }
 
 func (m Metrics) Execute(args []string, _ Input) Result {
@@ -142,10 +143,12 @@ func formatSystemStatus(status SystemStatus) string {
 		detail := ""
 		if service.Online {
 			state = "online"
-			if service.Name == "vaultsh" {
-				detail = "uptime " + formatUptime(status.Uptime)
-			} else {
-				detail = fmt.Sprintf("latency %d ms", service.LatencyMS)
+			uptime := service.Uptime
+			if uptime == 0 && service.Name == "vaultsh" {
+				uptime = status.Uptime
+			}
+			if uptime > 0 {
+				detail = "uptime " + formatUptime(uptime)
 			}
 		}
 		line := fmt.Sprintf("  %-8s %s", service.Name, state)
