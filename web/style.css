@@ -555,7 +555,11 @@ h1::after {
   }
 
   .terminal {
+    width: 100vw;
     min-height: calc(100svh - 11rem);
+    margin-left: calc((100vw - 100%) / -2);
+    border-inline: 0;
+    border-radius: 0;
   }
 
   .terminal-body {
