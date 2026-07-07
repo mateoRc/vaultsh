@@ -18,7 +18,15 @@ func (Pwd) Description() string {
 	return "Print the current directory"
 }
 
-func (p Pwd) Execute([]string, Input) Result {
+func (Pwd) Usage() string {
+	return "pwd"
+}
+
+func (p Pwd) Execute(args []string, _ Input) Result {
+	if len(args) != 0 {
+		return Result{Output: "usage: pwd", ExitCode: ExitUsage}
+	}
+
 	return Result{
 		Output:   p.workingDirectory.Path(),
 		ExitCode: ExitSuccess,

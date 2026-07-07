@@ -10,7 +10,15 @@ func (About) Description() string {
 	return "Describe Vaultsh"
 }
 
-func (About) Execute([]string, Input) Result {
+func (About) Usage() string {
+	return "about"
+}
+
+func (About) Execute(args []string, _ Input) Result {
+	if len(args) != 0 {
+		return Result{Output: "usage: about", ExitCode: ExitUsage}
+	}
+
 	return Result{
 		Output: "Vaultsh is a read-only virtual shell for exploring Mateo's " +
 			"CV, projects, and live backend services.\n\n" +
