@@ -31,9 +31,11 @@ const serviceStates = Object.freeze({
   unavailable: "unavailable",
 });
 const terminalLinkPattern = /\[([^\]\n]+)\]\((https?:\/\/[^\s)]+|mailto:[^\s)]+)\)/g;
+const autoWelcomeCommand = "welcome";
+const autoWelcomeDelayMilliseconds = 250;
+const autoWelcomeKeystrokeMilliseconds = 28;
 const statusRefreshMilliseconds = 10000;
 const suggestions = [
-  ["Show welcome", "welcome"],
   ["About Mateo", "cat /cv/about.md"],
   ["Browse experience", "tree /cv/experience"],
   ["Review skills", 'cat /cv/skills.md | grep "Languages"'],
@@ -84,6 +86,7 @@ renderOutput();
 if (window.matchMedia("(pointer: fine)").matches) {
   focusCommand();
 }
+window.setTimeout(typeWelcomeCommand, autoWelcomeDelayMilliseconds);
 
 refreshVaultStatus();
 refreshServiceStatus();
@@ -142,6 +145,31 @@ function focusCommand() {
   command.focus();
   const end = command.value.length;
   command.setSelectionRange(end, end);
+}
+
+function typeWelcomeCommand() {
+  if (running || command.value !== "") {
+    return;
+  }
+
+  if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+    command.value = autoWelcomeCommand;
+    form.requestSubmit();
+    return;
+  }
+
+  let nextIndex = 0;
+  command.readOnly = true;
+  const typing = window.setInterval(() => {
+    nextIndex++;
+    command.value = autoWelcomeCommand.slice(0, nextIndex);
+
+    if (nextIndex >= autoWelcomeCommand.length) {
+      window.clearInterval(typing);
+      command.readOnly = false;
+      form.requestSubmit();
+    }
+  }, autoWelcomeKeystrokeMilliseconds);
 }
 
 function shellPrompt(path = currentDirectory) {
