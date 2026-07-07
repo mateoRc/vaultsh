@@ -33,6 +33,7 @@ const serviceStates = Object.freeze({
 const terminalLinkPattern = /\[([^\]\n]+)\]\((https?:\/\/[^\s)]+|mailto:[^\s)]+)\)/g;
 const statusRefreshMilliseconds = 10000;
 const suggestions = [
+  ["Show welcome", "welcome"],
   ["About Mateo", "cat /cv/about.md"],
   ["Browse experience", "tree /cv/experience"],
   ["Review skills", 'cat /cv/skills.md | grep "Languages"'],
@@ -347,7 +348,7 @@ function renderOutput() {
   output.replaceChildren();
   for (const entry of outputEntries) {
     if (entry.welcome !== undefined) {
-      output.append(document.createTextNode(entry.welcome));
+      appendTerminalText(output, entry.welcome);
       continue;
     }
 

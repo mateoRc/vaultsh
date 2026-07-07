@@ -62,16 +62,7 @@
       <div class="terminal-body">
         <div id="output" role="log" aria-live="polite">I decided to build a portfolio, so naturally I built a shell first.
 
-Welcome to Vaultsh.
-
-Explore Mateo's CV &amp; project docs:
-  about (project overview)
-  tree /cv (browse experience and skills)
-  search "Languages" (search the portfolio)
-  contact (email, GitHub, and LinkedIn)
-  dashboard (view live service activity)
-
-Choose a suggestion below or type help.</div>
+Type welcome, help, or choose a suggestion below.</div>
 
         <form id="command-form">
           <label id="prompt" for="command">mateo@vault:/$</label>
@@ -133,6 +124,7 @@ Choose a suggestion below or type help.</div>
             </button>
             <button type="button" data-command="cat /cv/skills.md">Skills</button>
             <button type="button" data-command="search distributed systems">Search</button>
+            <button type="button" data-command="welcome">Welcome</button>
             <button type="button" data-command="metrics">Analytics</button>
             <button type="button" data-command="dashboard">Dashboard</button>
             <button type="button" data-command="deployments">Deployments</button>
@@ -145,6 +137,6 @@ Choose a suggestion below or type help.</div>
     <p class="hint">Tap a suggestion or type a command · Tab completes · Ctrl+L clears</p>
     <p class="touch-hint">Tap a suggestion or enter a command.</p>
   </main>
-  <script src="terminal.js?v=20260711"></script>
+  <script src="terminal.js?v=20260713"></script>
 </body>
 </html>
