@@ -22,7 +22,7 @@ body {
 }
 
 .page {
-  width: min(58rem, calc(100% - 2rem));
+  width: min(72rem, calc(100% - 3rem));
   margin: 0 auto;
   padding:
     clamp(2.5rem, 7vw, 5rem)
@@ -267,14 +267,18 @@ h1::after {
 }
 
 .terminal-body {
-  min-height: 30rem;
+  display: flex;
+  min-height: clamp(36rem, calc(100svh - 18rem), 46rem);
+  flex-direction: column;
   padding: clamp(1rem, 3vw, 1.5rem);
   color: #e9eee9;
   font: 0.9rem/1.65 ui-monospace, SFMono-Regular, Consolas, monospace;
 }
 
 #output {
-  max-height: 55svh;
+  flex: 1;
+  min-height: 24rem;
+  max-height: none;
   margin: 0 0 1rem;
   overflow-y: auto;
   color: #dfe7df;
@@ -303,6 +307,18 @@ h1::after {
 
 .output-result[data-exit-code]:not([data-exit-code="0"]) {
   color: #ff8a70;
+}
+
+.output-result a {
+  color: #f7c843;
+  font-weight: 700;
+  text-decoration: underline;
+  text-underline-offset: 0.18rem;
+}
+
+.output-result a:hover,
+.output-result a:focus-visible {
+  color: #fff3a6;
 }
 
 .quick-command-drawer {
@@ -431,6 +447,7 @@ h1::after {
 .touch-actions {
   display: none;
   gap: 0.4rem;
+  margin-left: auto;
 }
 
 .request-status {
@@ -506,8 +523,13 @@ h1::after {
 
 @media (max-width: 36rem) {
   .page {
-    width: min(100% - 1rem, 58rem);
-    padding-top: calc(1.5rem + env(safe-area-inset-top));
+    width: calc(100% - 0.75rem);
+    padding-top: calc(1rem + env(safe-area-inset-top));
+    padding-bottom: calc(0.75rem + env(safe-area-inset-bottom));
+  }
+
+  .intro {
+    margin-bottom: 1rem;
   }
 
   h1 {
@@ -532,13 +554,17 @@ h1::after {
     display: none;
   }
 
-  #output {
-    max-height: 52svh;
+  .terminal {
+    min-height: calc(100svh - 11rem);
   }
 
   .terminal-body {
-    min-height: 25rem;
+    min-height: calc(100svh - 14rem);
     font-size: 0.82rem;
+  }
+
+  #output {
+    min-height: 0;
   }
 
   #command {
@@ -587,14 +613,22 @@ h1::after {
 }
 
 @media (max-width: 36rem) {
+  .quick-command-drawer {
+    align-items: flex-start;
+  }
+
   .quick-commands {
     flex: 1 1 100%;
+  }
+
+  .touch-actions {
+    justify-content: flex-end;
   }
 }
 
 @media (max-width: 22rem) {
   .page {
-    width: calc(100% - 0.75rem);
+    width: calc(100% - 0.5rem);
   }
 
   h1 {
@@ -610,7 +644,7 @@ h1::after {
   }
 
   .terminal-body {
-    min-height: 23rem;
+    min-height: calc(100svh - 13.25rem);
     padding: 0.85rem;
   }
 

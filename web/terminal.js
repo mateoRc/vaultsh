@@ -30,6 +30,7 @@ const serviceStates = Object.freeze({
   online: "online",
   unavailable: "unavailable",
 });
+const terminalLinkPattern = /\[([^\]\n]+)\]\((https?:\/\/[^\s)]+|mailto:[^\s)]+)\)/g;
 const statusRefreshMilliseconds = 10000;
 const suggestions = [
   ["About Mateo", "cat /cv/about.md"],
@@ -362,9 +363,33 @@ function renderOutput() {
     const result = document.createElement("div");
     result.className = "output-result";
     result.dataset.exitCode = String(entry.exitCode);
-    result.textContent = entry.result;
+    appendTerminalText(result, entry.result);
     container.append(commandLine, result);
     output.append(container);
   }
   output.scrollTop = output.scrollHeight;
+}
+
+function appendTerminalText(parent, text) {
+  let offset = 0;
+  terminalLinkPattern.lastIndex = 0;
+
+  for (const match of text.matchAll(terminalLinkPattern)) {
+    parent.append(document.createTextNode(text.slice(offset, match.index)));
+    parent.append(createTerminalLink(match[1], match[2]));
+    offset = match.index + match[0].length;
+  }
+
+  parent.append(document.createTextNode(text.slice(offset)));
+}
+
+function createTerminalLink(label, href) {
+  const link = document.createElement("a");
+  link.href = href;
+  link.textContent = label;
+  if (href.startsWith("http")) {
+    link.target = "_blank";
+    link.rel = "noreferrer";
+  }
+  return link;
 }

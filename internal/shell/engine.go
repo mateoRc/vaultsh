@@ -52,6 +52,7 @@ func NewWithContextAndDependencies(
 	commands.Register(command.NewCat(workingDirectory))
 	commands.Register(command.NewCd(workingDirectory))
 	commands.Register(command.Clear{})
+	commands.Register(command.Contact{})
 	commands.Register(command.NewGrep(workingDirectory))
 	commands.Register(command.NewHead(workingDirectory))
 	commands.Register(command.NewHelp(commands))

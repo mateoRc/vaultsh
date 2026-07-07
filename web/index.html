@@ -18,20 +18,12 @@
   <link rel="canonical" href="https://mateolabs.dev/vault/">
   <link rel="icon" href="/vault/favicon.svg" type="image/svg+xml">
   <title>Vaultsh by Mateo Mahmutović</title>
-  <link rel="stylesheet" href="style.css?v=20260708">
+  <link rel="stylesheet" href="style.css?v=20260710">
 </head>
 <body>
   <main class="page">
     <header class="intro">
-      <p class="eyebrow">Read-only virtual shell engine</p>
       <h1><span class="product-name">Vault</span><span class="shell-suffix">sh</span></h1>
-      <div class="tags" aria-label="Primary engineering focus">
-        <span>Backend</span>
-        <span>Infrastructure</span>
-        <span>Distributed systems</span>
-        <span>Search</span>
-        <span>Developer tooling</span>
-      </div>
     </header>
 
     <div class="engine-note">
@@ -72,7 +64,7 @@
 
 Welcome to Vaultsh.
 
-Explore Mateo's backend work &amp; project docs:
+Explore Mateo's CV &amp; project docs:
   about (project overview)
   tree /cv (browse experience and skills)
   search "Languages" (search the portfolio)
@@ -92,10 +84,6 @@ Choose a suggestion below or type help.</div>
             aria-label="Shell command"
             placeholder="type a command..."
           >
-          <div class="touch-actions">
-            <button id="clear-command" type="button">Clear</button>
-            <button id="run-command" type="submit">Run</button>
-          </div>
         </form>
         <p id="request-status" class="request-status" aria-live="polite"></p>
         <div id="next-commands" class="next-commands" aria-label="Suggested command" hidden>
@@ -113,6 +101,10 @@ Choose a suggestion below or type help.</div>
           >
             Commands
           </button>
+          <div class="touch-actions">
+            <button id="clear-command" type="button">Clear</button>
+            <button id="run-command" type="submit" form="command-form">Run</button>
+          </div>
           <div
             id="quick-commands"
             class="quick-commands"
@@ -151,6 +143,6 @@ Choose a suggestion below or type help.</div>
     <p class="hint">Tap a suggestion or type a command · Tab completes · Ctrl+L clears</p>
     <p class="touch-hint">Tap a suggestion or enter a command.</p>
   </main>
-  <script src="terminal.js?v=20260708"></script>
+  <script src="terminal.js?v=20260710"></script>
 </body>
 </html>
