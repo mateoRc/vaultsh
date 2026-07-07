@@ -63,7 +63,7 @@ function initTerminal() {
   const statusTimeoutMilliseconds = 3000;
   const statusRefreshMilliseconds = 10000;
   const suggestions = [
-    ["About Mateo", "cat /cv/about.md"],
+    ["Read profile", "cat /cv/about.md"],
     ["Browse experience", "tree /cv/experience"],
     ["Review skills", 'cat /cv/skills.md | grep "Languages"'],
     ["Search distributed systems", "search distributed systems"],
@@ -79,7 +79,7 @@ function initTerminal() {
       "Review recent experience",
       "cat /cv/experience/reversinglabs.md | head -n 8",
     ],
-    ["Show current role", "whoami"],
+    ["Show identity", "whoami"],
     ["Inspect the vault root", "ls -la /"],
     [
       "Review Vaultsh technologies",

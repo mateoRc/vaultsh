@@ -27,7 +27,7 @@ func (Welcome) Execute(args []string, _ Input) Result {
 			"[LinkedIn](https://www.linkedin.com/in/mateo-mahmutovi%C4%87-a9837232b/)\n\n" +
 			"Explore Mateo's CV & project docs:\n" +
 			"  about (project overview)\n" +
-			"  whoami (about Mateo)\n" +
+			"  whoami (current role and links)\n" +
 			"  tree /cv/experience (browse experience)\n" +
 			"  cat /cv/skills.md (view skills)\n" +
 			"  search \"Languages\" (search the portfolio)\n" +
