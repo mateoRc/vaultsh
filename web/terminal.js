@@ -83,7 +83,7 @@ function initTerminal() {
     ["Inspect the vault root", "ls -la /"],
     [
       "Review Vaultsh technologies",
-      'cat /projects/vaultsh.md | grep "Technology"',
+      'cat /projects/vaultsh.md | grep -i "technology"',
     ],
     ["Search languages", 'search "Languages"'],
     ["Explore available commands", "help"],
