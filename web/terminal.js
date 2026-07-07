@@ -94,7 +94,10 @@ refreshServiceStatus();
 setInterval(refreshVaultStatus, statusRefreshMilliseconds);
 setInterval(refreshServiceStatus, statusRefreshMilliseconds);
 window.addEventListener("offline", setUnavailableStatus);
-window.addEventListener("online", refreshVaultStatus);
+window.addEventListener("online", () => {
+  refreshVaultStatus();
+  refreshServiceStatus();
+});
 
 function setStatus(state) {
   status.textContent = state;
