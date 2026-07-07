@@ -32,8 +32,8 @@ const serviceStates = Object.freeze({
 });
 const terminalLinkPattern = /\[([^\]\n]+)\]\((https?:\/\/[^\s)]+|mailto:[^\s)]+)\)/g;
 const autoWelcomeCommand = "welcome";
-const autoWelcomeDelayMilliseconds = 250;
-const autoWelcomeKeystrokeMilliseconds = 28;
+const autoWelcomeDelayMilliseconds = 350;
+const autoWelcomeKeystrokeMilliseconds = 75;
 const statusRefreshMilliseconds = 10000;
 const suggestions = [
   ["About Mateo", "cat /cv/about.md"],
