@@ -226,21 +226,6 @@ func TestEngineListOptions(t *testing.T) {
 	}
 }
 
-/*func TestEngineListRejectsTimestampSortWithoutMetadata(t *testing.T) {
-	result := New().Execute("ls -lt")
-
-	if result.Output != "ls: option -t requires file timestamps" {
-		t.Errorf("ls -lt output = %q", result.Output)
-	}
-	if result.ExitCode != command.ExitUnsupported {
-		t.Errorf(
-			"ls -lt exit code = %d, want %d",
-			result.ExitCode,
-			command.ExitUnsupported,
-		)
-	}
-}*/
-
 func TestEngineListRecursive(t *testing.T) {
 	root := filesystem.NewDirectory("")
 	docs := filesystem.NewDirectory("docs")
