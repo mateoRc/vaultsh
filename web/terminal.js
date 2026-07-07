@@ -1,4 +1,4 @@
-window.addEventListener("DOMContentLoaded", () => {
+function initTerminal() {
 const status = document.querySelector("#status");
 const atlasStatus = document.querySelector("#atlas-status");
 const forgeStatus = document.querySelector("#forge-status");
@@ -8,7 +8,9 @@ const prompt = document.querySelector("#prompt");
 const output = document.querySelector("#output");
 const requestStatus = document.querySelector("#request-status");
 const nextCommands = document.querySelector("#next-commands");
-const nextCommandButton = nextCommands.querySelector("button");
+const nextCommandButton = nextCommands
+  ? nextCommands.querySelector("button")
+  : null;
 const clearCommand = document.querySelector("#clear-command");
 const quickCommandToggle = document.querySelector("#quick-command-toggle");
 const quickCommands = document.querySelector("#quick-commands");
@@ -40,10 +42,10 @@ window.addEventListener("error", () => {
   forgeStatus.dataset.state = "unavailable";
 });
 const endpoints = Object.freeze({
-  health: "/healthz",
-  status: "/api/status",
-  execute: "/api/exec",
-  complete: "/api/complete",
+  health: new URL("/healthz", window.location.origin).toString(),
+  status: new URL("/api/status", window.location.origin).toString(),
+  execute: new URL("/api/exec", window.location.origin).toString(),
+  complete: new URL("/api/complete", window.location.origin).toString(),
 });
 const storageKeys = Object.freeze({
   session: "vaultsh-session",
@@ -514,4 +516,10 @@ function createTerminalLink(label, href) {
   }
   return link;
 }
-});
+}
+
+if (document.readyState === "loading") {
+  window.addEventListener("DOMContentLoaded", initTerminal);
+} else {
+  initTerminal();
+}
