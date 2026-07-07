@@ -297,6 +297,10 @@ h1::after {
   margin-top: 1.25rem;
 }
 
+.output-entry--new {
+  animation: output-reveal 180ms ease-out both;
+}
+
 .output-command {
   color: #fff3a6;
   font-weight: 700;
@@ -702,6 +706,24 @@ h1::after {
 @media (prefers-reduced-motion: no-preference) {
   h1::after {
     animation: blink 1.1s steps(1) infinite;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .output-entry--new {
+    animation: none;
+  }
+}
+
+@keyframes output-reveal {
+  from {
+    opacity: 0;
+    transform: translateY(0.35rem);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
   }
 }
 

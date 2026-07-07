@@ -456,12 +456,12 @@ function initTerminal() {
   function appendEntry(line, result, path, exitCode) {
     outputEntries.push({ line, result, path, exitCode });
     outputEntries = outputEntries.slice(-maxOutputEntries);
-    renderOutput();
+    renderOutput({ animateLatest: true });
   }
 
-  function renderOutput() {
+  function renderOutput(options = {}) {
     output.replaceChildren();
-    for (const entry of outputEntries) {
+    for (const [index, entry] of outputEntries.entries()) {
       if (entry.welcome !== undefined) {
         appendTerminalText(output, entry.welcome);
         continue;
@@ -469,6 +469,9 @@ function initTerminal() {
 
       const container = document.createElement("div");
       container.className = "output-entry";
+      if (options.animateLatest && index === outputEntries.length - 1) {
+        container.classList.add("output-entry--new");
+      }
 
       const commandLine = document.createElement("div");
       commandLine.className = "output-command";
@@ -484,7 +487,18 @@ function initTerminal() {
       container.append(commandLine, result);
       output.append(container);
     }
-    output.scrollTop = output.scrollHeight;
+    scrollOutputToEnd(options.animateLatest);
+  }
+
+  function scrollOutputToEnd(smooth) {
+    const behavior =
+      smooth && !window.matchMedia("(prefers-reduced-motion: reduce)").matches
+        ? "smooth"
+        : "auto";
+    output.scrollTo({
+      top: output.scrollHeight,
+      behavior,
+    });
   }
 
   function appendTerminalText(parent, text) {
