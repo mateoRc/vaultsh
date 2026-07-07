@@ -42,6 +42,7 @@ const suggestions = [
   ["Show live dashboard", "dashboard"],
   ["Show deployment status", "deployments"],
   ["Show analytics", "metrics"],
+  ["Contact Mateo", "contact"],
   ["Browse projects", "tree -L 2 /projects"],
   ["Find backend experience", 'grep -in "backend" /cv/about.md'],
   [
