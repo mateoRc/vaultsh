@@ -106,7 +106,7 @@ func (Dashboard) Description() string {
 }
 
 func (Dashboard) Help() string {
-	return "Renders live service activity as a terminal-friendly dashboard."
+	return "Renders persisted activity, system status, deployment, and Sentinel data."
 }
 
 func (d Dashboard) Execute(args []string, _ Input) Result {
