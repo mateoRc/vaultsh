@@ -287,7 +287,7 @@ function initTerminal() {
   clearCommand.addEventListener("click", () => execute("clear"));
 
   quickCommandToggle.addEventListener("click", () => {
-    setQuickCommandsExpanded(quickCommands.hidden);
+    setQuickCommandsExpanded(isQuickCommandsCollapsed());
   });
 
   for (const button of actionButtons) {
@@ -298,7 +298,7 @@ function initTerminal() {
   }
 
   document.addEventListener("keydown", async (event) => {
-    if (event.key === "Escape" && !quickCommands.hidden) {
+    if (event.key === "Escape" && !isQuickCommandsCollapsed()) {
       setQuickCommandsExpanded(false);
       quickCommandToggle.focus();
       return;
@@ -317,9 +317,14 @@ function initTerminal() {
     }
   });
 
+  function isQuickCommandsCollapsed() {
+    return quickCommands.classList.contains("quick-commands--collapsed");
+  }
+
   function setQuickCommandsExpanded(expanded) {
-    quickCommands.hidden = !expanded;
+    quickCommands.classList.toggle("quick-commands--collapsed", !expanded);
     quickCommandToggle.setAttribute("aria-expanded", String(expanded));
+    quickCommands.setAttribute("aria-hidden", String(!expanded));
   }
 
   async function complete() {
