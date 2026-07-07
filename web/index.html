@@ -103,29 +103,30 @@
           >
             <button
               type="button"
-              data-command="search Technology"
+              data-command="cat /cv/about.md"
             >
-              Technology
+              Profile
             </button>
             <button
               type="button"
-              data-command="cat /docs/architecture/overview.md"
+              data-command="whoami"
             >
-              Architecture
+              Identity
             </button>
+            <button type="button" data-command="cat /cv/skills.md">Skills</button>
+            <button type="button" data-command="tree -L 2 /">Browse</button>
             <button type="button" data-command="tree /cv/experience">Experience</button>
             <button
               type="button"
               data-command='search Java | grep "/cv/experience/"'
             >
-              Experience - Java
+              Java
             </button>
-            <button type="button" data-command="cat /cv/skills.md">Skills</button>
             <button type="button" data-command="search distributed systems">Search</button>
+            <button type="button" data-command="tree -L 1 /projects">Projects</button>
+            <button type="button" data-command="cat /projects/vaultsh.md">Vaultsh</button>
             <button type="button" data-command="welcome">Welcome</button>
-            <button type="button" data-command="metrics">Analytics</button>
             <button type="button" data-command="dashboard">Dashboard</button>
-            <button type="button" data-command="deployments">Deployments</button>
             <button type="button" data-command="contact">Contact</button>
           </div>
         </div>
@@ -133,6 +134,6 @@
     </section>
 
   </main>
-  <script src="terminal.js?v=20260728" defer></script>
+  <script src="terminal.js?v=20260729" defer></script>
 </body>
 </html>

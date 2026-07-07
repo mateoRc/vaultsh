@@ -63,30 +63,26 @@ function initTerminal() {
   const statusTimeoutMilliseconds = 3000;
   const statusRefreshMilliseconds = 10000;
   const suggestions = [
-    ["Read profile", "cat /cv/about.md"],
+    ["Start with profile", "cat /cv/about.md"],
+    ["Show identity and links", "whoami"],
+    ["Review core skills", "cat /cv/skills.md"],
     ["Browse experience", "tree /cv/experience"],
-    ["Review skills", 'cat /cv/skills.md | grep "Languages"'],
-    ["Search distributed systems", "search distributed systems"],
-    ["Browse technologies", "search Technology"],
-    ["Find Java experience", 'search Java | grep "/cv/experience/"'],
-    ["Show live dashboard", "dashboard"],
-    ["Show deployment status", "deployments"],
-    ["Show analytics", "metrics"],
-    ["Contact Mateo", "contact"],
-    ["Browse projects", "tree -L 2 /projects"],
-    ["Find backend experience", 'grep -in "backend" /cv/about.md'],
     [
-      "Review recent experience",
-      "cat /cv/experience/reversinglabs.md | head -n 8",
+      "Read recent role",
+      "cat /cv/experience/reversinglabs.md",
     ],
-    ["Show identity", "whoami"],
-    ["Inspect the vault root", "ls -la /"],
+    ["Find backend work", 'grep -in "backend" /cv/about.md'],
+    ["Search Java experience", 'search Java | grep "/cv/experience/"'],
+    ["Search distributed systems", "search distributed systems"],
+    ["Browse projects", "tree -L 1 /projects"],
+    ["Open Vaultsh project", "cat /projects/vaultsh.md"],
     [
-      "Review Vaultsh technologies",
+      "Review Vaultsh stack",
       'cat /projects/vaultsh.md | grep -i "technology"',
     ],
-    ["Search languages", 'search "Languages"'],
-    ["Explore available commands", "help"],
+    ["Show live dashboard", "dashboard"],
+    ["Contact Mateo", "contact"],
+    ["See available commands", "help"],
   ];
   const maxOutputEntries = 100;
   let outputEntries = output.textContent ? [{ welcome: output.textContent }] : [];
