@@ -33,6 +33,10 @@ func (Deployments) Description() string {
 	return "Show the latest production deployment"
 }
 
+func (Deployments) Usage() string {
+	return "deployments"
+}
+
 func (Deployments) Help() string {
 	return "Shows sanitized deployment status, version, and timestamp."
 }

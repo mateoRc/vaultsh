@@ -31,11 +31,14 @@ func (Sort) Usage() string {
 func (s Sort) Execute(args []string, input Input) Result {
 	reverse := false
 	var path string
+	optionsEnded := false
 	for _, arg := range args {
 		switch {
-		case arg == "-r":
+		case !optionsEnded && arg == "--":
+			optionsEnded = true
+		case !optionsEnded && arg == "-r":
 			reverse = true
-		case strings.HasPrefix(arg, "-") && arg != "-":
+		case !optionsEnded && strings.HasPrefix(arg, "-") && arg != "-":
 			return Result{
 				Output:   fmt.Sprintf("sort: unknown option: %s", arg),
 				ExitCode: ExitUsage,

@@ -23,7 +23,15 @@ func (History) Description() string {
 	return "List commands from this session"
 }
 
-func (h History) Execute([]string, Input) Result {
+func (History) Usage() string {
+	return "history"
+}
+
+func (h History) Execute(args []string, _ Input) Result {
+	if len(args) != 0 {
+		return Result{Output: "usage: history", ExitCode: ExitUsage}
+	}
+
 	var output strings.Builder
 	for index, line := range h.store.Entries() {
 		if index > 0 {

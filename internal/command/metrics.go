@@ -52,6 +52,10 @@ func (Metrics) Description() string {
 	return "Show service analytics from Forge"
 }
 
+func (Metrics) Usage() string {
+	return "metrics"
+}
+
 func (Metrics) Help() string {
 	return "Shows request, error, response time, service, and command totals."
 }
@@ -103,6 +107,10 @@ func (Dashboard) Name() string {
 
 func (Dashboard) Description() string {
 	return "Show the Forge analytics dashboard"
+}
+
+func (Dashboard) Usage() string {
+	return "dashboard"
 }
 
 func (Dashboard) Help() string {

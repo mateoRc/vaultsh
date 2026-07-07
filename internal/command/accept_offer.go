@@ -30,6 +30,10 @@ func (AcceptOffer) Hidden() bool {
 	return true
 }
 
+func (a AcceptOffer) Usage() string {
+	return a.name
+}
+
 func (a AcceptOffer) Execute(args []string, _ Input) Result {
 	if len(args) != 0 {
 		return Result{

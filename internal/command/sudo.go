@@ -35,6 +35,10 @@ func (Sudo) Hidden() bool {
 	return true
 }
 
+func (Sudo) Usage() string {
+	return "sudo hire mateo -s <yearly_salary>"
+}
+
 func (s Sudo) Execute(args []string, _ Input) Result {
 	if len(args) != 4 ||
 		args[0] != "hire" ||

@@ -65,9 +65,14 @@ func (w Wc) Execute(args []string, input Input) Result {
 func parseWcOptions(args []string) (wcOptions, *Result) {
 	var options wcOptions
 	selected := false
+	optionsEnded := false
 
 	for _, arg := range args {
-		if strings.HasPrefix(arg, "-") && arg != "-" {
+		if !optionsEnded && arg == "--" {
+			optionsEnded = true
+			continue
+		}
+		if !optionsEnded && strings.HasPrefix(arg, "-") && arg != "-" {
 			for _, option := range strings.TrimPrefix(arg, "-") {
 				switch option {
 				case 'l':

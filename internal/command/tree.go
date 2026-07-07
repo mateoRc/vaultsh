@@ -69,13 +69,18 @@ func parseTreeOptions(args []string) (int, string, bool, *Result) {
 	target := "."
 	pathSet := false
 	all := false
+	optionsEnded := false
 
 	for index := 0; index < len(args); index++ {
-		if args[index] == "-a" {
+		if !optionsEnded && args[index] == "--" {
+			optionsEnded = true
+			continue
+		}
+		if !optionsEnded && args[index] == "-a" {
 			all = true
 			continue
 		}
-		if args[index] == "-L" {
+		if !optionsEnded && args[index] == "-L" {
 			if index+1 >= len(args) {
 				return 0, "", false, treeUsage()
 			}
@@ -90,7 +95,7 @@ func parseTreeOptions(args []string) (int, string, bool, *Result) {
 			index++
 			continue
 		}
-		if strings.HasPrefix(args[index], "-") && args[index] != "-" {
+		if !optionsEnded && strings.HasPrefix(args[index], "-") && args[index] != "-" {
 			return 0, "", false, &Result{
 				Output:   fmt.Sprintf("tree: unknown option: %s", args[index]),
 				ExitCode: ExitUsage,

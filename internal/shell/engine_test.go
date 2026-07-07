@@ -337,9 +337,14 @@ func TestEngineCommandUsage(t *testing.T) {
 		line string
 		want string
 	}{
+		{line: "about extra", want: "usage: about"},
 		{line: "cd one two", want: "usage: cd [directory]"},
+		{line: "clear extra", want: "usage: clear"},
 		{line: "cat", want: "usage: cat [-n] [file]"},
+		{line: "history extra", want: "usage: history"},
+		{line: "pwd extra", want: "usage: pwd"},
 		{line: "tree one two", want: "usage: tree [-a] [-L depth] [path]"},
+		{line: "whoami extra", want: "usage: whoami"},
 	}
 
 	for _, tt := range tests {
@@ -396,6 +401,37 @@ func TestEngineCatLineNumbers(t *testing.T) {
 					result.ExitCode,
 					command.ExitSuccess,
 				)
+			}
+		})
+	}
+}
+
+func TestEngineOptionTerminator(t *testing.T) {
+	root := filesystem.NewDirectory("")
+	if err := root.Add(filesystem.NewFile("-n", "first\nsecond\n")); err != nil {
+		t.Fatalf("Add(-n): %v", err)
+	}
+	engine := NewWithRoot(root)
+
+	tests := []struct {
+		line string
+		want string
+	}{
+		{line: "cat -- -n", want: "first\nsecond\n"},
+		{line: "head -n 1 -- -n", want: "first"},
+		{line: "tail -n 1 -- -n", want: "second"},
+		{line: "sort -- -n", want: "first\nsecond"},
+		{line: "wc -l -- -n", want: "2"},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.line, func(t *testing.T) {
+			result := engine.Execute(tt.line)
+			if result.Output != tt.want {
+				t.Errorf("output = %q, want %q", result.Output, tt.want)
+			}
+			if result.ExitCode != command.ExitSuccess {
+				t.Errorf("exit code = %d, want %d", result.ExitCode, command.ExitSuccess)
 			}
 		})
 	}

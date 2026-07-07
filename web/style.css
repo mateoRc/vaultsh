@@ -533,8 +533,10 @@ h1::after {
   }
 
   .page {
+    display: flex;
     width: 100%;
     min-height: 100dvh;
+    flex-direction: column;
     padding-top: calc(1rem + env(safe-area-inset-top));
     padding-bottom: 0;
   }
@@ -567,7 +569,10 @@ h1::after {
   }
 
   .terminal {
+    display: flex;
     width: 100vw;
+    flex: 1;
+    flex-direction: column;
     margin-left: 0;
     border-inline: 0;
     border-bottom: 0;
@@ -575,13 +580,14 @@ h1::after {
   }
 
   .terminal-body {
-    min-height: auto;
+    min-height: 0;
+    flex: 1;
     padding-bottom: calc(1rem + env(safe-area-inset-bottom));
     font-size: 0.82rem;
   }
 
   #output {
-    flex: none;
+    flex: 1;
     min-height: 18rem;
     overflow-y: visible;
   }

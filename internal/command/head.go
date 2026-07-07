@@ -50,9 +50,14 @@ func (h Head) Execute(args []string, input Input) Result {
 func parseLineCount(name string, defaultCount int, args []string) (int, string, *Result) {
 	count := defaultCount
 	var path string
+	optionsEnded := false
 
 	for index := 0; index < len(args); index++ {
-		if args[index] == "-n" {
+		if !optionsEnded && args[index] == "--" {
+			optionsEnded = true
+			continue
+		}
+		if !optionsEnded && args[index] == "-n" {
 			if index+1 >= len(args) {
 				return 0, "", lineCountUsage(name)
 			}
@@ -66,6 +71,12 @@ func parseLineCount(name string, defaultCount int, args []string) (int, string, 
 			count = value
 			index++
 			continue
+		}
+		if !optionsEnded && len(args[index]) > 1 && args[index][0] == '-' {
+			return 0, "", &Result{
+				Output:   fmt.Sprintf("%s: unknown option: %s", name, args[index]),
+				ExitCode: ExitUsage,
+			}
 		}
 		if path != "" {
 			return 0, "", lineCountUsage(name)

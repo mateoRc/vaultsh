@@ -14,6 +14,10 @@ func (Hire) Hidden() bool {
 	return true
 }
 
+func (Hire) Usage() string {
+	return "hire mateo"
+}
+
 func (Hire) Execute(args []string, _ Input) Result {
 	if len(args) != 1 || args[0] != "mateo" {
 		return Result{

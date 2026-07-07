@@ -14,7 +14,15 @@ func (Whoami) Hidden() bool {
 	return true
 }
 
-func (Whoami) Execute([]string, Input) Result {
+func (Whoami) Usage() string {
+	return "whoami"
+}
+
+func (Whoami) Execute(args []string, _ Input) Result {
+	if len(args) != 0 {
+		return Result{Output: "usage: whoami", ExitCode: ExitUsage}
+	}
+
 	return Result{
 		Output: "Mateo Mahmutović\n" +
 			"Senior Backend Engineer\n" +
