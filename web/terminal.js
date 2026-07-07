@@ -1,3 +1,4 @@
+window.addEventListener("DOMContentLoaded", () => {
 const status = document.querySelector("#status");
 const atlasStatus = document.querySelector("#atlas-status");
 const forgeStatus = document.querySelector("#forge-status");
@@ -15,6 +16,29 @@ const actionButtons = document.querySelectorAll("[data-command]");
 const submitButtons = document.querySelectorAll(
   "#run-command, #clear-command, .next-commands button, .quick-commands button",
 );
+if (
+  !status ||
+  !atlasStatus ||
+  !forgeStatus ||
+  !form ||
+  !command ||
+  !prompt ||
+  !output ||
+  !requestStatus ||
+  !nextCommands ||
+  !nextCommandButton ||
+  !clearCommand ||
+  !quickCommandToggle ||
+  !quickCommands
+) {
+  return;
+}
+window.addEventListener("error", () => {
+  status.textContent = "unavailable";
+  status.dataset.state = "unavailable";
+  atlasStatus.dataset.state = "unavailable";
+  forgeStatus.dataset.state = "unavailable";
+});
 const endpoints = Object.freeze({
   health: "/healthz",
   status: "/api/status",
@@ -64,12 +88,12 @@ const suggestions = [
 ];
 const maxOutputEntries = 100;
 let outputEntries = [{ welcome: output.textContent }];
-let sessionId = sessionStorage.getItem(storageKeys.session) || "";
+let sessionId = storageGet(storageKeys.session) || "";
 let currentDirectory = sessionId
-  ? sessionStorage.getItem(storageKeys.currentDirectory) || "/"
+  ? storageGet(storageKeys.currentDirectory) || "/"
   : "/";
 let suggestionIndex = Number.parseInt(
-  sessionStorage.getItem(storageKeys.suggestionIndex) || "0",
+  storageGet(storageKeys.suggestionIndex) || "0",
   10,
 );
 if (
@@ -103,6 +127,22 @@ function setStatus(state) {
   status.textContent = state;
   status.dataset.state = state;
   status.setAttribute("aria-label", `Vaultsh ${state}`);
+}
+
+function storageGet(key) {
+  try {
+    return window.sessionStorage.getItem(key);
+  } catch {
+    return "";
+  }
+}
+
+function storageSet(key, value) {
+  try {
+    window.sessionStorage.setItem(key, value);
+  } catch {
+    // Storage can be unavailable in private or restricted browser contexts.
+  }
 }
 
 async function refreshVaultStatus() {
@@ -400,7 +440,7 @@ function handleResult(line, result, submittedFrom) {
 function suggestNext() {
   const [label, commandLine] = suggestions[suggestionIndex];
   suggestionIndex = (suggestionIndex + 1) % suggestions.length;
-  sessionStorage.setItem(storageKeys.suggestionIndex, String(suggestionIndex));
+  storageSet(storageKeys.suggestionIndex, String(suggestionIndex));
 
   nextCommandButton.textContent = label;
   nextCommandButton.dataset.command = commandLine;
@@ -410,8 +450,8 @@ function suggestNext() {
 function updateSession(result) {
   sessionId = result.session_id;
   currentDirectory = result.current_directory || currentDirectory;
-  sessionStorage.setItem(storageKeys.session, sessionId);
-  sessionStorage.setItem(storageKeys.currentDirectory, currentDirectory);
+  storageSet(storageKeys.session, sessionId);
+  storageSet(storageKeys.currentDirectory, currentDirectory);
   updatePrompt();
 }
 
@@ -474,3 +514,4 @@ function createTerminalLink(label, href) {
   }
   return link;
 }
+});
