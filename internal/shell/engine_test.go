@@ -8,6 +8,11 @@ import (
 	"github.com/mateom/vaultsh/internal/filesystem"
 )
 
+const aboutOutput = "Vaultsh is a read-only virtual shell for exploring Mateo's " +
+	"CV, projects, and live backend services.\n\n" +
+	"The portfolio is the system: a Go shell backed by " +
+	"Atlas search, Forge telemetry, and Lab deployment docs."
+
 func TestEngineExecute(t *testing.T) {
 	tests := []struct {
 		name string
@@ -42,7 +47,7 @@ func TestEngineExecute(t *testing.T) {
 			name: "about",
 			line: "about",
 			want: command.Result{
-				Output:   "Vaultsh is a read-only virtual shell engine.",
+				Output:   aboutOutput,
 				ExitCode: 0,
 			},
 		},

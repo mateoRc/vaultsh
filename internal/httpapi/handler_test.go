@@ -16,6 +16,11 @@ type statusStub struct {
 	forge bool
 }
 
+const aboutOutput = "Vaultsh is a read-only virtual shell for exploring Mateo's " +
+	"CV, projects, and live backend services.\n\n" +
+	"The portfolio is the system: a Go shell backed by " +
+	"Atlas search, Forge telemetry, and Lab deployment docs."
+
 func (s statusStub) Availability() (bool, bool) {
 	return s.atlas, s.forge
 }
@@ -82,7 +87,7 @@ func TestExec(t *testing.T) {
 	if err := json.NewDecoder(response.Body).Decode(&result); err != nil {
 		t.Fatalf("decode response: %v", err)
 	}
-	if result.Output != "Vaultsh is a read-only virtual shell engine." {
+	if result.Output != aboutOutput {
 		t.Errorf("output = %q, want about output", result.Output)
 	}
 	if result.ExitCode != 0 {
