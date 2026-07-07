@@ -20,7 +20,8 @@ func (Welcome) Execute(args []string, _ Input) Result {
 	}
 
 	return Result{
-		Output: "Welcome to Vaultsh.\n\n" +
+		Output: "I decided to build a portfolio, so naturally I built a shell first.\n\n" +
+			"Welcome to Vaultsh.\n\n" +
 			"[Contact](mailto:mahmutovic.mateo@gmail.com) · " +
 			"[GitHub](https://github.com/mateoRc/vaultsh) · " +
 			"[LinkedIn](https://www.linkedin.com/in/mateo-mahmutovi%C4%87-a9837232b/)\n\n" +
@@ -30,7 +31,7 @@ func (Welcome) Execute(args []string, _ Input) Result {
 			"  search \"Languages\" (search the portfolio)\n" +
 			"  contact (email, GitHub, and LinkedIn)\n" +
 			"  dashboard (view live service activity)\n\n" +
-			"Choose a suggestion below or type help.",
+			"Type help or choose a suggestion below.",
 		ExitCode: ExitSuccess,
 	}
 }
