@@ -28,8 +28,9 @@ func TestCompleteCommandCommonPrefix(t *testing.T) {
 	if result.Replacement != "c" {
 		t.Errorf("replacement = %q, want %q", result.Replacement, "c")
 	}
-	if !reflect.DeepEqual(result.Candidates, []string{"cat", "cd", "clear"}) {
-		t.Errorf("candidates = %q, want [cat cd clear]", result.Candidates)
+	want := []string{"cat", "cd", "clear", "contact"}
+	if !reflect.DeepEqual(result.Candidates, want) {
+		t.Errorf("candidates = %q, want %q", result.Candidates, want)
 	}
 }
 

@@ -23,6 +23,7 @@ func TestEngineExecute(t *testing.T) {
 					"\n  cat - Print file contents" +
 					"\n  cd - Change the current directory" +
 					"\n  clear - Clear the terminal" +
+					"\n  contact - Show contact links" +
 					"\n  grep - Filter lines by a regular expression" +
 					"\n  head - Print the first lines" +
 					"\n  help - List available commands" +
@@ -32,7 +33,8 @@ func TestEngineExecute(t *testing.T) {
 					"\n  sort - Sort lines" +
 					"\n  tail - Print the last lines" +
 					"\n  tree - Print a directory tree" +
-					"\n  wc - Count lines, words and bytes",
+					"\n  wc - Count lines, words and bytes" +
+					"\n  welcome - Show the terminal introduction",
 				ExitCode: 0,
 			},
 		},
@@ -125,7 +127,10 @@ func TestEngineWhoamiEasterEgg(t *testing.T) {
 	result := New().Execute("whoami")
 	want := "Mateo Mahmutović\n" +
 		"Senior Backend Engineer\n" +
-		"Currently building distributed backend systems."
+		"Currently building distributed backend systems.\n\n" +
+		"[Email](mailto:mahmutovic.mateo@gmail.com)\n" +
+		"[GitHub](https://github.com/mateoRc)\n" +
+		"[LinkedIn](https://www.linkedin.com/in/mateo-mahmutovi%C4%87-a9837232b/)"
 
 	if result.Output != want {
 		t.Errorf("output = %q, want %q", result.Output, want)
