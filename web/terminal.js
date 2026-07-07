@@ -1,4 +1,3 @@
-function initTerminal() {
 const status = document.querySelector("#status");
 const atlasStatus = document.querySelector("#atlas-status");
 const forgeStatus = document.querySelector("#forge-status");
@@ -515,11 +514,4 @@ function createTerminalLink(label, href) {
     link.rel = "noreferrer";
   }
   return link;
-}
-}
-
-if (document.readyState === "loading") {
-  window.addEventListener("DOMContentLoaded", initTerminal);
-} else {
-  initTerminal();
 }
