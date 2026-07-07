@@ -89,7 +89,7 @@ function initTerminal() {
     ["Explore available commands", "help"],
   ];
   const maxOutputEntries = 100;
-  let outputEntries = [{ welcome: output.textContent }];
+  let outputEntries = output.textContent ? [{ welcome: output.textContent }] : [];
   let sessionId = storageGet(storageKeys.session) || "";
   let currentDirectory = sessionId
     ? storageGet(storageKeys.currentDirectory) || "/"
