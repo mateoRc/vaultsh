@@ -526,7 +526,7 @@ h1::after {
   }
 
   body {
-    overflow: hidden;
+    overflow-x: hidden;
   }
 
   .page {
@@ -585,6 +585,7 @@ h1::after {
   }
 
   #output {
+    flex: 1;
     min-height: 0;
   }
 
