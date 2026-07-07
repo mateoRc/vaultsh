@@ -389,6 +389,11 @@ h1::after {
   transform: translateY(-0.3rem);
 }
 
+.quick-commands--instant,
+.quick-commands--instant button {
+  transition: none;
+}
+
 .quick-commands button,
 .touch-actions button {
   min-height: 1.9rem;

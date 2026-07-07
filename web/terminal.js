@@ -292,8 +292,9 @@ function initTerminal() {
 
   for (const button of actionButtons) {
     button.addEventListener("click", async () => {
-      await execute(button.dataset.command);
-      setQuickCommandsExpanded(false);
+      const commandLine = button.dataset.command;
+      setQuickCommandsExpanded(false, { instant: true });
+      await execute(commandLine);
     });
   }
 
@@ -321,10 +322,18 @@ function initTerminal() {
     return quickCommands.classList.contains("quick-commands--collapsed");
   }
 
-  function setQuickCommandsExpanded(expanded) {
+  function setQuickCommandsExpanded(expanded, options = {}) {
+    if (options.instant) {
+      quickCommands.classList.add("quick-commands--instant");
+    }
     quickCommands.classList.toggle("quick-commands--collapsed", !expanded);
     quickCommandToggle.setAttribute("aria-expanded", String(expanded));
     quickCommands.setAttribute("aria-hidden", String(!expanded));
+    if (options.instant) {
+      window.requestAnimationFrame(() => {
+        quickCommands.classList.remove("quick-commands--instant");
+      });
+    }
   }
 
   async function complete() {
@@ -436,8 +445,8 @@ function initTerminal() {
     }
 
     const details = result.verbose ? `\n[verbose] ${result.verbose}` : "";
-    appendEntry(line, `${result.output}${details}`, submittedFrom, result.exit_code);
     suggestNext();
+    appendEntry(line, `${result.output}${details}`, submittedFrom, result.exit_code);
   }
 
   function suggestNext() {
@@ -496,8 +505,11 @@ function initTerminal() {
   }
 
   function scrollOutputToEnd(smooth) {
+    const coarsePointer = window.matchMedia("(pointer: coarse)").matches;
     const behavior =
-      smooth && !window.matchMedia("(prefers-reduced-motion: reduce)").matches
+      smooth &&
+      coarsePointer &&
+      !window.matchMedia("(prefers-reduced-motion: reduce)").matches
         ? "smooth"
         : "auto";
     output.scrollTo({
