@@ -227,7 +227,11 @@ function initTerminal() {
   }
 
   function focusCommand() {
-    command.focus();
+    try {
+      command.focus({ preventScroll: true });
+    } catch {
+      command.focus();
+    }
     const end = command.value.length;
     command.setSelectionRange(end, end);
   }
@@ -292,10 +296,12 @@ function initTerminal() {
 
   for (const button of actionButtons) {
     button.addEventListener("click", async () => {
-      document.querySelector(".terminal").scrollIntoView({
-        behavior: "smooth",
-        block: "start",
-      });
+      if (window.matchMedia("(pointer: fine)").matches) {
+        document.querySelector(".terminal").scrollIntoView({
+          behavior: "smooth",
+          block: "start",
+        });
+      }
       await execute(button.dataset.command);
       setQuickCommandsExpanded(false);
     });

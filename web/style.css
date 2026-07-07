@@ -526,7 +526,7 @@ h1::after {
   }
 
   body {
-    overflow-x: hidden;
+    overflow: hidden;
   }
 
   .page {
@@ -587,6 +587,8 @@ h1::after {
   #output {
     flex: 1;
     min-height: 0;
+    overscroll-behavior: contain;
+    -webkit-overflow-scrolling: touch;
   }
 
   #command {
