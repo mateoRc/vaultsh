@@ -20,7 +20,7 @@ func (Welcome) Execute(args []string, _ Input) Result {
 	}
 
 	return Result{
-		Output: "I built my portfolio as a shell.\n\n" +
+		Output: "I decided to build a portfolio, so naturally I built a shell first.\n\n" +
 			"Welcome to Vaultsh.\n\n" +
 			"[Contact](mailto:mahmutovic.mateo@gmail.com) · " +
 			"[GitHub](https://github.com/mateoRc/vaultsh) · " +
