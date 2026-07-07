@@ -3,6 +3,7 @@ package filesystem
 import (
 	"errors"
 	"testing"
+	"time"
 )
 
 type stubNode struct {
@@ -16,6 +17,10 @@ func (n stubNode) Name() string {
 
 func (n stubNode) Kind() Kind {
 	return n.kind
+}
+
+func (stubNode) ModTime() time.Time {
+	return time.Time{}
 }
 
 func TestDirectoryImplementsNode(t *testing.T) {

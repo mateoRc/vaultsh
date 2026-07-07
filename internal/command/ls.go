@@ -3,6 +3,7 @@ package command
 import (
 	"fmt"
 	"path"
+	"sort"
 	"strconv"
 	"strings"
 
@@ -22,6 +23,8 @@ type lsOptions struct {
 	all       bool
 	long      bool
 	recursive bool
+	reverse   bool
+	timeSort  bool
 	path      string
 	pathSet   bool
 }
@@ -39,7 +42,7 @@ func (Ls) Description() string {
 }
 
 func (Ls) Usage() string {
-	return "ls [-alR] [path]"
+	return "ls [-alrtR] [path]"
 }
 
 func (Ls) Help() string {
@@ -105,11 +108,10 @@ func parseLsOptions(args []string) (lsOptions, *Result) {
 					options.long = true
 				case 'R':
 					options.recursive = true
+				case 'r':
+					options.reverse = true
 				case 't':
-					return options, &Result{
-						Output:   "ls: option -t requires file timestamps",
-						ExitCode: ExitUnsupported,
-					}
+					options.timeSort = true
 				default:
 					return options, &Result{
 						Output:   fmt.Sprintf("ls: unknown option -- %c", option),
@@ -121,7 +123,7 @@ func parseLsOptions(args []string) (lsOptions, *Result) {
 		}
 		if options.pathSet {
 			return options, &Result{
-				Output:   "usage: ls [-alR] [path]",
+				Output:   "usage: ls [-alrtR] [path]",
 				ExitCode: ExitUsage,
 			}
 		}
@@ -138,7 +140,7 @@ func collectRecursiveListings(
 	options lsOptions,
 	sections *[]string,
 ) {
-	entries := visibleChildren(directory, options.all)
+	entries := orderedChildren(directory, options)
 	lines := []string{directoryPath + ":"}
 	for _, entry := range entries {
 		lines = append(lines, formatLsEntry(entry, options.long))
@@ -160,7 +162,7 @@ func collectRecursiveListings(
 }
 
 func formatDirectoryEntries(directory *filesystem.Directory, options lsOptions) []string {
-	children := visibleChildren(directory, options.all)
+	children := orderedChildren(directory, options)
 	entries := make([]string, 0, len(children))
 	for _, child := range children {
 		entries = append(entries, formatLsEntry(child, options.long))
@@ -175,6 +177,26 @@ func visibleChildren(directory *filesystem.Directory, all bool) []filesystem.Nod
 			continue
 		}
 		children = append(children, child)
+	}
+	return children
+}
+
+func orderedChildren(directory *filesystem.Directory, options lsOptions) []filesystem.Node {
+	children := visibleChildren(directory, options.all)
+	if options.timeSort {
+		sort.SliceStable(children, func(i, j int) bool {
+			left := children[i]
+			right := children[j]
+			if left.ModTime().Equal(right.ModTime()) {
+				return left.Name() < right.Name()
+			}
+			return left.ModTime().After(right.ModTime())
+		})
+	}
+	if options.reverse {
+		for left, right := 0, len(children)-1; left < right; left, right = left+1, right-1 {
+			children[left], children[right] = children[right], children[left]
+		}
 	}
 	return children
 }

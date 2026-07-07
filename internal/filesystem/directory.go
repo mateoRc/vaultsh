@@ -3,18 +3,25 @@ package filesystem
 import (
 	"errors"
 	"sort"
+	"time"
 )
 
 var ErrNodeExists = errors.New("node already exists")
 
 type Directory struct {
 	name     string
+	modTime  time.Time
 	children map[string]Node
 }
 
 func NewDirectory(name string) *Directory {
+	return NewDirectoryWithModTime(name, time.Time{})
+}
+
+func NewDirectoryWithModTime(name string, modTime time.Time) *Directory {
 	return &Directory{
 		name:     name,
+		modTime:  modTime,
 		children: make(map[string]Node),
 	}
 }
@@ -25,6 +32,10 @@ func (d *Directory) Name() string {
 
 func (*Directory) Kind() Kind {
 	return KindDirectory
+}
+
+func (d *Directory) ModTime() time.Time {
+	return d.modTime
 }
 
 func (d *Directory) Add(node Node) error {

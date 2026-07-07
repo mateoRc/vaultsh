@@ -19,6 +19,10 @@ func Load(source fs.FS) (*filesystem.Directory, error) {
 		if name == "." {
 			return nil
 		}
+		info, err := entry.Info()
+		if err != nil {
+			return fmt.Errorf("stat file %s: %w", name, err)
+		}
 
 		parent, found := directories[path.Dir(name)]
 		if !found {
@@ -26,7 +30,7 @@ func Load(source fs.FS) (*filesystem.Directory, error) {
 		}
 
 		if entry.IsDir() {
-			directory := filesystem.NewDirectory(entry.Name())
+			directory := filesystem.NewDirectoryWithModTime(entry.Name(), info.ModTime())
 			if err := parent.Add(directory); err != nil {
 				return fmt.Errorf("add directory %s: %w", name, err)
 			}
@@ -38,7 +42,8 @@ func Load(source fs.FS) (*filesystem.Directory, error) {
 		if err != nil {
 			return fmt.Errorf("read file %s: %w", name, err)
 		}
-		if err := parent.Add(filesystem.NewFile(entry.Name(), string(content))); err != nil {
+		file := filesystem.NewFileWithModTime(entry.Name(), string(content), info.ModTime())
+		if err := parent.Add(file); err != nil {
 			return fmt.Errorf("add file %s: %w", name, err)
 		}
 		return nil

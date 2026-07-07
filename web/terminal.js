@@ -296,12 +296,6 @@ function initTerminal() {
 
   for (const button of actionButtons) {
     button.addEventListener("click", async () => {
-      if (window.matchMedia("(pointer: fine)").matches) {
-        document.querySelector(".terminal").scrollIntoView({
-          behavior: "smooth",
-          block: "start",
-        });
-      }
       await execute(button.dataset.command);
       setQuickCommandsExpanded(false);
     });

@@ -1,5 +1,7 @@
 package filesystem
 
+import "time"
+
 type Kind string
 
 const (
@@ -10,4 +12,5 @@ const (
 type Node interface {
 	Name() string
 	Kind() Kind
+	ModTime() time.Time
 }
