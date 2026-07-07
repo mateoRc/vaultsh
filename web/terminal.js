@@ -63,7 +63,7 @@ function initTerminal() {
   const statusTimeoutMilliseconds = 3000;
   const statusRefreshMilliseconds = 10000;
   const suggestions = [
-    ["Start with profile", "cat /cv/about.md"],
+    ["Start with about", "about"],
     ["Show identity and links", "whoami"],
     ["Review core skills", "cat /cv/skills.md"],
     ["Browse experience", "tree /cv/experience"],
