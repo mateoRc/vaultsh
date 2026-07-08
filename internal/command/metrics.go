@@ -8,12 +8,13 @@ import (
 )
 
 type MetricsSummary struct {
-	Requests int            `json:"requests"`
-	Errors   int            `json:"errors"`
-	Average  float64        `json:"avg_ms"`
-	Median   float64        `json:"median_ms"`
-	Services map[string]int `json:"services"`
-	Commands map[string]int `json:"commands"`
+	Requests   int            `json:"requests"`
+	Errors     int            `json:"errors"`
+	UserErrors int            `json:"user_errors"`
+	Average    float64        `json:"avg_ms"`
+	Median     float64        `json:"median_ms"`
+	Services   map[string]int `json:"services"`
+	Commands   map[string]int `json:"commands"`
 }
 
 type MetricsService interface {
@@ -71,7 +72,8 @@ func (m Metrics) Execute(args []string, _ Input) Result {
 
 	lines := []string{
 		fmt.Sprintf("requests: %d", summary.Requests),
-		fmt.Sprintf("errors: %d", summary.Errors),
+		fmt.Sprintf("runtime errors: %d", summary.Errors),
+		fmt.Sprintf("user errors: %d", summary.UserErrors),
 		fmt.Sprintf("avg ms: %g", summary.Average),
 		fmt.Sprintf("median ms: %g", summary.Median),
 		"services:",

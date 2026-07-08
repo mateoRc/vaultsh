@@ -97,7 +97,12 @@ func newSessionManager(
 func (m *SessionManager) Execute(
 	sessionID,
 	line string,
-) (command.Result, string, string, error) {
+) (
+	result command.Result,
+	returnedSessionID string,
+	currentDirectory string,
+	err error,
+) {
 	current, sessionID, err := m.get(sessionID)
 	if err != nil {
 		return command.Result{}, "", "", err
@@ -110,7 +115,29 @@ func (m *SessionManager) Execute(
 	}()
 
 	started := time.Now()
-	result := current.engine.Execute(line)
+	defer func() {
+		if recover() == nil {
+			return
+		}
+		result = command.Result{
+			Output:   "internal error",
+			ExitCode: command.ExitFailure,
+		}
+		returnedSessionID = sessionID
+		currentDirectory = current.engine.context.WorkingDirectory().Path()
+		err = nil
+		if name := commandName(line); name != "" && m.deps.Events != nil {
+			_ = m.deps.Events.Record(
+				"vault",
+				"command.runtime_error",
+				name,
+				time.Since(started).Milliseconds(),
+				result.ExitCode,
+			)
+		}
+	}()
+
+	result = current.engine.Execute(line)
 	if name := commandName(line); name != "" && m.deps.Events != nil {
 		_ = m.deps.Events.Record(
 			"vault",

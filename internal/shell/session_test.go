@@ -32,6 +32,20 @@ func (r *eventRecorderStub) Record(
 
 type unavailableServices struct{}
 
+type panicCommand struct{}
+
+func (panicCommand) Name() string {
+	return "panic"
+}
+
+func (panicCommand) Description() string {
+	return "Panic for runtime telemetry tests"
+}
+
+func (panicCommand) Execute([]string, command.Input) command.Result {
+	panic("boom")
+}
+
 func (unavailableServices) Search(string) ([]command.SearchResult, error) {
 	return nil, context.DeadlineExceeded
 }
@@ -60,6 +74,36 @@ func TestSessionManagerRecordsCommandTelemetryWithoutChangingResult(t *testing.T
 		recorder.event != "command.executed" ||
 		recorder.name != "about" ||
 		recorder.exitCode != command.ExitSuccess {
+		t.Errorf("recorded event = %#v", recorder)
+	}
+}
+
+func TestSessionManagerRecordsRuntimeErrorTelemetryForPanics(t *testing.T) {
+	recorder := &eventRecorderStub{}
+	manager := NewSessionManagerWithDependencies(
+		filesystem.NewDirectory(""),
+		Dependencies{Events: recorder},
+	)
+	current, sessionID, err := manager.get("")
+	if err != nil {
+		t.Fatalf("get(): %v", err)
+	}
+	current.engine.commands.Register(panicCommand{})
+
+	result, returnedID, _, err := manager.Execute(sessionID, "panic")
+
+	if err != nil {
+		t.Fatalf("Execute() error = %v", err)
+	}
+	if returnedID != sessionID {
+		t.Errorf("session ID = %q, want %q", returnedID, sessionID)
+	}
+	if result.Output != "internal error" || result.ExitCode != command.ExitFailure {
+		t.Fatalf("Execute() result = %#v", result)
+	}
+	if recorder.event != "command.runtime_error" ||
+		recorder.name != "panic" ||
+		recorder.exitCode != command.ExitFailure {
 		t.Errorf("recorded event = %#v", recorder)
 	}
 }
