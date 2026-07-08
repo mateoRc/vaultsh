@@ -33,7 +33,7 @@ func TestForgeRequestsSendBearerToken(t *testing.T) {
 		case "/summary":
 			w.Header().Set("Content-Type", "application/json")
 			_, _ = w.Write([]byte(
-				`{"requests":0,"errors":0,"avg_ms":0,"services":{},"commands":{}}`,
+				`{"requests":0,"errors":0,"user_errors":0,"avg_ms":0,"services":{},"commands":{}}`,
 			))
 		default:
 			http.NotFound(w, r)
