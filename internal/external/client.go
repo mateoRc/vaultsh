@@ -13,19 +13,12 @@ import (
 )
 
 type Client struct {
-	atlasURL          string
-	forgeURL          string
-	atlasToken        string
-	forgeToken        string
-	http              *http.Client
-	startedAt         time.Time
-	contentBytes      int64
-	contentBytesKnown bool
-}
-
-func (c *Client) SetContentBytes(bytes int64) {
-	c.contentBytes = bytes
-	c.contentBytesKnown = true
+	atlasURL   string
+	forgeURL   string
+	atlasToken string
+	forgeToken string
+	http       *http.Client
+	startedAt  time.Time
 }
 
 type searchResponse struct {
@@ -159,9 +152,7 @@ func (c *Client) SystemStatus() command.SystemStatus {
 	atlasOnline, atlasUptime := c.serviceStatus(c.atlasURL)
 	forgeOnline, forgeUptime := c.serviceStatus(c.forgeURL)
 	return command.SystemStatus{
-		Uptime:             vaultUptime,
-		ContentBytes:       c.contentBytes,
-		ContentBytesKnown:  c.contentBytesKnown,
+		Uptime: vaultUptime,
 		Services: []command.ServiceHealth{
 			{Name: "vaultsh", Online: true, Uptime: vaultUptime},
 			{Name: "atlas", Online: atlasOnline, Uptime: atlasUptime},

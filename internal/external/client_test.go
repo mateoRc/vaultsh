@@ -49,18 +49,3 @@ func TestForgeRequestsSendBearerToken(t *testing.T) {
 		t.Fatal(err)
 	}
 }
-
-func TestSystemStatusIncludesConfiguredContentSize(t *testing.T) {
-	client := NewClient("", "", "", "")
-	client.SetContentBytes(1234)
-
-	status := client.SystemStatus()
-
-	if !status.ContentBytesKnown || status.ContentBytes != 1234 {
-		t.Errorf(
-			"SystemStatus() content size = %d, known=%v",
-			status.ContentBytes,
-			status.ContentBytesKnown,
-		)
-	}
-}
