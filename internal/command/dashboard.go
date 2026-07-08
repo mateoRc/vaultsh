@@ -84,7 +84,7 @@ func (d Dashboard) Execute(args []string, _ Input) Result {
 	if d.assessment != nil {
 		current, assessmentErr := d.assessment.CurrentAssessment()
 		if assessmentErr == nil {
-			output += "\n\n" + FormatAssessment(current)
+			output += "\n\n" + sentinel.FormatAssessment(current)
 		}
 	}
 	return Result{Output: output, ExitCode: ExitSuccess}

@@ -1,13 +1,11 @@
-package command
+package sentinel
 
 import (
 	"fmt"
 	"strings"
-
-	"github.com/mateom/vaultsh/internal/sentinel"
 )
 
-func FormatAssessment(assessment sentinel.Assessment) string {
+func FormatAssessment(assessment Assessment) string {
 	counts := countCheckStatuses(assessment.Checks)
 	lines := []string{
 		"SENTINEL",
@@ -33,7 +31,7 @@ func FormatAssessment(assessment sentinel.Assessment) string {
 	return strings.Join(lines, "\n")
 }
 
-func countCheckStatuses(checks []sentinel.AssessmentCheck) map[string]int {
+func countCheckStatuses(checks []AssessmentCheck) map[string]int {
 	counts := map[string]int{}
 	for _, check := range checks {
 		counts[check.Status]++
@@ -48,7 +46,7 @@ func shortCommit(commit string) string {
 	return commit[:7]
 }
 
-func formatFindings(checks []sentinel.AssessmentCheck) []string {
+func formatFindings(checks []AssessmentCheck) []string {
 	lines := []string{}
 	for _, check := range checks {
 		if check.Status == "passed" {
@@ -62,7 +60,7 @@ func formatFindings(checks []sentinel.AssessmentCheck) []string {
 	return lines
 }
 
-func formatFinding(check sentinel.AssessmentCheck) string {
+func formatFinding(check AssessmentCheck) string {
 	return fmt.Sprintf(
 		"    - [%s] %s (%s): %s",
 		check.Status,
