@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"strings"
 	"time"
+
+	"github.com/mateom/vaultsh/internal/sentinel"
 )
 
 type ServiceHealth struct {
@@ -19,6 +21,10 @@ type SystemStatus struct {
 
 type SystemService interface {
 	SystemStatus() SystemStatus
+}
+
+type AssessmentService interface {
+	CurrentAssessment() (sentinel.Assessment, error)
 }
 
 type Dashboard struct {

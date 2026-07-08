@@ -6,10 +6,15 @@ import (
 )
 
 type Help struct {
-	registry *Registry
+	registry HelpRegistry
 }
 
-func NewHelp(registry *Registry) Help {
+type HelpRegistry interface {
+	Find(name string) (Command, bool)
+	Commands() []Command
+}
+
+func NewHelp(registry HelpRegistry) Help {
 	return Help{registry: registry}
 }
 

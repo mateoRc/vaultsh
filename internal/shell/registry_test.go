@@ -1,6 +1,10 @@
-package command
+package shell
 
-import "testing"
+import (
+	"testing"
+
+	"github.com/mateom/vaultsh/internal/command"
+)
 
 type stubCommand struct {
 	name string
@@ -14,8 +18,8 @@ func (stubCommand) Description() string {
 	return "test command"
 }
 
-func (stubCommand) Execute([]string, Input) Result {
-	return Result{}
+func (stubCommand) Execute([]string, command.Input) command.Result {
+	return command.Result{}
 }
 
 func TestRegistryRegisterAndFind(t *testing.T) {

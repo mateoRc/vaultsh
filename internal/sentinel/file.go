@@ -4,8 +4,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"os"
-
-	"github.com/mateom/vaultsh/internal/command"
 )
 
 type FileReader struct {
@@ -16,8 +14,8 @@ func NewFileReader(path string) *FileReader {
 	return &FileReader{path: path}
 }
 
-func (r *FileReader) CurrentAssessment() (command.Assessment, error) {
-	var assessment command.Assessment
+func (r *FileReader) CurrentAssessment() (Assessment, error) {
+	var assessment Assessment
 	data, err := os.ReadFile(r.path)
 	if err != nil {
 		return assessment, err

@@ -10,7 +10,7 @@ import (
 )
 
 type Engine struct {
-	commands *command.Registry
+	commands *Registry
 	context  *ExecutionContext
 }
 
@@ -43,7 +43,7 @@ func NewWithContextAndDependencies(
 	context *ExecutionContext,
 	dependencies Dependencies,
 ) *Engine {
-	commands := command.NewRegistry()
+	commands := NewRegistry()
 	workingDirectory := context.WorkingDirectory()
 	negotiation := context.Negotiation()
 

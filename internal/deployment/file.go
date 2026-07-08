@@ -4,8 +4,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"os"
-
-	"github.com/mateom/vaultsh/internal/command"
 )
 
 type FileReader struct {
@@ -16,8 +14,8 @@ func NewFileReader(path string) *FileReader {
 	return &FileReader{path: path}
 }
 
-func (r *FileReader) CurrentDeployment() (command.Deployment, error) {
-	var deployment command.Deployment
+func (r *FileReader) CurrentDeployment() (Deployment, error) {
+	var deployment Deployment
 	data, err := os.ReadFile(r.path)
 	if err != nil {
 		return deployment, err

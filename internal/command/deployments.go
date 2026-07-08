@@ -3,18 +3,12 @@ package command
 import (
 	"fmt"
 	"strings"
-	"time"
+
+	"github.com/mateom/vaultsh/internal/deployment"
 )
 
-type Deployment struct {
-	Status     string    `json:"status"`
-	Version    string    `json:"version"`
-	DeployedAt time.Time `json:"deployed_at"`
-	Services   map[string]string `json:"services"`
-}
-
 type DeploymentService interface {
-	CurrentDeployment() (Deployment, error)
+	CurrentDeployment() (deployment.Deployment, error)
 }
 
 type Deployments struct {
@@ -52,7 +46,7 @@ func (d Deployments) Execute(args []string, _ Input) Result {
 	return Result{Output: FormatDeployment(deployment), ExitCode: ExitSuccess}
 }
 
-func FormatDeployment(deployment Deployment) string {
+func FormatDeployment(deployment deployment.Deployment) string {
 	return strings.Join([]string{
 		"DEPLOYMENT",
 		"==========",

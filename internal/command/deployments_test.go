@@ -4,10 +4,13 @@ import (
 	"errors"
 	"testing"
 	"time"
+
+	"github.com/mateom/vaultsh/internal/deployment"
+	"github.com/mateom/vaultsh/internal/sentinel"
 )
 
 type deploymentStub struct {
-	deployment Deployment
+	deployment deployment.Deployment
 	err        error
 }
 
@@ -16,7 +19,7 @@ type systemStub struct {
 }
 
 type assessmentStub struct {
-	assessment Assessment
+	assessment sentinel.Assessment
 	err        error
 }
 
@@ -24,16 +27,16 @@ func (s systemStub) SystemStatus() SystemStatus {
 	return s.status
 }
 
-func (s assessmentStub) CurrentAssessment() (Assessment, error) {
+func (s assessmentStub) CurrentAssessment() (sentinel.Assessment, error) {
 	return s.assessment, s.err
 }
 
-func (s deploymentStub) CurrentDeployment() (Deployment, error) {
+func (s deploymentStub) CurrentDeployment() (deployment.Deployment, error) {
 	return s.deployment, s.err
 }
 
 func TestDeploymentsFormatsSanitizedMetadata(t *testing.T) {
-	service := deploymentStub{deployment: Deployment{
+	service := deploymentStub{deployment: deployment.Deployment{
 		Status:     "success",
 		Version:    "deploy-42",
 		DeployedAt: time.Date(2026, 7, 3, 15, 20, 0, 0, time.UTC),
@@ -70,7 +73,7 @@ func TestDeploymentsDegradesWhenMetadataIsUnavailable(t *testing.T) {
 
 func TestDashboardIncludesDeployment(t *testing.T) {
 	metrics := externalStub{dashboard: "Forge dashboard"}
-	deployments := deploymentStub{deployment: Deployment{
+	deployments := deploymentStub{deployment: deployment.Deployment{
 		Status:     "success",
 		Version:    "deploy-42",
 		DeployedAt: time.Date(2026, 7, 3, 15, 20, 0, 0, time.UTC),
@@ -113,12 +116,12 @@ func TestDashboardIncludesServiceHealthAndUptime(t *testing.T) {
 
 func TestDashboardIncludesSentinelAssessment(t *testing.T) {
 	metrics := externalStub{dashboard: "Forge dashboard"}
-	assessment := assessmentStub{assessment: Assessment{
+	assessment := assessmentStub{assessment: sentinel.Assessment{
 		Commit:     "abcdef123456",
 		AnalyzedAt: time.Date(2026, 7, 4, 12, 0, 0, 0, time.UTC),
 		Risk:       "high",
 		Decision:   "advisory",
-		Checks: []AssessmentCheck{
+		Checks: []sentinel.AssessmentCheck{
 			{Name: "tests", Status: "passed"},
 			{
 				Name:     "vaultsh-image-security",
