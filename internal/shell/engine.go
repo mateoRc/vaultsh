@@ -47,7 +47,7 @@ func NewWithContextAndDependencies(
 	workingDirectory := context.WorkingDirectory()
 	negotiation := context.Negotiation()
 
-	commands.Register(command.NewAcceptOffer("Y", negotiation))
+	commands.Register(NewAcceptOffer("Y", negotiation))
 	commands.Register(command.About{})
 	commands.Register(command.NewCat(workingDirectory))
 	commands.Register(command.NewCd(workingDirectory))
@@ -67,7 +67,7 @@ func NewWithContextAndDependencies(
 	commands.Register(command.NewWc(workingDirectory))
 	commands.Register(command.Welcome{})
 	commands.Register(command.Whoami{})
-	commands.Register(command.NewAcceptOffer("y", negotiation))
+	commands.Register(NewAcceptOffer("y", negotiation))
 	if dependencies.Search != nil {
 		commands.Register(command.NewSearch(dependencies.Search))
 	}
