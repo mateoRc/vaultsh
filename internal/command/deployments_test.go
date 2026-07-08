@@ -111,6 +111,47 @@ func TestDashboardIncludesServiceHealthAndUptime(t *testing.T) {
 	}
 }
 
+func TestDashboardAddsContentSizeToStorageSection(t *testing.T) {
+	metrics := externalStub{dashboard: "Forge dashboard\n\nSTORAGE\n=======\ndatabase         1.9 / 128 MiB"}
+	system := systemStub{status: SystemStatus{
+		ContentBytes:      100 * 1024 * 1024,
+		ContentBytesKnown: true,
+		Services:          []ServiceHealth{{Name: "vaultsh", Online: true}},
+	}}
+
+	result := NewDashboard(metrics, nil, system, nil).Execute(nil, Input{})
+
+	want := "Forge dashboard\n\nSTORAGE\n=======\n" +
+		"database         1.9 / 128 MiB\n" +
+		"content          100 MiB\n\n" +
+		"SERVICES\n========\n" +
+		"  vaultsh  online"
+	if result.ExitCode != ExitSuccess || result.Output != want {
+		t.Errorf("result = %#v", result)
+	}
+}
+
+func TestFormatBytesUsesBinaryUnitsWithThreeSignificantDigits(t *testing.T) {
+	tests := []struct {
+		bytes int64
+		want  string
+	}{
+		{bytes: 512, want: "512 B"},
+		{bytes: 1536, want: "1.5 KiB"},
+		{bytes: 100 * 1024 * 1024, want: "100 MiB"},
+		{bytes: 1234 * 1024 * 1024, want: "1.21 GiB"},
+		{bytes: 999 * 1024 * 1024 * 1024, want: "999 GiB"},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.want, func(t *testing.T) {
+			if got := formatBytes(tt.bytes); got != tt.want {
+				t.Errorf("formatBytes(%d) = %q, want %q", tt.bytes, got, tt.want)
+			}
+		})
+	}
+}
+
 func TestDashboardIncludesSentinelAssessment(t *testing.T) {
 	metrics := externalStub{dashboard: "Forge dashboard"}
 	assessment := assessmentStub{assessment: Assessment{

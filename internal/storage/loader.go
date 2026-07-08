@@ -54,3 +54,26 @@ func Load(source fs.FS) (*filesystem.Directory, error) {
 
 	return root, nil
 }
+
+func Size(root *filesystem.Directory) int64 {
+	var total int64
+	for _, child := range root.Children() {
+		total += nodeSize(child)
+	}
+	return total
+}
+
+func nodeSize(node filesystem.Node) int64 {
+	switch current := node.(type) {
+	case *filesystem.File:
+		return int64(len(current.Content()))
+	case *filesystem.Directory:
+		var total int64
+		for _, child := range current.Children() {
+			total += nodeSize(child)
+		}
+		return total
+	default:
+		return 0
+	}
+}

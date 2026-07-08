@@ -54,3 +54,18 @@ func TestLoadPreservesModTime(t *testing.T) {
 		t.Errorf("ModTime() = %s, want %s", node.ModTime(), modTime)
 	}
 }
+
+func TestSizeTotalsLoadedFileContentBytes(t *testing.T) {
+	source := fstest.MapFS{
+		"about.md":            {Data: []byte("about")},
+		"projects/vaultsh.md": {Data: []byte("vaultsh")},
+	}
+	root, err := Load(source)
+	if err != nil {
+		t.Fatalf("Load(): %v", err)
+	}
+
+	if got := Size(root); got != 12 {
+		t.Errorf("Size() = %d, want 12", got)
+	}
+}

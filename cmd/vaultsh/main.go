@@ -32,6 +32,7 @@ func main() {
 		logger.Error("content loading failed", "error", err)
 		os.Exit(1)
 	}
+	contentBytes := storage.Size(root)
 	atlasURL := os.Getenv("ATLAS_URL")
 	forgeURL := os.Getenv("FORGE_URL")
 	services := external.NewClient(
@@ -40,6 +41,7 @@ func main() {
 		serviceToken(atlasURL, "ATLAS_AUTH_TOKEN", logger),
 		serviceToken(forgeURL, "FORGE_AUTH_TOKEN", logger),
 	)
+	services.SetContentBytes(contentBytes)
 	var deployments *deployment.FileReader
 	if path := os.Getenv("DEPLOYMENT_METADATA_PATH"); path != "" {
 		deployments = deployment.NewFileReader(path)
