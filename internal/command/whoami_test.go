@@ -6,7 +6,7 @@ func TestWhoami(t *testing.T) {
 	result := (Whoami{}).Execute(nil, Input{})
 	want := "Mateo Mahmutović\n" +
 		"Senior Backend Engineer\n" +
-		"Currently building distributed backend systems.\n\n" +
+		"Building production APIs, integrations, and distributed backend systems.\n\n" +
 		"[Email](mailto:mahmutovic.mateo@gmail.com)\n" +
 		"[GitHub](https://github.com/mateoRc)\n" +
 		"[LinkedIn](https://www.linkedin.com/in/mateo-mahmutovi%C4%87-a9837232b/)"
