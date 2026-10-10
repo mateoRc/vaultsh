@@ -800,6 +800,7 @@ h1::after {
   border: 2px solid #1d1f1e;
   border-radius: 0.5rem;
   padding: 0.2rem;
+  overflow: hidden;
   background: #e9e2d2;
   box-shadow: 3px 3px 0 #1d1f1e;
 }
@@ -809,11 +810,10 @@ h1::after {
   top: 0.2rem;
   bottom: 0.2rem;
   left: 0.2rem;
-  width: calc(50% - 0.3rem);
+  width: calc(50% - 0.4rem);
   border: 1.5px solid #1d1f1e;
   border-radius: 0.25rem;
   background: #f7c843;
-  box-shadow: 2px 2px 0 #1d1f1e;
   content: "";
   transition: transform 180ms ease;
 }
@@ -825,6 +825,10 @@ h1::after {
 .mode-tab {
   position: relative;
   z-index: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.65rem;
   min-height: 2.25rem;
   border: 0;
   padding: 0.35rem 0.65rem;
@@ -835,15 +839,26 @@ h1::after {
   white-space: nowrap;
 }
 
-.mode-tab span {
-  margin-left: 0.4rem;
-  font-size: 0.9rem;
+.mode-icon--terminal {
+  font-size: 1.05rem;
+  font-weight: 900;
+  letter-spacing: -0.12em;
+}
+
+.mode-icon--desktop {
+  width: 1.15rem;
+  height: 1.15rem;
+  flex: none;
 }
 
 .mode-tab:focus-visible,
 .mode-hint button:focus-visible {
   outline: 2px solid #f05a28;
   outline-offset: 2px;
+}
+
+.mode-tab:focus-visible {
+  outline-offset: -2px;
 }
 
 .mode-hint {
