@@ -5,6 +5,7 @@ import (
 	"crypto/rand"
 	"encoding/hex"
 	"errors"
+	"strings"
 	"sync"
 	"time"
 
@@ -20,6 +21,19 @@ const (
 )
 
 var ErrSessionLimit = errors.New("session limit reached")
+
+type BrowseEntry struct {
+	Name string          `json:"name"`
+	Kind filesystem.Kind `json:"kind"`
+	Path string          `json:"path"`
+}
+
+type BrowseResult struct {
+	Path     string          `json:"path"`
+	Kind     filesystem.Kind `json:"kind"`
+	Children []BrowseEntry   `json:"children,omitempty"`
+	Content  string          `json:"content,omitempty"`
+}
 
 type SessionConfig struct {
 	TTL         time.Duration
@@ -170,6 +184,37 @@ func (m *SessionManager) Complete(
 		sessionID,
 		current.engine.context.WorkingDirectory().Path(),
 		nil
+}
+
+// Browse reads the same immutable virtual filesystem used by shell commands.
+func (m *SessionManager) Browse(target string) (BrowseResult, error) {
+	if !strings.HasPrefix(target, "/") {
+		return BrowseResult{}, filesystem.ErrNodeNotFound
+	}
+	node, resolvedPath, err := filesystem.NewResolver(m.root).Resolve("/", target)
+	if err != nil {
+		return BrowseResult{}, err
+	}
+	result := BrowseResult{Path: resolvedPath, Kind: node.Kind()}
+	switch current := node.(type) {
+	case *filesystem.Directory:
+		result.Children = make([]BrowseEntry, 0, len(current.Children()))
+		for _, child := range current.Children() {
+			if strings.HasPrefix(child.Name(), ".") {
+				continue
+			}
+			childPath := resolvedPath
+			if childPath != "/" {
+				childPath += "/"
+			}
+			result.Children = append(result.Children, BrowseEntry{
+				Name: child.Name(), Kind: child.Kind(), Path: childPath + child.Name(),
+			})
+		}
+	case *filesystem.File:
+		result.Content = current.Content()
+	}
+	return result, nil
 }
 
 func (m *SessionManager) CleanupExpired() int {

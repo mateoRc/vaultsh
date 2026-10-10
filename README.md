@@ -1,8 +1,10 @@
 # Vaultsh
 
-A Go service that presents mounted Markdown through a read-only virtual shell.
-It provides sessions, pipelines, completion, a browser terminal, and optional
-Atlas search and Forge telemetry.
+A Go service that presents mounted Markdown through a read-only virtual shell
+and a click-driven portfolio explorer. The browser can switch between the
+terminal and a retro desktop view with folders and rendered document previews.
+It provides sessions, pipelines, completion, and optional Atlas search and
+Forge telemetry.
 
 Vaultsh never invokes a host shell or exposes the host filesystem.
 
@@ -23,6 +25,10 @@ docker compose up --build
 ```
 
 Open http://localhost:8080/vault/.
+
+The desktop reads the same virtual filesystem as the shell through
+`GET /api/browse?path=/cv`. Directory responses include child names, types, and
+paths; file responses include their Markdown content. The endpoint is read-only.
 
 ## Configuration
 
@@ -47,7 +53,7 @@ internal/httpapi/     HTTP transport
 internal/parser/      tokenizer, lexer, and parser
 internal/shell/       execution engine and sessions
 internal/storage/     mounted-content loader
-web/                  browser terminal
+web/                  browser terminal and desktop explorer
 ```
 
 The sibling `lab` repository owns shared content, production orchestration,

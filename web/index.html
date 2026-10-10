@@ -18,7 +18,7 @@
   <link rel="canonical" href="https://mateolabs.dev/vault/">
   <link rel="icon" href="/vault/favicon.svg" type="image/svg+xml">
   <title>Vaultsh</title>
-  <link rel="stylesheet" href="style.css?v=20260735">
+  <link rel="stylesheet" href="style.css?v=20261010">
 </head>
 <body>
   <main class="page">
@@ -44,7 +44,15 @@
       </nav>
     </div>-->
 
-    <section class="terminal" aria-label="Interactive portfolio terminal">
+    <div class="mode-row">
+      <div class="mode-switch" role="tablist" aria-label="Portfolio view">
+        <button id="shell-tab" class="mode-tab" type="button" role="tab" aria-selected="true" aria-controls="shell-panel">vaultsh <span>⌘</span></button>
+        <button id="gui-tab" class="mode-tab" type="button" role="tab" aria-selected="false" aria-controls="gui-panel" tabindex="-1">desktop <span>▦</span></button>
+      </div>
+      <p class="mode-hint">Prefer clicking? <button id="open-gui" type="button">Open the desktop →</button></p>
+    </div>
+
+    <section id="shell-panel" class="terminal" role="tabpanel" aria-labelledby="shell-tab" aria-label="Interactive portfolio terminal">
       <header class="terminal-bar">
         <div class="window-controls" aria-hidden="true">
           <span></span>
@@ -133,7 +141,41 @@
       </div>
     </section>
 
+    <section id="gui-panel" class="desktop" role="tabpanel" aria-labelledby="gui-tab" hidden>
+      <header class="desktop-bar">
+        <div class="window-controls" aria-hidden="true"><span></span><span></span><span></span></div>
+        <span>Portfolio Explorer</span>
+        <span class="desktop-bar-end">READ ONLY · 2026</span>
+      </header>
+      <div class="desktop-toolbar">
+        <div class="desktop-toolbar-title"><span class="desktop-mark" aria-hidden="true">▦</span><div><strong>Mateo's files</strong><small>Browse the work, projects and background</small></div></div>
+        <nav id="gui-breadcrumbs" class="gui-breadcrumbs" aria-label="Current folder"></nav>
+      </div>
+      <div class="desktop-main">
+        <aside class="desktop-sidebar" aria-label="Quick locations">
+          <p class="sidebar-label">PLACES</p>
+          <button type="button" data-gui-path="/cv"><span aria-hidden="true">▣</span> Profile</button>
+          <button type="button" data-gui-path="/projects"><span aria-hidden="true">▦</span> Projects</button>
+          <button type="button" data-gui-path="/docs"><span aria-hidden="true">▤</span> Documents</button>
+          <div class="sidebar-divider"></div>
+          <p class="sidebar-label">SHORTCUTS</p>
+          <button type="button" data-gui-path="/cv/about.md"><span aria-hidden="true">↗</span> About me</button>
+          <button type="button" data-gui-path="/cv/skills.md"><span aria-hidden="true">↗</span> Skills</button>
+          <button type="button" data-gui-path="/cv/experience"><span aria-hidden="true">↗</span> Experience</button>
+          <button type="button" data-gui-path="/cv/contact.md"><span aria-hidden="true">↗</span> Contact</button>
+        </aside>
+        <div class="desktop-content">
+          <div class="desktop-location"><span id="gui-location">/</span><span id="gui-count"></span></div>
+          <div id="gui-folders" class="gui-folders" aria-label="Files and folders"></div>
+          <article id="gui-document" class="gui-document" aria-label="Document preview" hidden></article>
+          <p id="gui-message" class="gui-message" role="status" aria-live="polite"></p>
+        </div>
+      </div>
+      <footer class="desktop-footer"><span>VAULTSH EXPLORER</span><span>Double click? Single click works here.</span></footer>
+    </section>
+
   </main>
-  <script src="terminal.js?v=20260735" defer></script>
+  <script src="terminal.js?v=20261010" defer></script>
+  <script src="gui.js?v=20261010" defer></script>
 </body>
 </html>

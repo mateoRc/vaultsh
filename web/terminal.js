@@ -294,7 +294,7 @@ function initTerminal() {
       return;
     }
 
-    if (event.ctrlKey && event.key.toLowerCase() === "l") {
+    if (event.ctrlKey && event.key.toLowerCase() === "l" && !document.querySelector("#shell-panel")?.hidden) {
       event.preventDefault();
       await execute("clear");
       focusCommand();

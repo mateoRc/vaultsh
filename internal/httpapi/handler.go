@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"errors"
 	"net/http"
+	"strings"
 
 	"github.com/mateom/vaultsh/internal/command"
 	"github.com/mateom/vaultsh/internal/shell"
@@ -105,6 +106,9 @@ func NewHandlerWithConfig(
 	mux.HandleFunc("GET /", redirectToVault)
 	mux.HandleFunc("GET /healthz", health)
 	mux.HandleFunc("GET /api/status", limited(statusLimit, statusHandler(status)))
+	mux.HandleFunc("GET /api/browse", limited(statusLimit, func(w http.ResponseWriter, r *http.Request) {
+		browse(w, r, sessions)
+	}))
 	mux.Handle(
 		"GET /vault/",
 		http.StripPrefix("/vault/", http.FileServer(http.Dir("web"))),
@@ -135,6 +139,23 @@ func statusHandler(status StatusProvider) http.HandlerFunc {
 		}
 		writeJSON(w, map[string]bool{"atlas": atlas, "forge": forge})
 	}
+}
+
+func browse(w http.ResponseWriter, r *http.Request, sessions *shell.SessionManager) {
+	target := r.URL.Query().Get("path")
+	if target == "" {
+		target = "/"
+	}
+	if len(target) > maxCommandLength || !strings.HasPrefix(target, "/") {
+		http.Error(w, "invalid path", http.StatusBadRequest)
+		return
+	}
+	result, err := sessions.Browse(target)
+	if err != nil {
+		http.NotFound(w, r)
+		return
+	}
+	writeJSON(w, result)
 }
 
 func withRateLimit(

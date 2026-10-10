@@ -55,6 +55,54 @@ func TestHealth(t *testing.T) {
 	}
 }
 
+func TestBrowseVirtualFiles(t *testing.T) {
+	root := filesystem.NewDirectory("")
+	cv := filesystem.NewDirectory("cv")
+	if err := cv.Add(filesystem.NewFile("about.md", "# About\n\nA profile.")); err != nil {
+		t.Fatal(err)
+	}
+	if err := cv.Add(filesystem.NewFile(".private.md", "hidden")); err != nil {
+		t.Fatal(err)
+	}
+	if err := root.Add(cv); err != nil {
+		t.Fatal(err)
+	}
+	handler := NewHandler(shell.NewSessionManager(root))
+
+	for _, test := range []struct {
+		path string
+		code int
+		kind filesystem.Kind
+		children int
+		content string
+	}{
+		{"/api/browse?path=/cv", http.StatusOK, filesystem.KindDirectory, 1, ""},
+		{"/api/browse?path=/cv/about.md", http.StatusOK, filesystem.KindFile, 0, "# About\n\nA profile."},
+		{"/api/browse?path=../../", http.StatusBadRequest, "", 0, ""},
+		{"/api/browse?path=/missing", http.StatusNotFound, "", 0, ""},
+	} {
+		response := httptest.NewRecorder()
+		handler.ServeHTTP(response, httptest.NewRequest(http.MethodGet, test.path, nil))
+		if response.Code != test.code {
+			t.Errorf("%s: status = %d, want %d", test.path, response.Code, test.code)
+			continue
+		}
+		if test.code != http.StatusOK {
+			continue
+		}
+		var result shell.BrowseResult
+		if err := json.NewDecoder(response.Body).Decode(&result); err != nil {
+			t.Fatal(err)
+		}
+		if result.Kind != test.kind || len(result.Children) != test.children || result.Content != test.content {
+			t.Errorf("%s: unexpected result: %+v", test.path, result)
+		}
+		if test.children == 1 && len(result.Children) == 1 && result.Children[0].Path != "/cv/about.md" {
+			t.Errorf("child path = %q", result.Children[0].Path)
+		}
+	}
+}
+
 func TestRootRedirectsToVault(t *testing.T) {
 	request := httptest.NewRequest(http.MethodGet, "/", nil)
 	response := httptest.NewRecorder()
