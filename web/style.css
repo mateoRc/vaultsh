@@ -955,7 +955,11 @@ h1::after {
   border: 2px solid #1d1f1e;
   background: #f7c843;
   box-shadow: 3px 3px 0 #1d1f1e;
-  font-size: 1.5rem;
+}
+
+.desktop-mark svg {
+  width: 1.7rem;
+  height: 1.7rem;
 }
 
 .gui-breadcrumbs {
