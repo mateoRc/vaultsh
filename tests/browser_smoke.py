@@ -12,6 +12,7 @@ import re
 import subprocess
 import tempfile
 import threading
+import time
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from urllib.parse import parse_qs, urlsplit
 
@@ -124,10 +125,19 @@ SMOKE = r"""
     document.querySelector('#command-form').dispatchEvent(new Event('submit', {bubbles: true, cancelable: true}));
     await wait(() => document.querySelector('#output').textContent.includes('Service unavailable'));
     check(!input.disabled, 'execution failure unlocks input');
+    await wait(() => document.activeElement === input);
+    check(document.activeElement === input, 'input focus after failed command');
     input.value = 'help';
     document.querySelector('#command-form').dispatchEvent(new Event('submit', {bubbles: true, cancelable: true}));
     await wait(() => [...document.querySelectorAll('#output .output-result')].at(-1)?.textContent === 'ok');
     check(!input.disabled, 'manual command recovery');
+    await wait(() => document.activeElement === input);
+    check(document.activeElement === input, 'input focus after successful command');
+    input.value = 'slow';
+    document.querySelector('#command-form').dispatchEvent(new Event('submit', {bubbles: true, cancelable: true}));
+    document.querySelector('#quick-command-toggle').focus();
+    await wait(() => !input.disabled && [...document.querySelectorAll('#output .output-command')].at(-1)?.textContent.includes('slow'));
+    check(document.activeElement.id === 'quick-command-toggle', 'deliberate focus move preserved');
     document.querySelector('#smoke-results').textContent = 'PASS ' + results.join(', ');
   } catch (error) {
     document.querySelector('#smoke-results').textContent = 'FAIL ' + error.message + ' after ' + results.join(', ');
@@ -157,6 +167,21 @@ DEEP = r"""
     sessionStorage.setItem('smoke-reloaded', 'yes'); location.reload(); return;
   }
   result.textContent = 'PASS deep link, refresh, and mobile layout ' + innerWidth + 'px viewport';
+})();
+</script>
+"""
+
+MOBILE_START = r"""
+<pre id="smoke-results">RUNNING</pre><script>
+(async () => {
+  const result = document.querySelector('#smoke-results');
+  for (let i = 0; i < 80 && !document.querySelector('#output').textContent.includes('Explore projects'); i++)
+    await new Promise(resolve => setTimeout(resolve, 50));
+  result.textContent = !document.querySelector('#shell-panel').hidden &&
+    document.activeElement.id !== 'command' &&
+    matchMedia('(max-width: 36rem)').matches
+      ? 'PASS mobile terminal starts without input focus'
+      : 'FAIL mobile terminal initial focus';
 })();
 </script>
 """
@@ -223,7 +248,7 @@ class Handler(BaseHTTPRequestHandler):
             source = (WEB / "index.html").read_text(encoding="utf-8")
             smoke = parse_qs(url.query).get("smoke", [""])[0]
             if smoke:
-                source = source.replace("</body>", ({"deep": DEEP, "diagram": DIAGRAM}.get(smoke, SMOKE)) + "</body>")
+                source = source.replace("</body>", ({"deep": DEEP, "mobile": MOBILE_START, "diagram": DIAGRAM}.get(smoke, SMOKE)) + "</body>")
             return self.send_bytes(source.encode(), "text/html")
         if url.path.startswith("/vault/"):
             path = (WEB / url.path.removeprefix("/vault/")).resolve()
@@ -244,6 +269,8 @@ class Handler(BaseHTTPRequestHandler):
                 Handler.fail_exec = False
                 return self.send_error(503)
             line = body["line"]
+            if line == "slow":
+                time.sleep(0.2)
             if line == "welcome":
                 output = ("Explore projects: head -n 11 /projects/overview.md\n"
                           "View architecture: head -n 26 /docs/architecture/overview.md\n"
@@ -281,6 +308,7 @@ def main():
     try:
         for query, expected, width in (
             ("smoke=main", "PASS terminal default", 1280),
+            ("smoke=mobile", "PASS mobile terminal starts without input focus", 512),
             ("smoke=deep&doc=/cv/experience.md", "PASS deep link, refresh, and mobile layout", 512),
             ("smoke=diagram&doc=/docs/architecture/vaultsh.md", "PASS compact command flow diagram", 512),
         ):

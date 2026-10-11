@@ -253,9 +253,28 @@ function initTerminal() {
       return;
     }
 
+    const submittedFromInput = document.activeElement === command;
+    let movedElsewhere = false;
+    const markFocusMove = (focusEvent) => {
+      if (focusEvent.target !== command) movedElsewhere = true;
+    };
+    const markPointerMove = (pointerEvent) => {
+      if (!form.contains(pointerEvent.target)) movedElsewhere = true;
+    };
+    if (submittedFromInput) {
+      document.addEventListener("focusin", markFocusMove, true);
+      document.addEventListener("pointerdown", markPointerMove, true);
+    }
     command.value = "";
-    await execute(line);
-    if (document.activeElement === command) focusCommand();
+    try {
+      await execute(line);
+    } finally {
+      if (submittedFromInput) {
+        document.removeEventListener("focusin", markFocusMove, true);
+        document.removeEventListener("pointerdown", markPointerMove, true);
+        if (!movedElsewhere && !document.querySelector("#shell-panel").hidden) focusCommand();
+      }
+    }
   });
 
   clearCommand.addEventListener("click", () => execute("clear"));
