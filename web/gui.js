@@ -7,17 +7,32 @@ function initGui() {
   const breadcrumbs = document.querySelector("#gui-breadcrumbs");
   const location = document.querySelector("#gui-location");
   const count = document.querySelector("#gui-count");
+  const guiNav = document.querySelector("#gui-nav");
+  const back = document.querySelector("#gui-back");
+  const home = document.querySelector("#gui-home");
   const folders = document.querySelector("#gui-folders");
   const documentView = document.querySelector("#gui-document");
   const message = document.querySelector("#gui-message");
   const shortcuts = document.querySelectorAll("[data-gui-path]");
   if (!shellTab || !guiTab || !shellPanel || !guiPanel || !openGui ||
-      !breadcrumbs || !location || !count || !folders || !documentView || !message) return;
+      !breadcrumbs || !location || !count || !guiNav || !back || !home ||
+      !folders || !documentView || !message) return;
 
   let mode = "shell";
+  let currentPath = "/";
   let requestNumber = 0;
   let hasLoaded = false;
   let mermaidModule;
+
+  const modeRow = document.querySelector(".mode-row");
+  const modeSentinel = document.querySelector(".mode-sticky-sentinel");
+  if (modeRow && modeSentinel) {
+    const updateSticky = () => {
+      modeRow.classList.toggle("is-stuck", modeSentinel.getBoundingClientRect().bottom < 0);
+    };
+    window.addEventListener("scroll", updateSticky, { passive: true });
+    updateSticky();
+  }
 
   function setMode(next, focus = true) {
     mode = next;
@@ -51,6 +66,12 @@ function initGui() {
   for (const shortcut of shortcuts) {
     shortcut.addEventListener("click", () => navigate(shortcut.dataset.guiPath));
   }
+  back.addEventListener("click", () => navigate(parentPath(currentPath)));
+  home.addEventListener("click", () => navigate("/"));
+
+  function parentPath(path) {
+    return path.slice(0, path.lastIndexOf("/")) || "/";
+  }
 
   async function navigate(path) {
     const serial = ++requestNumber;
@@ -62,7 +83,9 @@ function initGui() {
       if (!response.ok) throw new Error(response.status === 429 ? "Too many requests. Try again shortly." : "This item could not be opened.");
       const item = await response.json();
       if (serial !== requestNumber) return;
+      currentPath = item.path;
       location.textContent = item.path;
+      guiNav.hidden = item.path === "/";
       renderBreadcrumbs(item.path);
       renderShortcuts(item.path);
       if (item.kind === "directory") renderDirectory(item);
@@ -76,14 +99,16 @@ function initGui() {
   function renderBreadcrumbs(path) {
     breadcrumbs.replaceChildren();
     const parts = path.split("/").filter(Boolean);
-    addCrumb("Home", "/");
+    if (!parts.length) addCrumb("Home", "/");
     let soFar = "";
     for (const part of parts) {
+      if (soFar) {
+        const separator = document.createElement("span");
+        separator.className = "breadcrumb-separator";
+        separator.textContent = "/";
+        breadcrumbs.append(separator);
+      }
       soFar += "/" + part;
-      const separator = document.createElement("span");
-      separator.className = "breadcrumb-separator";
-      separator.textContent = "/";
-      breadcrumbs.append(separator);
       addCrumb(part, soFar);
     }
     function addCrumb(label, target) {
@@ -145,12 +170,6 @@ function initGui() {
     documentView.hidden = false;
     documentView.replaceChildren();
     count.textContent = "DOCUMENT PREVIEW";
-    const back = document.createElement("button");
-    back.type = "button";
-    back.className = "document-back";
-    back.textContent = "← Back to folder";
-    back.addEventListener("click", () => navigate(item.path.slice(0, item.path.lastIndexOf("/")) || "/"));
-    documentView.append(back);
     const body = document.createElement("div");
     body.className = "markdown-body";
     renderMarkdown(body, item.content || "");

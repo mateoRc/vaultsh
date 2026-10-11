@@ -18,7 +18,7 @@
   <link rel="canonical" href="https://mateolabs.dev/vault/">
   <link rel="icon" href="/vault/favicon.svg" type="image/svg+xml">
   <title>Vaultsh</title>
-  <link rel="stylesheet" href="style.css?v=20261011a">
+  <link rel="stylesheet" href="style.css?v=20261011b">
   <link rel="stylesheet" href="mermaid.css?v=20261011a">
 </head>
 <body>
@@ -45,6 +45,7 @@
       </nav>
     </div>-->
 
+    <div class="mode-sticky-sentinel" aria-hidden="true"></div>
     <div class="mode-row">
       <div class="mode-switch" role="tablist" aria-label="Portfolio view">
         <button id="shell-tab" class="mode-tab" type="button" role="tab" aria-selected="true" aria-controls="shell-panel">vaultsh <span class="mode-icon mode-icon--terminal" aria-hidden="true">&gt;_</span></button>
@@ -166,7 +167,16 @@
           <button type="button" data-gui-path="/cv/contact.md"><span aria-hidden="true">↗</span> Contact</button>
         </aside>
         <div class="desktop-content">
-          <div class="desktop-location"><span id="gui-location">/</span><span id="gui-count"></span></div>
+          <div class="desktop-location">
+            <span id="gui-location">/</span>
+            <div class="desktop-location-actions">
+              <span id="gui-count"></span>
+              <nav id="gui-nav" class="gui-nav" aria-label="Explorer navigation" hidden>
+                <button id="gui-back" type="button" aria-label="Back to parent folder">← Back</button>
+                <button id="gui-home" type="button" aria-label="Go to Explorer home">Home</button>
+              </nav>
+            </div>
+          </div>
           <div id="gui-folders" class="gui-folders" aria-label="Files and folders"></div>
           <article id="gui-document" class="gui-document" aria-label="Document preview" hidden></article>
           <p id="gui-message" class="gui-message" role="status" aria-live="polite"></p>
@@ -177,6 +187,6 @@
 
   </main>
   <script src="terminal.js?v=20261010" defer></script>
-  <script src="gui.js?v=20261011a" defer></script>
+  <script src="gui.js?v=20261011b" defer></script>
 </body>
 </html>
