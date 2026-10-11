@@ -238,6 +238,15 @@ def main():
                                     f"--user-data-dir={profile}", f"--window-size={width},844",
                                     "--virtual-time-budget=4000", f"--screenshot={screenshot}", capture_url],
                                    capture_output=True, timeout=25, check=True)
+        with tempfile.TemporaryDirectory() as profile:
+            url = f"http://127.0.0.1:{server.server_port}/vault/"
+            completed = subprocess.run([browser, "--headless=new", "--disable-gpu", "--no-sandbox",
+                                        "--disable-software-rasterizer", "--disable-javascript",
+                                        f"--user-data-dir={profile}", "--dump-dom", url],
+                                       capture_output=True, text=True, encoding="utf-8", errors="replace", timeout=25)
+            if completed.returncode or "Backend Lab connects Vaultsh's read-only virtual shell" not in completed.stdout:
+                raise SystemExit("No-JavaScript fallback missing")
+            print("No-JavaScript fallback: PASS")
     finally:
         server.shutdown()
 
