@@ -126,6 +126,27 @@ DEEP = r"""
 </script>
 """
 
+DIAGRAM = r"""
+<pre id="smoke-results">RUNNING</pre><script>
+(async () => {
+  const result = document.querySelector('#smoke-results');
+  for (let i = 0; i < 400 && (document.querySelector('.mermaid--compact svg')?.querySelectorAll('.node').length ?? 0) < 7; i++)
+    await new Promise(resolve => setTimeout(resolve, 50));
+  const svg = document.querySelector('.mermaid--compact svg');
+  const wrapper = document.querySelector('.mermaid--compact');
+  if (!svg || !wrapper || svg.getBoundingClientRect().width > wrapper.clientWidth + 1 ||
+      svg.getBoundingClientRect().height < 100 ||
+      svg.querySelectorAll('.node').length < 7) {
+    result.textContent = 'FAIL command flow diagram: svg=' + !!svg + ', wrapper=' + !!wrapper +
+      ', svgWidth=' + (svg?.getBoundingClientRect().width ?? -1) + ', wrapperWidth=' + (wrapper?.clientWidth ?? -1) +
+      ', svgHeight=' + (svg?.getBoundingClientRect().height ?? -1) +
+      ', nodes=' + (svg?.querySelectorAll('.node').length ?? -1); return;
+  }
+  result.textContent = 'PASS compact command flow diagram';
+})();
+</script>
+"""
+
 
 class Handler(BaseHTTPRequestHandler):
     fail_next = False
@@ -167,7 +188,7 @@ class Handler(BaseHTTPRequestHandler):
             source = (WEB / "index.html").read_text(encoding="utf-8")
             smoke = parse_qs(url.query).get("smoke", [""])[0]
             if smoke:
-                source = source.replace("</body>", (DEEP if smoke == "deep" else SMOKE) + "</body>")
+                source = source.replace("</body>", ({"deep": DEEP, "diagram": DIAGRAM}.get(smoke, SMOKE)) + "</body>")
             return self.send_bytes(source.encode(), "text/html")
         if url.path.startswith("/vault/"):
             path = (WEB / url.path.removeprefix("/vault/")).resolve()
@@ -217,18 +238,19 @@ def main():
         for query, expected, width in (
             ("smoke=main", "PASS terminal default", 1280),
             ("smoke=deep&doc=/cv/experience.md", "PASS deep link, refresh, and mobile layout", 512),
+            ("smoke=diagram&doc=/docs/architecture/vaultsh.md", "PASS compact command flow diagram", 512),
         ):
             with tempfile.TemporaryDirectory() as profile:
                 url = f"http://127.0.0.1:{server.server_port}/vault/?{query}"
                 completed = subprocess.run([browser, "--headless=new", "--disable-gpu", "--no-sandbox", "--disable-software-rasterizer", "--no-first-run",
                                             f"--user-data-dir={profile}", f"--window-size={width},844",
-                                            "--virtual-time-budget=12000", "--dump-dom", url],
+                                            "--virtual-time-budget=30000" if "smoke=diagram" in query else "--virtual-time-budget=12000", "--dump-dom", url],
                                            capture_output=True, text=True, encoding="utf-8", errors="replace", timeout=35)
                 marker = completed.stdout.split('id="smoke-results">')[-1].split("</pre>")[0]
                 print(f"{width}px: {marker}")
                 if completed.returncode or expected not in marker:
                     raise SystemExit(f"Browser smoke failed: {completed.stdout[-1300:]} {completed.stderr[-600:]}")
-                if screenshot_dir := os.environ.get("VAULTSH_SCREENSHOTS"):
+                if (screenshot_dir := os.environ.get("VAULTSH_SCREENSHOTS")) and "smoke=diagram" not in query:
                     screenshot = Path(screenshot_dir) / f"vaultsh-{width}.png"
                     screenshot.parent.mkdir(parents=True, exist_ok=True)
                     document = "/projects/overview.md" if width == 1280 else "/cv/experience.md"

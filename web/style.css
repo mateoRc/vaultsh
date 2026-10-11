@@ -1272,6 +1272,7 @@ h1::after {
   text-align: center;
 }
 .markdown-body pre.mermaid svg { display: block; min-width: 72rem; max-width: none; height: auto; margin: 0 auto; }
+.markdown-body pre.mermaid--compact svg { width: 100%; min-width: 0; max-width: 100%; }
 .markdown-body blockquote { margin: 1rem 0; border-left: 4px solid #f7c843; padding: 0.2rem 1rem; background: #f5f0e4; }
 .markdown-body hr { border: 0; border-top: 2px solid #e4decf; margin: 1.5rem 0; }
 

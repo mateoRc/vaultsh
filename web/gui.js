@@ -24,6 +24,7 @@ function initGui() {
   let activeRequest;
   let retryPath = currentPath;
   let mermaidModule;
+  let diagramSerial = 0;
   folders.tabIndex = -1;
   documentView.tabIndex = -1;
 
@@ -246,10 +247,16 @@ function initGui() {
       mermaid.initialize({ startOnLoad: false, securityLevel: "strict", theme: "neutral", htmlLabels: false, suppressErrorRendering: true });
       for (const diagram of diagrams) {
         if (!diagram.isConnected) continue;
+        const source = diagram.textContent;
         try {
-          await mermaid.run({ nodes: [diagram], suppressErrors: true });
+          if (diagram.classList.contains("mermaid--compact")) {
+            const { svg } = await mermaid.render(`vaultsh-compact-${++diagramSerial}`, source);
+            const parsed = new DOMParser().parseFromString(svg, "image/svg+xml");
+            if (parsed.querySelector("parsererror") || parsed.documentElement.localName !== "svg") throw new Error("Invalid diagram output");
+            if (diagram.isConnected) diagram.replaceChildren(document.importNode(parsed.documentElement, true));
+          } else await mermaid.run({ nodes: [diagram], suppressErrors: true });
         } catch {
-          // The original diagram source remains readable if rendering fails.
+          if (diagram.isConnected) diagram.textContent = source;
         }
       }
     } catch {
@@ -272,7 +279,7 @@ function initGui() {
         if (index < lines.length) index++;
         const pre = document.createElement("pre");
         if (fence[1].toLowerCase() === "mermaid") {
-          pre.className = "mermaid";
+          pre.className = /^\s*```mermaid\s+compact\s*$/i.test(line) ? "mermaid mermaid--compact" : "mermaid";
           pre.textContent = code.join("\n");
         } else {
           const codeNode = document.createElement("code");
