@@ -17,6 +17,7 @@ function initGui() {
   let mode = "shell";
   let requestNumber = 0;
   let hasLoaded = false;
+  let mermaidModule;
 
   function setMode(next, focus = true) {
     mode = next;
@@ -154,6 +155,27 @@ function initGui() {
     body.className = "markdown-body";
     renderMarkdown(body, item.content || "");
     documentView.append(body);
+    renderDiagrams(body);
+  }
+
+  async function renderDiagrams(body) {
+    const diagrams = [...body.querySelectorAll("pre.mermaid")];
+    if (!diagrams.length) return;
+    try {
+      mermaidModule ??= import("./vendor/mermaid.js");
+      const { default: mermaid } = await mermaidModule;
+      mermaid.initialize({ startOnLoad: false, securityLevel: "strict", theme: "neutral", htmlLabels: false, suppressErrorRendering: true });
+      for (const diagram of diagrams) {
+        if (!diagram.isConnected) continue;
+        try {
+          await mermaid.run({ nodes: [diagram], suppressErrors: true });
+        } catch {
+          // The original diagram source remains readable if rendering fails.
+        }
+      }
+    } catch {
+      // The source remains visible if the diagram library is unavailable.
+    }
   }
 
   // Build DOM nodes from Markdown instead of inserting source content as HTML.
@@ -170,9 +192,14 @@ function initGui() {
         while (index < lines.length && !/^\s*```/.test(lines[index])) code.push(lines[index++]);
         if (index < lines.length) index++;
         const pre = document.createElement("pre");
-        const codeNode = document.createElement("code");
-        codeNode.textContent = code.join("\n");
-        pre.append(codeNode);
+        if (fence[1].toLowerCase() === "mermaid") {
+          pre.className = "mermaid";
+          pre.textContent = code.join("\n");
+        } else {
+          const codeNode = document.createElement("code");
+          codeNode.textContent = code.join("\n");
+          pre.append(codeNode);
+        }
         parent.append(pre);
         continue;
       }
