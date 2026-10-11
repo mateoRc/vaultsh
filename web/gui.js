@@ -38,7 +38,7 @@ function initGui() {
   function validPath(path) {
     return typeof path === "string" && path.length <= 4096 &&
       /^\/(?:[\w.-]+(?:\/[\w.-]+)*)?$/.test(path) &&
-      !path.split("/").some(part => part === "." || part === "..");
+      !path.split("/").some(part => part.startsWith("."));
   }
 
   function setMode(next, focus = true, updateHistory = true) {
