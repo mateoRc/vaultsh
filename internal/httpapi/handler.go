@@ -273,6 +273,9 @@ func writeSessionError(w http.ResponseWriter, err error) {
 
 func securityHeaders(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if strings.HasPrefix(r.URL.Path, "/vault/") {
+			w.Header().Set("Cache-Control", "no-cache")
+		}
 		w.Header().Set(
 			"Content-Security-Policy",
 			"default-src 'self'; base-uri 'none'; frame-ancestors 'none'; "+
