@@ -1,0 +1,205 @@
+"""Local browser smoke test with a read-only content API fixture.
+
+Run: python tests/browser_smoke.py
+Requires a local Chrome or Edge binary; does not start the Go service.
+"""
+
+import json
+import mimetypes
+import os
+from pathlib import Path
+import subprocess
+import tempfile
+import threading
+from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
+from urllib.parse import parse_qs, urlsplit
+
+
+ROOT = Path(__file__).resolve().parents[1]
+WEB = ROOT / "web"
+CONTENT = ROOT.parent / "lab" / "content"
+
+SMOKE = r"""
+<pre id="smoke-results">RUNNING</pre><script>
+(async () => {
+  const results = [];
+  const check = (condition, label) => { if (!condition) throw Error(label); results.push(label); };
+  const wait = async (test) => {
+    for (let i = 0; i < 80; i++) {
+      if (test()) return;
+      await new Promise(resolve => setTimeout(resolve, 50));
+    }
+    throw Error('timed out waiting for UI');
+  };
+  try {
+    await wait(() => document.querySelector('#output').textContent.includes('Explore projects'));
+    check(!document.querySelector('#shell-panel').hidden, 'terminal default');
+    check(document.activeElement.id !== 'command', 'no automatic input focus');
+    document.querySelector('#gui-tab').click();
+    await wait(() => document.querySelector('#gui-location').textContent === '/projects');
+    check(document.querySelector('.gui-item strong').textContent === 'Overview', 'overview first');
+    check(getComputedStyle(document.querySelector('.desktop-main')).display === 'grid', 'desktop layout');
+    document.querySelector('.gui-item').click();
+    await wait(() => document.querySelector('#gui-location').textContent === '/projects/overview.md');
+    check(location.search.includes('overview.md'), 'shareable URL');
+    [...document.querySelectorAll('.markdown-body a')].find(a => a.textContent === 'Architecture').click();
+    await wait(() => document.querySelector('#gui-location').textContent === '/docs/architecture/overview.md');
+    check(document.querySelector('.markdown-body h1').textContent === 'Backend Lab Architecture', 'relative link');
+    history.back();
+    await wait(() => document.querySelector('#gui-location').textContent === '/projects/overview.md');
+    check(document.querySelector('.markdown-body h1').textContent.includes('Backend Lab'), 'browser Back');
+    document.querySelector('[data-gui-path="/docs"]').click();
+    await wait(() => document.querySelector('#gui-location').textContent === '/docs');
+    [...document.querySelectorAll('.gui-item')].find(e => e.textContent.includes('Architecture')).click();
+    await wait(() => document.querySelector('#gui-location').textContent === '/docs/architecture');
+    [...document.querySelectorAll('.gui-item')].find(e => e.textContent.includes('Vaultsh')).click();
+    await wait(() => document.querySelector('#gui-location').textContent === '/docs/architecture/vaultsh.md');
+    [...document.querySelectorAll('.markdown-body a')].find(a => a.textContent === 'browse API').click();
+    await wait(() => document.querySelector('#gui-location').textContent === '/docs/api.md');
+    check(location.hash === '#browse-content' && document.activeElement.id === 'browse-content', 'relative fragment');
+    await fetch('/api/fail-next');
+    document.querySelector('[data-gui-path="/projects"]').click();
+    await wait(() => !document.querySelector('#gui-retry').hidden);
+    check(document.querySelector('#gui-message').textContent.includes('unavailable'), 'browse error');
+    document.querySelector('#gui-retry').click();
+    await wait(() => document.querySelector('#gui-location').textContent === '/projects');
+    check(document.querySelector('#gui-retry').hidden, 'browse retry');
+    document.querySelector('#shell-tab').click();
+    const input = document.querySelector('#command');
+    input.focus(); input.value = 'cat /projects/ov'; input.setSelectionRange(input.value.length, input.value.length);
+    const tab = () => { const event = new KeyboardEvent('keydown', {key: 'Tab', bubbles: true, cancelable: true}); input.dispatchEvent(event); return event.defaultPrevented; };
+    check(tab(), 'first Tab completes');
+    await wait(() => input.value.includes('overview.md'));
+    check(!tab(), 'second Tab leaves input');
+    const shift = new KeyboardEvent('keydown', {key: 'Tab', shiftKey: true, bubbles: true, cancelable: true});
+    input.dispatchEvent(shift);
+    check(!shift.defaultPrevented, 'Shift+Tab moves normally');
+    input.dispatchEvent(new KeyboardEvent('keydown', {key: 'Escape', bubbles: true}));
+    check(document.activeElement.id === 'quick-command-toggle', 'Escape leaves input');
+    document.querySelector('#smoke-results').textContent = 'PASS ' + results.join(', ');
+  } catch (error) {
+    document.querySelector('#smoke-results').textContent = 'FAIL ' + error.message + ' after ' + results.join(', ');
+  }
+})();
+</script>
+"""
+
+DEEP = r"""
+<pre id="smoke-results">RUNNING</pre><script>
+(async () => {
+  const result = document.querySelector('#smoke-results');
+  for (let i = 0; i < 80 && document.querySelector('#gui-location').textContent !== '/cv/experience.md'; i++)
+    await new Promise(resolve => setTimeout(resolve, 50));
+  if (document.querySelector('#gui-location').textContent !== '/cv/experience.md' ||
+      document.querySelector('#gui-panel').hidden ||
+      !document.querySelector('#gui-document').textContent.includes('ReversingLabs')) {
+    result.textContent = 'FAIL direct document load'; return;
+  }
+  if (!matchMedia('(max-width: 36rem)').matches ||
+      getComputedStyle(document.querySelector('.desktop-main')).display !== 'block' ||
+      document.documentElement.scrollWidth > innerWidth + 1 ||
+      document.activeElement.id === 'command') {
+    result.textContent = 'FAIL mobile layout'; return;
+  }
+  if (!sessionStorage.getItem('smoke-reloaded')) {
+    sessionStorage.setItem('smoke-reloaded', 'yes'); location.reload(); return;
+  }
+  result.textContent = 'PASS deep link, refresh, and mobile layout';
+})();
+</script>
+"""
+
+
+class Handler(BaseHTTPRequestHandler):
+    fail_next = False
+
+    def log_message(self, *_args):
+        pass
+
+    def do_GET(self):
+        url = urlsplit(self.path)
+        if url.path == "/api/fail-next":
+            Handler.fail_next = True
+            return self.send_bytes(b"ok", "text/plain")
+        if url.path == "/healthz":
+            return self.send_bytes(b"ok", "text/plain")
+        if url.path == "/api/status":
+            return self.send_json({"atlas": True, "forge": True})
+        if url.path == "/api/browse":
+            if Handler.fail_next:
+                Handler.fail_next = False
+                return self.send_error(503)
+            path = parse_qs(url.query).get("path", ["/"])[0]
+            target = (CONTENT / path.lstrip("/")).resolve()
+            if not target.is_relative_to(CONTENT.resolve()) or not target.exists() or target.name.startswith("."):
+                return self.send_error(404)
+            if target.is_dir():
+                children = [{"name": child.name, "kind": "directory" if child.is_dir() else "file", "path": (path.rstrip("/") + "/" + child.name)}
+                            for child in target.iterdir() if not child.name.startswith(".")]
+                return self.send_json({"path": path, "kind": "directory", "children": children})
+            return self.send_json({"path": path, "kind": "file", "content": target.read_text(encoding="utf-8")})
+        if url.path in ("/vault/", "/vault/index.html"):
+            source = (WEB / "index.html").read_text(encoding="utf-8")
+            smoke = parse_qs(url.query).get("smoke", [""])[0]
+            if smoke:
+                source = source.replace("</body>", (DEEP if smoke == "deep" else SMOKE) + "</body>")
+            return self.send_bytes(source.encode(), "text/html")
+        if url.path.startswith("/vault/"):
+            path = (WEB / url.path.removeprefix("/vault/")).resolve()
+            if path.is_relative_to(WEB.resolve()) and path.is_file():
+                return self.send_bytes(path.read_bytes(), mimetypes.guess_type(path)[0] or "application/octet-stream")
+        self.send_error(404)
+
+    def do_POST(self):
+        body = json.loads(self.rfile.read(int(self.headers.get("Content-Length", 0))))
+        if self.path == "/api/complete":
+            line = body["line"]
+            return self.send_json({"start": 4, "end": len(line), "replacement": "/projects/overview.md ", "candidates": ["/projects/overview.md"], "session_id": "test", "current_directory": "/"})
+        if self.path == "/api/exec":
+            line = body["line"]
+            output = "Explore projects: cat /projects/overview.md" if line == "welcome" else "ok"
+            return self.send_json({"output": output, "exit_code": 0, "session_id": "test", "current_directory": "/"})
+        self.send_error(404)
+
+    def send_json(self, value):
+        self.send_bytes(json.dumps(value).encode(), "application/json")
+
+    def send_bytes(self, value, content_type):
+        self.send_response(200)
+        self.send_header("Content-Type", content_type)
+        self.send_header("Content-Length", str(len(value)))
+        self.end_headers()
+        self.wfile.write(value)
+
+
+def main():
+    browser = os.environ.get("BROWSER") or next((str(path) for path in (
+        Path(r"C:\Program Files\Google\Chrome\Application\chrome.exe"),
+        Path(r"C:\Program Files (x86)\Microsoft\Edge\Application\msedge.exe"),
+    ) if path.exists()), None)
+    if not browser:
+        raise SystemExit("Chrome or Edge required")
+    server = ThreadingHTTPServer(("127.0.0.1", 0), Handler)
+    thread = threading.Thread(target=server.serve_forever, daemon=True)
+    thread.start()
+    try:
+        for query, expected, width in (
+            ("smoke=main", "PASS terminal default", 1280),
+            ("smoke=deep&doc=/cv/experience.md", "PASS deep link, refresh, and mobile layout", 390),
+        ):
+            with tempfile.TemporaryDirectory() as profile:
+                url = f"http://127.0.0.1:{server.server_port}/vault/?{query}"
+                completed = subprocess.run([browser, "--headless=new", "--disable-gpu", "--no-sandbox", "--disable-software-rasterizer", "--no-first-run",
+                                            f"--user-data-dir={profile}", f"--window-size={width},844",
+                                            "--virtual-time-budget=12000", "--dump-dom", url],
+                                           capture_output=True, text=True, encoding="utf-8", errors="replace", timeout=35)
+                marker = completed.stdout.split('id="smoke-results">')[-1].split("</pre>")[0]
+                print(f"{width}px: {marker}")
+                if completed.returncode or expected not in marker:
+                    raise SystemExit(f"Browser smoke failed: {completed.stdout[-1300:]} {completed.stderr[-600:]}")
+    finally:
+        server.shutdown()
+
+
+if __name__ == "__main__":
+    main()
