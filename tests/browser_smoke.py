@@ -8,6 +8,7 @@ import json
 import mimetypes
 import os
 from pathlib import Path
+import re
 import subprocess
 import tempfile
 import threading
@@ -18,6 +19,28 @@ from urllib.parse import parse_qs, urlsplit
 ROOT = Path(__file__).resolve().parents[1]
 WEB = ROOT / "web"
 CONTENT = ROOT.parent / "lab" / "content"
+EXCERPTS = (
+    ("head -n 11 /projects/overview.md", "## Components"),
+    ("head -n 26 /docs/architecture/overview.md", "## Runtime topology"),
+)
+
+
+def verify_excerpts():
+    sources = (
+        WEB / "index.html",
+        WEB / "terminal.js",
+        ROOT / "internal" / "command" / "welcome.go",
+        CONTENT / "README.md",
+    )
+    for command, section in EXCERPTS:
+        count, path = re.fullmatch(r"head -n (\d+) (/[\w/.-]+\.md)", command).groups()
+        lines = (CONTENT / path.lstrip("/")).read_text(encoding="utf-8").splitlines()
+        excerpt = lines[:int(count)]
+        assert len(excerpt) < len(lines) and lines[int(count)] == "", command
+        assert section in excerpt and excerpt.count("```mermaid") == excerpt.count("```"), command
+        for source in sources:
+            assert command in source.read_text(encoding="utf-8"), f"{command} missing from {source}"
+    print("Command excerpts: PASS complete sections and matching suggestions")
 
 SMOKE = r"""
 <pre id="smoke-results">RUNNING</pre><script>
@@ -29,12 +52,24 @@ SMOKE = r"""
       if (test()) return;
       await new Promise(resolve => setTimeout(resolve, 50));
     }
-    throw Error('timed out waiting for UI');
+    throw Error('timed out waiting for UI: ' + document.querySelector('#output').textContent.slice(-600));
   };
   try {
     await wait(() => document.querySelector('#output').textContent.includes('Explore projects'));
     check(!document.querySelector('#shell-panel').hidden, 'terminal default');
     check(document.activeElement.id !== 'command', 'no automatic input focus');
+    const examples = [...document.querySelectorAll('#output .terminal-example')];
+    check(examples.length === 3 && examples.every(button => button.tagName === 'BUTTON'), 'clickable welcome examples');
+    check(examples[0].textContent === 'head -n 11 /projects/overview.md' &&
+          examples[1].textContent === 'head -n 26 /docs/architecture/overview.md', 'welcome excerpts');
+    check([...document.querySelectorAll('#quick-commands [data-command]')].slice(0, 2)
+      .map(button => button.dataset.command).join('|') === examples.slice(0, 2).map(button => button.textContent).join('|'), 'shortcut consistency');
+    examples[0].click();
+    await wait(() => [...document.querySelectorAll('#output .output-result')].at(-1)?.textContent.includes('**Lab** owns Docker Compose'));
+    check(![...document.querySelectorAll('#output .output-result')].at(-1).textContent.includes('## Design decisions'), 'project excerpt boundary');
+    document.querySelectorAll('#output .terminal-example')[1].click();
+    await wait(() => [...document.querySelectorAll('#output .output-result')].at(-1)?.textContent.includes('inside the private Compose networks.'));
+    check(![...document.querySelectorAll('#output .output-result')].at(-1).textContent.includes('## Component ownership'), 'architecture excerpt boundary');
     document.querySelector('#gui-tab').click();
     await wait(() => document.querySelector('#gui-location').textContent === '/projects');
     check(document.querySelector('.gui-item strong').textContent === 'Overview', 'overview first');
@@ -209,7 +244,15 @@ class Handler(BaseHTTPRequestHandler):
                 Handler.fail_exec = False
                 return self.send_error(503)
             line = body["line"]
-            output = "Explore projects: cat /projects/overview.md" if line == "welcome" else "ok"
+            if line == "welcome":
+                output = ("Explore projects: head -n 11 /projects/overview.md\n"
+                          "View architecture: head -n 26 /docs/architecture/overview.md\n"
+                          "Live dashboard: dashboard")
+            elif match := re.fullmatch(r"head -n (\d+) (/[\w/.-]+\.md)", line):
+                target = CONTENT / match[2].lstrip("/")
+                output = "\n".join(target.read_text(encoding="utf-8").splitlines()[:int(match[1])])
+            else:
+                output = "ok"
             return self.send_json({"output": output, "exit_code": 0, "session_id": "test", "current_directory": "/"})
         self.send_error(404)
 
@@ -225,6 +268,7 @@ class Handler(BaseHTTPRequestHandler):
 
 
 def main():
+    verify_excerpts()
     browser = os.environ.get("BROWSER") or next((str(path) for path in (
         Path(r"C:\Program Files\Google\Chrome\Application\chrome.exe"),
         Path(r"C:\Program Files (x86)\Microsoft\Edge\Application\msedge.exe"),

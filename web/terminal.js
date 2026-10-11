@@ -63,8 +63,8 @@ function initTerminal() {
   const statusTimeoutMilliseconds = 3000;
   const statusRefreshMilliseconds = 10000;
   const suggestions = [
-    ["Explore projects", "cat /projects/overview.md"],
-    ["View architecture", "cat /docs/architecture/overview.md"],
+    ["Explore projects", "head -n 11 /projects/overview.md"],
+    ["View architecture", "head -n 26 /docs/architecture/overview.md"],
     ["Live dashboard", "dashboard"],
     ["See commands", "help"],
   ];
@@ -480,7 +480,7 @@ function initTerminal() {
       const result = document.createElement("div");
       result.className = "output-result";
       result.dataset.exitCode = String(entry.exitCode);
-      appendTerminalText(result, entry.result);
+      appendTerminalText(result, entry.result, entry.line === "welcome" && entry.exitCode === 0);
       container.append(commandLine, result);
       output.append(container);
     }
@@ -501,7 +501,30 @@ function initTerminal() {
     });
   }
 
-  function appendTerminalText(parent, text) {
+  function appendTerminalText(parent, text, clickableExamples = false) {
+    if (clickableExamples) {
+      const lines = text.split("\n");
+      for (const [index, line] of lines.entries()) {
+        const example = suggestions.find(([label, commandLine]) => line === `${label}: ${commandLine}`);
+        if (example) {
+          parent.append(document.createTextNode(`${example[0]}: `));
+          const button = document.createElement("button");
+          button.type = "button";
+          button.className = "terminal-example";
+          button.textContent = example[1];
+          button.addEventListener("click", () => execute(example[1]));
+          parent.append(button);
+        } else {
+          appendTerminalLinks(parent, line);
+        }
+        if (index < lines.length - 1) parent.append(document.createTextNode("\n"));
+      }
+      return;
+    }
+    appendTerminalLinks(parent, text);
+  }
+
+  function appendTerminalLinks(parent, text) {
     let offset = 0;
     terminalLinkPattern.lastIndex = 0;
     let match = terminalLinkPattern.exec(text);

@@ -318,16 +318,33 @@ h1::after {
   color: #ff8a70;
 }
 
-.output-result a {
+.output-result a,
+.output-result .terminal-example {
   color: #f7c843;
   font-weight: 700;
   text-decoration: underline;
   text-underline-offset: 0.18rem;
 }
 
+.output-result .terminal-example {
+  background: none;
+  border: 0;
+  padding: 0;
+  font: inherit;
+  font-weight: 700;
+  cursor: pointer;
+}
+
 .output-result a:hover,
-.output-result a:focus-visible {
+.output-result a:focus-visible,
+.output-result .terminal-example:hover,
+.output-result .terminal-example:focus-visible {
   color: #fff3a6;
+}
+
+.output-result .terminal-example:focus-visible {
+  outline: 2px solid currentColor;
+  outline-offset: 3px;
 }
 
 .quick-command-drawer {
