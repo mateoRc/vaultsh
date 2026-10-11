@@ -1,6 +1,6 @@
 # Vaultsh
 
-A Go service that presents Backend Lab Markdown through a read-only virtual shell
+A Go service that a read-only virtual shell
 and a click-driven Explorer. The terminal is the default; Explorer shows
 project documents, architecture, and brief professional background.
 It provides sessions, pipelines, completion, and optional Atlas search and
