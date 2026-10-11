@@ -16,10 +16,10 @@ type statusStub struct {
 	forge bool
 }
 
-const aboutOutput = "Vaultsh is a read-only virtual shell for exploring Mateo's " +
-	"CV, projects, and live backend services.\n\n" +
-	"The portfolio is the system: a Go shell backed by " +
-	"Atlas search, Forge telemetry, and Lab deployment docs."
+const aboutOutput = "Vaultsh is the read-only virtual shell and Explorer for Backend Lab.\n\n" +
+	"Start with /projects/overview.md for the integrated system, " +
+	"then /docs/architecture/overview.md for its boundaries. " +
+	"Professional background is under /cv."
 
 func (s statusStub) Availability() (bool, bool) {
 	return s.atlas, s.forge

@@ -3,38 +3,46 @@ function initGui() {
   const guiTab = document.querySelector("#gui-tab");
   const shellPanel = document.querySelector("#shell-panel");
   const guiPanel = document.querySelector("#gui-panel");
-  const openGui = document.querySelector("#open-gui");
   const breadcrumbs = document.querySelector("#gui-breadcrumbs");
   const location = document.querySelector("#gui-location");
   const count = document.querySelector("#gui-count");
   const guiNav = document.querySelector("#gui-nav");
   const back = document.querySelector("#gui-back");
-  const home = document.querySelector("#gui-home");
+  const retry = document.querySelector("#gui-retry");
   const folders = document.querySelector("#gui-folders");
   const documentView = document.querySelector("#gui-document");
   const message = document.querySelector("#gui-message");
   const shortcuts = document.querySelectorAll("[data-gui-path]");
-  if (!shellTab || !guiTab || !shellPanel || !guiPanel || !openGui ||
-      !breadcrumbs || !location || !count || !guiNav || !back || !home ||
+  if (!shellTab || !guiTab || !shellPanel || !guiPanel ||
+      !breadcrumbs || !location || !count || !guiNav || !back || !retry ||
       !folders || !documentView || !message) return;
 
   let mode = "shell";
-  let currentPath = "/";
+  let currentPath = "/projects";
   let requestNumber = 0;
   let hasLoaded = false;
+  let activeRequest;
+  let retryPath = currentPath;
   let mermaidModule;
+  folders.tabIndex = -1;
+  documentView.tabIndex = -1;
 
-  const modeRow = document.querySelector(".mode-row");
-  const modeSentinel = document.querySelector(".mode-sticky-sentinel");
-  if (modeRow && modeSentinel) {
-    const updateSticky = () => {
-      modeRow.classList.toggle("is-stuck", modeSentinel.getBoundingClientRect().bottom < 0);
-    };
-    window.addEventListener("scroll", updateSticky, { passive: true });
-    updateSticky();
+  function documentURL(path, fragment = "") {
+    const url = new URL(window.location.href);
+    if (path) url.searchParams.set("doc", path);
+    else url.searchParams.delete("doc");
+    url.hash = fragment;
+    return url;
   }
 
-  function setMode(next, focus = true) {
+  function validPath(path) {
+    return typeof path === "string" && path.length <= 4096 &&
+      /^\/(?:[\w.-]+(?:\/[\w.-]+)*)?$/.test(path) &&
+      !path.split("/").some(part => part === "." || part === "..");
+  }
+
+  function setMode(next, focus = true, updateHistory = true) {
+    if (next === mode && (next === "shell" || hasLoaded)) return;
     mode = next;
     const desktop = next === "desktop";
     shellPanel.hidden = desktop;
@@ -47,14 +55,14 @@ function initGui() {
     if (focus) (desktop ? guiTab : shellTab).focus();
     if (desktop && !hasLoaded) {
       hasLoaded = true;
-      navigate("/");
+      navigate(currentPath, { history: updateHistory ? "push" : "none", focus: false });
+    } else if (updateHistory) {
+      window.history.pushState({}, "", documentURL(desktop ? currentPath : ""));
     }
-    try { window.sessionStorage.setItem("vaultsh-view", next); } catch { /* optional */ }
   }
 
   shellTab.addEventListener("click", () => setMode("shell"));
   guiTab.addEventListener("click", () => setMode("desktop"));
-  openGui.addEventListener("click", () => setMode("desktop"));
   for (const tab of [shellTab, guiTab]) {
     tab.addEventListener("keydown", (event) => {
       if (event.key === "ArrowLeft" || event.key === "ArrowRight") {
@@ -67,32 +75,60 @@ function initGui() {
     shortcut.addEventListener("click", () => navigate(shortcut.dataset.guiPath));
   }
   back.addEventListener("click", () => navigate(parentPath(currentPath)));
-  home.addEventListener("click", () => navigate("/"));
+  retry.addEventListener("click", () => navigate(retryPath));
+  window.addEventListener("popstate", () => {
+    const path = new URL(window.location.href).searchParams.get("doc");
+    if (path && validPath(path)) {
+      currentPath = path;
+      if (mode !== "desktop") setMode("desktop", false, false);
+      navigate(path, { history: "none", focus: false, fragment: window.location.hash });
+    } else setMode("shell", false, false);
+  });
 
   function parentPath(path) {
     return path.slice(0, path.lastIndexOf("/")) || "/";
   }
 
-  async function navigate(path) {
+  async function navigate(path, options = {}) {
+    if (!validPath(path)) {
+      message.textContent = "Invalid document path.";
+      return;
+    }
     const serial = ++requestNumber;
+    activeRequest?.abort();
+    const controller = new AbortController();
+    activeRequest = controller;
+    retryPath = path;
+    retry.hidden = true;
     message.textContent = "Opening…";
+    const timeout = window.setTimeout(() => controller.abort(), 8000);
     try {
       const url = new URL("/api/browse", window.location.origin);
       url.searchParams.set("path", path);
-      const response = await fetch(url, { cache: "no-store" });
-      if (!response.ok) throw new Error(response.status === 429 ? "Too many requests. Try again shortly." : "This item could not be opened.");
+      const response = await fetch(url, { cache: "no-store", signal: controller.signal });
+      if (!response.ok) throw new Error(response.status === 429 ? "Too many requests. Try again shortly." : response.status === 404 ? "Document not found." : "Explorer is unavailable.");
       const item = await response.json();
       if (serial !== requestNumber) return;
+      if (!validPath(item.path) || !["directory", "file"].includes(item.kind)) throw new Error("Invalid document response.");
       currentPath = item.path;
+      if (options.history !== "none") window.history[options.history === "replace" ? "replaceState" : "pushState"]({}, "", documentURL(item.path, options.fragment));
       location.textContent = item.path;
+      location.title = item.path;
       guiNav.hidden = item.path === "/";
       renderBreadcrumbs(item.path);
       renderShortcuts(item.path);
       if (item.kind === "directory") renderDirectory(item);
       else renderFile(item);
       message.textContent = "";
+      if (options.fragment) focusFragment(options.fragment);
+      else if (options.focus !== false) (item.kind === "file" ? documentView : folders).focus({ preventScroll: true });
     } catch (error) {
-      if (serial === requestNumber) message.textContent = error.message || "This item could not be opened.";
+      if (serial === requestNumber) {
+        message.textContent = error.name === "AbortError" ? "Explorer timed out. Try again." : error.message || "Explorer is unavailable. Try again.";
+        retry.hidden = false;
+      }
+    } finally {
+      window.clearTimeout(timeout);
     }
   }
 
@@ -115,6 +151,7 @@ function initGui() {
       const button = document.createElement("button");
       button.type = "button";
       button.textContent = label;
+      button.title = label;
       button.disabled = target === path;
       button.addEventListener("click", () => navigate(target));
       breadcrumbs.append(button);
@@ -136,6 +173,7 @@ function initGui() {
     folders.hidden = false;
     folders.replaceChildren();
     const children = (item.children || []).slice().sort((a, b) =>
+      a.name === "overview.md" ? -1 : b.name === "overview.md" ? 1 :
       (a.kind === b.kind ? a.name.localeCompare(b.name) : a.kind === "directory" ? -1 : 1));
     count.textContent = `${children.length} item${children.length === 1 ? "" : "s"}`;
     if (!children.length) {
@@ -157,7 +195,14 @@ function initGui() {
       name.textContent = child.name === "cv" ? "CV" : child.name === "README.md" ? "Read me" :
         label.charAt(0).toUpperCase() + label.slice(1);
       const type = document.createElement("small");
-      type.textContent = child.kind === "directory" ? "Folder" : "Document";
+      const descriptions = {
+        "overview.md": "Integrated system and where to explore",
+        "vaultsh.md": "Virtual shell and Explorer",
+        "atlas.md": "Markdown search service",
+        "forge.md": "Telemetry and text dashboard",
+        "sentinel.md": "CI release assessment",
+      };
+      type.textContent = item.path === "/projects" ? descriptions[child.name] || "Document" : child.kind === "directory" ? "Folder" : "Document";
       button.append(icon, name, type);
       button.addEventListener("click", () => navigate(child.path));
       folders.append(button);
@@ -175,6 +220,17 @@ function initGui() {
     renderMarkdown(body, item.content || "");
     documentView.append(body);
     renderDiagrams(body);
+  }
+
+  function focusFragment(fragment) {
+    let id;
+    try { id = decodeURIComponent(fragment.replace(/^#/, "")); } catch { return; }
+    const target = document.getElementById(id);
+    if (target && documentView.contains(target)) {
+      target.tabIndex = -1;
+      target.focus({ preventScroll: true });
+      target.scrollIntoView({ block: "start" });
+    }
   }
 
   async function renderDiagrams(body) {
@@ -226,6 +282,7 @@ function initGui() {
       if (heading) {
         const node = document.createElement(`h${heading[1].length}`);
         appendInline(node, heading[2]);
+        node.id = heading[2].toLowerCase().replace(/[^\p{L}\p{N}\s-]/gu, "").trim().replace(/\s+/g, "-");
         parent.append(node);
         index++;
         continue;
@@ -287,6 +344,23 @@ function initGui() {
           link.textContent = match[2];
           if (/^https?:\/\//i.test(href)) { link.target = "_blank"; link.rel = "noreferrer noopener"; }
           parent.append(link);
+        } else if (!/^[a-z][a-z\d+.-]*:/i.test(href) && !href.startsWith("//") && !href.includes("\\")) {
+          try {
+            const target = new URL(href, `https://virtual.invalid${currentPath}`);
+            if (target.origin !== "https://virtual.invalid" || !validPath(target.pathname) || target.search) throw new Error("Invalid link");
+            const link = document.createElement("a");
+            link.href = documentURL(target.pathname, target.hash).toString();
+            link.textContent = match[2];
+            link.addEventListener("click", event => {
+              if (event.button !== 0 || event.ctrlKey || event.metaKey || event.shiftKey || event.altKey) return;
+              event.preventDefault();
+              if (target.pathname === currentPath && target.hash) {
+                window.history.pushState({}, "", documentURL(currentPath, target.hash));
+                focusFragment(target.hash);
+              } else navigate(target.pathname, { fragment: target.hash });
+            });
+            parent.append(link);
+          } catch { parent.append(document.createTextNode(match[2])); }
         } else parent.append(document.createTextNode(match[2]));
       } else {
         const node = document.createElement(match[4] !== undefined ? "strong" : match[5] !== undefined ? "code" : "em");
@@ -298,9 +372,22 @@ function initGui() {
     parent.append(document.createTextNode(source.slice(offset)));
   }
 
-  try {
-    if (window.sessionStorage.getItem("vaultsh-view") === "desktop") setMode("desktop", false);
-  } catch { /* optional */ }
+  const initialPath = new URL(window.location.href).searchParams.get("doc");
+  if (initialPath && validPath(initialPath)) {
+    currentPath = initialPath;
+    setMode("desktop", false, false);
+    const fragment = window.location.hash;
+    if (fragment) {
+      const loaded = requestNumber;
+      const observer = new MutationObserver(() => {
+        if (loaded !== requestNumber || !documentView.hidden) {
+          observer.disconnect();
+          focusFragment(fragment);
+        }
+      });
+      observer.observe(documentView, { attributes: true, attributeFilter: ["hidden"] });
+    }
+  }
 }
 
 initGui();

@@ -7,6 +7,7 @@ function initTerminal() {
   const prompt = document.querySelector("#prompt");
   const output = document.querySelector("#output");
   const requestStatus = document.querySelector("#request-status");
+  const offlineSummary = document.querySelector("#offline-summary");
   const nextCommands = document.querySelector("#next-commands");
   const nextCommandButton = nextCommands
     ? nextCommands.querySelector("button")
@@ -56,32 +57,16 @@ function initTerminal() {
     unavailable: "unavailable",
   });
   const terminalLinkPattern = /\[([^\]\n]+)\]\((https?:\/\/[^\s)]+|mailto:[^\s)]+)\)/g;
-  const autoWelcomeCommand = "welcome  ";
+  const autoWelcomeCommand = "welcome";
   const autoWelcomeDelayMilliseconds = 400;
   const autoWelcomeKeystrokeMilliseconds = 100;
   const statusTimeoutMilliseconds = 3000;
   const statusRefreshMilliseconds = 10000;
   const suggestions = [
-    ["Start with about", "about"],
-    ["Show identity and links", "whoami"],
-    ["Review core skills", "cat /cv/skills.md"],
-    ["Browse experience", "tree /cv/experience"],
-    [
-      "Read recent role",
-      "cat /cv/experience/reversinglabs.md",
-    ],
-    ["Find backend work", 'grep -in "backend" /cv/about.md'],
-    ["Search Java experience", 'search Java | grep "/cv/experience/"'],
-    ["Search distributed systems", "search distributed systems"],
-    ["Browse projects", "tree -L 1 /projects"],
-    ["Open Vaultsh project", "cat /projects/vaultsh.md"],
-    [
-      "Review Vaultsh stack",
-      'cat /projects/vaultsh.md | grep -i "technology"',
-    ],
-    ["Show live dashboard", "dashboard"],
-    ["Contact Mateo", "contact"],
-    ["See available commands", "help"],
+    ["Explore projects", "cat /projects/overview.md"],
+    ["View architecture", "cat /docs/architecture/overview.md"],
+    ["Live dashboard", "dashboard"],
+    ["See commands", "help"],
   ];
   const maxOutputEntries = 100;
   let outputEntries = output.textContent ? [{ welcome: output.textContent }] : [];
@@ -91,15 +76,14 @@ function initTerminal() {
     : "/";
   let suggestionIndex = 0;
   let running = false;
+  let allowTabExit = false;
+  quickCommands.inert = true;
 
   updatePrompt();
   refreshVaultStatus();
   refreshServiceStatus();
   renderOutput();
 
-  if (window.matchMedia("(pointer: fine)").matches) {
-    focusCommand();
-  }
   window.setTimeout(typeWelcomeCommand, autoWelcomeDelayMilliseconds);
 
   setInterval(refreshVaultStatus, statusRefreshMilliseconds);
@@ -114,6 +98,7 @@ function initTerminal() {
     status.textContent = state;
     status.dataset.state = state;
     status.setAttribute("aria-label", `Vaultsh ${state}`);
+    if (offlineSummary) offlineSummary.hidden = state !== serviceStates.unavailable;
   }
 
   function storageGet(key) {
@@ -182,11 +167,11 @@ function initTerminal() {
     }
   }
 
-  async function fetchWithTimeout(url, options = {}) {
+  async function fetchWithTimeout(url, options = {}, timeoutMilliseconds = statusTimeoutMilliseconds) {
     const controller = new AbortController();
     const timeout = window.setTimeout(
       () => controller.abort(),
-      statusTimeoutMilliseconds,
+      timeoutMilliseconds,
     );
 
     try {
@@ -222,7 +207,7 @@ function initTerminal() {
   }
 
   function typeWelcomeCommand() {
-    if (running || command.value !== "") {
+    if (running || command.value !== "" || document.activeElement === command) {
       return;
     }
 
@@ -270,7 +255,7 @@ function initTerminal() {
 
     command.value = "";
     await execute(line);
-    focusCommand();
+    if (document.activeElement === command) focusCommand();
   });
 
   clearCommand.addEventListener("click", () => execute("clear"));
@@ -284,6 +269,7 @@ function initTerminal() {
       const commandLine = button.dataset.command;
       setQuickCommandsExpanded(false, { instant: true });
       await execute(commandLine);
+      if (quickCommands.contains(button)) quickCommandToggle.focus();
     });
   }
 
@@ -301,11 +287,18 @@ function initTerminal() {
       return;
     }
 
-    if (event.key === "Tab" && document.activeElement === command) {
+    if (event.key === "Escape" && document.activeElement === command) {
+      quickCommandToggle.focus();
+      return;
+    }
+
+    if (event.key === "Tab" && !event.shiftKey && document.activeElement === command && command.value.trim() && !allowTabExit) {
       event.preventDefault();
+      allowTabExit = true;
       await complete();
     }
   });
+  command.addEventListener("input", () => { allowTabExit = false; });
 
   function isQuickCommandsCollapsed() {
     return quickCommands.classList.contains("quick-commands--collapsed");
@@ -318,6 +311,7 @@ function initTerminal() {
     quickCommands.classList.toggle("quick-commands--collapsed", !expanded);
     quickCommandToggle.setAttribute("aria-expanded", String(expanded));
     quickCommands.setAttribute("aria-hidden", String(!expanded));
+    quickCommands.inert = !expanded;
     if (options.instant) {
       window.requestAnimationFrame(() => {
         quickCommands.classList.remove("quick-commands--instant");
@@ -331,11 +325,11 @@ function initTerminal() {
     setRequestStatus("Completing…");
 
     try {
-      const response = await fetch(endpoints.complete, {
+      const response = await fetchWithTimeout(endpoints.complete, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ line, cursor, session_id: sessionId }),
-      });
+      }, 5000);
       if (!response.ok) {
         throw new Error(await friendlyError(response));
       }
@@ -352,7 +346,8 @@ function initTerminal() {
       }
       setRequestStatus("");
     } catch (error) {
-      setRequestStatus(error.message || "Completion unavailable.");
+      setRequestStatus(error.name === "AbortError" ? "Completion timed out. Edit the command or try Tab again." : error.message || "Completion unavailable. Try Tab again.");
+      allowTabExit = true;
     }
   }
 
@@ -373,11 +368,11 @@ function initTerminal() {
     }, 1200);
 
     try {
-      const response = await fetch(endpoints.execute, {
+      const response = await fetchWithTimeout(endpoints.execute, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ line, session_id: sessionId }),
-      });
+      }, 15000);
       if (!response.ok) {
         throw new Error(await friendlyError(response));
       }
@@ -387,7 +382,7 @@ function initTerminal() {
     } catch (error) {
       appendEntry(
         line,
-        error.message || "Request failed. Check your connection.",
+        error.name === "AbortError" ? "Timed out. The command may have run; check status before running it again." : error.message || "Request failed. Check your connection, then run a command again.",
         submittedFrom,
         1,
       );

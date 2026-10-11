@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-  <meta name="description" content="Explore Mateo Mahmutović's backend engineering portfolio through Vaultsh, the Atlas search engine, and Forge analytics.">
+  <meta name="description" content="Explore Backend Lab engineering decisions through Vaultsh's virtual shell, architecture docs, search service, and telemetry dashboard.">
   <meta property="og:type" content="website">
   <meta property="og:title" content="Vaultsh | Backend engineering portfolio">
   <meta property="og:description" content="Explore a backend engineering portfolio through a read-only virtual shell, search service, and telemetry dashboard.">
@@ -17,8 +17,8 @@
   <meta name="twitter:image" content="https://mateolabs.dev/vault/social-preview.png">
   <link rel="canonical" href="https://mateolabs.dev/vault/">
   <link rel="icon" href="/vault/favicon.svg" type="image/svg+xml">
-  <title>Vaultsh</title>
-  <link rel="stylesheet" href="style.css?v=20261011b">
+  <title>Vaultsh | Backend Lab engineering showcase</title>
+  <link rel="stylesheet" href="style.css?v=20261011c">
   <link rel="stylesheet" href="mermaid.css?v=20261011a">
 </head>
 <body>
@@ -27,32 +27,15 @@
       <h1><span class="product-name">Vault</span><span class="shell-suffix">sh</span></h1>
     </header>
 
-    <!--<div class="engine-note">
-      <nav class="profile-links" aria-label="Profile links">
-        <a class="contact-action" href="mailto:mahmutovic.mateo@gmail.com">
-          Contact ↗
-        </a>
-        <a href="https://github.com/mateoRc/vaultsh" target="_blank" rel="noreferrer">
-          GitHub ↗
-        </a>
-        <a
-          href="https://www.linkedin.com/in/mateo-mahmutovi%C4%87-a9837232b/"
-          target="_blank"
-          rel="noreferrer"
-        >
-          LinkedIn ↗
-        </a>
-      </nav>
-    </div>-->
+    <noscript><p class="static-summary">Backend Lab connects Vaultsh's read-only virtual shell with Atlas search, Forge telemetry, and Sentinel CI assessment. Read the <a href="https://github.com/mateoRc/lab/blob/main/content/projects/overview.md">project overview</a>, <a href="https://github.com/mateoRc/lab/blob/main/content/docs/architecture/overview.md">architecture</a>, or <a href="https://github.com/mateoRc/lab">source code</a>.</p></noscript>
 
-    <div class="mode-sticky-sentinel" aria-hidden="true"></div>
     <div class="mode-row">
       <div class="mode-switch" role="tablist" aria-label="Portfolio view">
         <button id="shell-tab" class="mode-tab" type="button" role="tab" aria-selected="true" aria-controls="shell-panel">vaultsh <span class="mode-icon mode-icon--terminal" aria-hidden="true">&gt;_</span></button>
         <button id="gui-tab" class="mode-tab" type="button" role="tab" aria-selected="false" aria-controls="gui-panel" tabindex="-1">explorer <svg class="mode-icon mode-icon--desktop" viewBox="0 0 20 20" fill="none" aria-hidden="true"><rect x="2" y="3" width="16" height="14" rx="1.5" stroke="currentColor" stroke-width="1.8"/><path d="M2 7h16M5 5h1M8 5h1M5 10h5v4H5zM12 10h3M12 13h3" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
       </div>
-      <p class="mode-hint">Prefer clicking? <button id="open-gui" type="button">Open Explorer →</button></p>
     </div>
+    <p id="offline-summary" class="static-summary" hidden>Backend Lab connects Vaultsh's virtual shell, Atlas search, Forge telemetry, and Sentinel CI assessment. Services are unavailable right now; read the <a href="https://github.com/mateoRc/lab/blob/main/content/projects/overview.md">project overview</a>, <a href="https://github.com/mateoRc/lab/blob/main/content/docs/architecture/overview.md">architecture</a>, or <a href="https://github.com/mateoRc/lab">source</a>.</p>
 
     <section id="shell-panel" class="terminal" role="tabpanel" aria-labelledby="shell-tab" aria-label="Interactive portfolio terminal">
       <header class="terminal-bar">
@@ -83,8 +66,10 @@
             maxlength="4096"
             aria-label="Shell command"
             placeholder="type a command..."
+            aria-describedby="command-hint"
           >
         </form>
+        <p id="command-hint" class="command-hint">Tab completes; Shift+Tab or Escape leaves the command input.</p>
         <p id="request-status" class="request-status" aria-live="polite"></p>
         <div id="next-commands" class="next-commands" aria-label="Suggested command" hidden>
           <span>Suggestion:</span>
@@ -111,33 +96,11 @@
             aria-label="Suggested commands"
             aria-hidden="true"
           >
-            <button
-              type="button"
-              data-command="cat /cv/about.md"
-            >
-              Profile
-            </button>
-            <button
-              type="button"
-              data-command="whoami"
-            >
-              Identity
-            </button>
-            <button type="button" data-command="cat /cv/skills.md">Skills</button>
-            <button type="button" data-command="tree -L 2 /">Browse</button>
-            <button type="button" data-command="tree /cv/experience">Experience</button>
-            <button
-              type="button"
-              data-command='search Java | grep "/cv/experience/"'
-            >
-              Java
-            </button>
-            <button type="button" data-command="search distributed systems">Search</button>
-            <button type="button" data-command="tree -L 1 /projects">Projects</button>
-            <button type="button" data-command="cat /projects/vaultsh.md">Vaultsh</button>
-            <button type="button" data-command="welcome">Welcome</button>
-            <button type="button" data-command="dashboard">Dashboard</button>
-            <button type="button" data-command="contact">Contact</button>
+            <button type="button" data-command="cat /projects/overview.md">Explore projects</button>
+            <button type="button" data-command="cat /docs/architecture/overview.md">View architecture</button>
+            <button type="button" data-command="dashboard">Live dashboard</button>
+            <button type="button" data-command="help">Help</button>
+            <button type="button" data-command="cat /cv/about.md">Profile</button>
           </div>
         </div>
       </div>
@@ -146,25 +109,19 @@
     <section id="gui-panel" class="desktop" role="tabpanel" aria-labelledby="gui-tab" hidden>
       <header class="desktop-bar">
         <div class="window-controls" aria-hidden="true"><span></span><span></span><span></span></div>
-        <span>Portfolio Explorer</span>
+        <span>Project Explorer</span>
         <span class="desktop-bar-end">READ ONLY · 2026</span>
       </header>
       <div class="desktop-toolbar">
-        <div class="desktop-toolbar-title"><span class="desktop-mark" aria-hidden="true"><svg viewBox="0 0 20 20" fill="none"><rect x="2" y="3" width="16" height="14" rx="1.5" stroke="currentColor" stroke-width="1.8"/><path d="M2 7h16M5 5h1M8 5h1M5 10h5v4H5zM12 10h3M12 13h3" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg></span><div><strong>Mateo's files</strong><small>Browse the work, projects and background</small></div></div>
+        <div class="desktop-toolbar-title"><span class="desktop-mark" aria-hidden="true"><svg viewBox="0 0 20 20" fill="none"><rect x="2" y="3" width="16" height="14" rx="1.5" stroke="currentColor" stroke-width="1.8"/><path d="M2 7h16M5 5h1M8 5h1M5 10h5v4H5zM12 10h3M12 13h3" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg></span><div><strong>Backend Lab</strong><small>Projects and engineering decisions</small></div></div>
         <nav id="gui-breadcrumbs" class="gui-breadcrumbs" aria-label="Current folder"></nav>
       </div>
       <div class="desktop-main">
         <aside class="desktop-sidebar" aria-label="Quick locations">
-          <p class="sidebar-label">PLACES</p>
-          <button type="button" data-gui-path="/cv"><span aria-hidden="true">▣</span> Profile</button>
           <button type="button" data-gui-path="/projects"><span aria-hidden="true">▦</span> Projects</button>
-          <button type="button" data-gui-path="/docs"><span aria-hidden="true">▤</span> Documents</button>
-          <div class="sidebar-divider"></div>
-          <p class="sidebar-label">SHORTCUTS</p>
-          <button type="button" data-gui-path="/cv/about.md"><span aria-hidden="true">↗</span> About me</button>
-          <button type="button" data-gui-path="/cv/skills.md"><span aria-hidden="true">↗</span> Skills</button>
-          <button type="button" data-gui-path="/cv/experience"><span aria-hidden="true">↗</span> Experience</button>
-          <button type="button" data-gui-path="/cv/contact.md"><span aria-hidden="true">↗</span> Contact</button>
+          <button type="button" data-gui-path="/docs"><span aria-hidden="true">▤</span> Docs</button>
+          <button type="button" data-gui-path="/cv"><span aria-hidden="true">▣</span> Profile</button>
+          <button class="sidebar-contact" type="button" data-gui-path="/cv/contact.md">Contact ↗</button>
         </aside>
         <div class="desktop-content">
           <div class="desktop-location">
@@ -173,20 +130,20 @@
               <span id="gui-count"></span>
               <nav id="gui-nav" class="gui-nav" aria-label="Explorer navigation" hidden>
                 <button id="gui-back" type="button" aria-label="Back to parent folder">← Back</button>
-                <button id="gui-home" type="button" aria-label="Go to Explorer home">Home</button>
               </nav>
             </div>
           </div>
           <div id="gui-folders" class="gui-folders" aria-label="Files and folders"></div>
           <article id="gui-document" class="gui-document" aria-label="Document preview" hidden></article>
           <p id="gui-message" class="gui-message" role="status" aria-live="polite"></p>
+          <button id="gui-retry" class="gui-retry" type="button" hidden>Retry</button>
         </div>
       </div>
       <footer class="desktop-footer"><span>VAULTSH EXPLORER</span><span>Double click? Single click works here.</span></footer>
     </section>
 
   </main>
-  <script src="terminal.js?v=20261010" defer></script>
-  <script src="gui.js?v=20261011b" defer></script>
+  <script src="terminal.js?v=20261011c" defer></script>
+  <script src="gui.js?v=20261011c" defer></script>
 </body>
 </html>
