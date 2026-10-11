@@ -121,7 +121,11 @@ function initGui() {
       else renderFile(item);
       message.textContent = "";
       if (options.fragment) focusFragment(options.fragment);
-      else if (options.focus !== false) (item.kind === "file" ? documentView : folders).focus({ preventScroll: true });
+      else if (options.focus !== false) {
+        const target = item.kind === "file" ? documentView.querySelector("h1") || documentView : folders.querySelector(".gui-item") || folders;
+        if (target.tagName === "H1") target.tabIndex = -1;
+        target.focus({ preventScroll: true });
+      }
     } catch (error) {
       if (serial === requestNumber) {
         message.textContent = error.name === "AbortError" ? "Explorer timed out. Try again." : error.message || "Explorer is unavailable. Try again.";

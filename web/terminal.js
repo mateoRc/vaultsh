@@ -77,7 +77,7 @@ function initTerminal() {
   let suggestionIndex = 0;
   let running = false;
   let allowTabExit = false;
-  quickCommands.inert = true;
+  quickCommands.inert = false;
 
   updatePrompt();
   refreshVaultStatus();
@@ -346,7 +346,7 @@ function initTerminal() {
       }
       setRequestStatus("");
     } catch (error) {
-      setRequestStatus(error.name === "AbortError" ? "Completion timed out. Edit the command or try Tab again." : error.message || "Completion unavailable. Try Tab again.");
+      setRequestStatus(error.name === "AbortError" ? "Completion timed out. Edit to retry, or press Tab again to leave." : (error.message || "Completion unavailable.") + " Edit to retry, or press Tab again to leave.");
       allowTabExit = true;
     }
   }

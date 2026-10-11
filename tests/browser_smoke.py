@@ -48,6 +48,9 @@ SMOKE = r"""
     history.back();
     await wait(() => document.querySelector('#gui-location').textContent === '/projects/overview.md');
     check(document.querySelector('.markdown-body h1').textContent.includes('Backend Lab'), 'browser Back');
+    history.forward();
+    await wait(() => document.querySelector('#gui-location').textContent === '/docs/architecture/overview.md');
+    check(document.querySelector('#gui-tab').getAttribute('aria-selected') === 'true', 'browser Forward and tab state');
     document.querySelector('[data-gui-path="/docs"]').click();
     await wait(() => document.querySelector('#gui-location').textContent === '/docs');
     [...document.querySelectorAll('.gui-item')].find(e => e.textContent.includes('Architecture')).click();
@@ -76,6 +79,20 @@ SMOKE = r"""
     check(!shift.defaultPrevented, 'Shift+Tab moves normally');
     input.dispatchEvent(new KeyboardEvent('keydown', {key: 'Escape', bubbles: true}));
     check(document.activeElement.id === 'quick-command-toggle', 'Escape leaves input');
+    await fetch('/api/fail-next-complete');
+    input.focus(); input.value = 'cat /projects/ov2'; input.dispatchEvent(new Event('input'));
+    check(tab(), 'completion request starts');
+    await wait(() => document.querySelector('#request-status').textContent.includes('Edit to retry'));
+    check(!tab(), 'completion failure permits exit');
+    await fetch('/api/fail-next-exec');
+    input.value = 'help';
+    document.querySelector('#command-form').dispatchEvent(new Event('submit', {bubbles: true, cancelable: true}));
+    await wait(() => document.querySelector('#output').textContent.includes('Service unavailable'));
+    check(!input.disabled, 'execution failure unlocks input');
+    input.value = 'help';
+    document.querySelector('#command-form').dispatchEvent(new Event('submit', {bubbles: true, cancelable: true}));
+    await wait(() => [...document.querySelectorAll('#output .output-result')].at(-1)?.textContent === 'ok');
+    check(!input.disabled, 'manual command recovery');
     document.querySelector('#smoke-results').textContent = 'PASS ' + results.join(', ');
   } catch (error) {
     document.querySelector('#smoke-results').textContent = 'FAIL ' + error.message + ' after ' + results.join(', ');
@@ -104,7 +121,7 @@ DEEP = r"""
   if (!sessionStorage.getItem('smoke-reloaded')) {
     sessionStorage.setItem('smoke-reloaded', 'yes'); location.reload(); return;
   }
-  result.textContent = 'PASS deep link, refresh, and mobile layout';
+  result.textContent = 'PASS deep link, refresh, and mobile layout ' + innerWidth + 'px viewport';
 })();
 </script>
 """
@@ -112,6 +129,8 @@ DEEP = r"""
 
 class Handler(BaseHTTPRequestHandler):
     fail_next = False
+    fail_complete = False
+    fail_exec = False
 
     def log_message(self, *_args):
         pass
@@ -120,6 +139,12 @@ class Handler(BaseHTTPRequestHandler):
         url = urlsplit(self.path)
         if url.path == "/api/fail-next":
             Handler.fail_next = True
+            return self.send_bytes(b"ok", "text/plain")
+        if url.path == "/api/fail-next-complete":
+            Handler.fail_complete = True
+            return self.send_bytes(b"ok", "text/plain")
+        if url.path == "/api/fail-next-exec":
+            Handler.fail_exec = True
             return self.send_bytes(b"ok", "text/plain")
         if url.path == "/healthz":
             return self.send_bytes(b"ok", "text/plain")
@@ -153,9 +178,15 @@ class Handler(BaseHTTPRequestHandler):
     def do_POST(self):
         body = json.loads(self.rfile.read(int(self.headers.get("Content-Length", 0))))
         if self.path == "/api/complete":
+            if Handler.fail_complete:
+                Handler.fail_complete = False
+                return self.send_error(503)
             line = body["line"]
             return self.send_json({"start": 4, "end": len(line), "replacement": "/projects/overview.md ", "candidates": ["/projects/overview.md"], "session_id": "test", "current_directory": "/"})
         if self.path == "/api/exec":
+            if Handler.fail_exec:
+                Handler.fail_exec = False
+                return self.send_error(503)
             line = body["line"]
             output = "Explore projects: cat /projects/overview.md" if line == "welcome" else "ok"
             return self.send_json({"output": output, "exit_code": 0, "session_id": "test", "current_directory": "/"})
@@ -185,7 +216,7 @@ def main():
     try:
         for query, expected, width in (
             ("smoke=main", "PASS terminal default", 1280),
-            ("smoke=deep&doc=/cv/experience.md", "PASS deep link, refresh, and mobile layout", 390),
+            ("smoke=deep&doc=/cv/experience.md", "PASS deep link, refresh, and mobile layout", 512),
         ):
             with tempfile.TemporaryDirectory() as profile:
                 url = f"http://127.0.0.1:{server.server_port}/vault/?{query}"
@@ -197,6 +228,16 @@ def main():
                 print(f"{width}px: {marker}")
                 if completed.returncode or expected not in marker:
                     raise SystemExit(f"Browser smoke failed: {completed.stdout[-1300:]} {completed.stderr[-600:]}")
+                if screenshot_dir := os.environ.get("VAULTSH_SCREENSHOTS"):
+                    screenshot = Path(screenshot_dir) / f"vaultsh-{width}.png"
+                    screenshot.parent.mkdir(parents=True, exist_ok=True)
+                    document = "/projects/overview.md" if width == 1280 else "/cv/experience.md"
+                    capture_url = f"http://127.0.0.1:{server.server_port}/vault/?doc={document}"
+                    subprocess.run([browser, "--headless=new", "--disable-gpu", "--no-sandbox",
+                                    "--disable-software-rasterizer", "--no-first-run",
+                                    f"--user-data-dir={profile}", f"--window-size={width},844",
+                                    "--virtual-time-budget=4000", f"--screenshot={screenshot}", capture_url],
+                                   capture_output=True, timeout=25, check=True)
     finally:
         server.shutdown()
 
