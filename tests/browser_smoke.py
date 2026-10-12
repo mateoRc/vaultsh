@@ -58,8 +58,9 @@ SMOKE = r"""
   try {
     await wait(() => document.querySelector('#output').textContent.includes('Explore projects'));
     check(!document.querySelector('#shell-panel').hidden, 'terminal default');
-    check(document.querySelector('.workspace > .mode-row .mode-switch') &&
-          document.querySelector('.intro-hint').textContent.includes('Explorer tab'), 'window tabs and Explorer hint');
+    check(document.querySelector('.page > .mode-row .mode-switch') &&
+          document.querySelector('.mode-row + .workspace') &&
+          document.querySelector('.intro-hint').textContent.includes('Explorer tab'), 'separate tabs and Explorer hint');
     check(document.activeElement.id !== 'command', 'no automatic input focus');
     const examples = [...document.querySelectorAll('#output .terminal-example')];
     check(examples.length === 3 && examples.every(button => button.tagName === 'BUTTON'), 'clickable welcome examples');

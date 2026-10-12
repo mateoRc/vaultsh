@@ -811,10 +811,7 @@ h1::after {
 .mode-row {
   display: flex;
   align-items: center;
-  min-height: 3rem;
-  border-bottom: 3px solid #1d1f1e;
-  padding: 0.45rem 0.8rem 0;
-  background: #eee9dc;
+  margin-bottom: 0.9rem;
 }
 
 .static-summary {
@@ -837,8 +834,7 @@ h1::after {
 
 .mode-switch {
   display: flex;
-  align-items: end;
-  gap: 0.3rem;
+  gap: 0.6rem;
 }
 
 .mode-tab {
@@ -848,20 +844,18 @@ h1::after {
   gap: 0.65rem;
   min-height: 2.5rem;
   border: 2px solid #1d1f1e;
-  border-bottom: 0;
-  border-radius: 0.35rem 0.35rem 0 0;
+  border-radius: 0.35rem;
   padding: 0.35rem 0.9rem;
   cursor: pointer;
   background: #d9d4c7;
   color: #1d1f1e;
   font: 800 0.75rem/1 ui-monospace, SFMono-Regular, Consolas, monospace;
   white-space: nowrap;
-  transform: translateY(3px);
 }
 
 .mode-tab[aria-selected="true"] {
   background: #f7c843;
-  box-shadow: inset 0 -3px #f7c843;
+  box-shadow: 3px 3px 0 #1d1f1e;
 }
 
 .mode-tab:not([aria-selected="true"]):hover {
@@ -882,7 +876,7 @@ h1::after {
 
 .mode-tab:focus-visible {
   outline: 2px solid #f05a28;
-  outline-offset: -2px;
+  outline-offset: 3px;
 }
 
 .desktop {
