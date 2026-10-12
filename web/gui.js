@@ -3,8 +3,6 @@ function initGui() {
   const guiTab = document.querySelector("#gui-tab");
   const shellPanel = document.querySelector("#shell-panel");
   const guiPanel = document.querySelector("#gui-panel");
-  const workspaceHeader = document.querySelector(".workspace-header");
-  const workspaceTitle = document.querySelector("#workspace-title");
   const serviceStatuses = document.querySelector(".service-statuses");
   const breadcrumbs = document.querySelector("#gui-breadcrumbs");
   const count = document.querySelector("#gui-count");
@@ -19,7 +17,7 @@ function initGui() {
   const treeToggle = document.querySelector("#gui-tree-toggle");
   const sidebar = document.querySelector(".desktop-sidebar");
   if (!shellTab || !guiTab || !shellPanel || !guiPanel ||
-      !workspaceHeader || !workspaceTitle || !serviceStatuses ||
+      !serviceStatuses ||
       !breadcrumbs || !count || !guiNav || !back || !retry ||
       !folders || !documentView || !message || !tree ||
       !treeLocation || !treeToggle || !sidebar) return;
@@ -59,8 +57,6 @@ function initGui() {
     const desktop = next === "desktop";
     shellPanel.hidden = desktop;
     guiPanel.hidden = !desktop;
-    workspaceHeader.dataset.mode = desktop ? "desktop" : "shell";
-    workspaceTitle.textContent = desktop ? "Project Explorer" : "mateo@vault — shell";
     serviceStatuses.hidden = desktop;
     shellTab.setAttribute("aria-selected", String(!desktop));
     guiTab.setAttribute("aria-selected", String(desktop));

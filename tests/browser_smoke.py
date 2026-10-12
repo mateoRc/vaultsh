@@ -61,6 +61,9 @@ SMOKE = r"""
     check(document.querySelector('.workspace > .workspace-header .mode-switch') &&
           getComputedStyle(document.querySelector('.workspace-header')).backgroundColor === 'rgb(247, 200, 67)' &&
           document.querySelector('.intro-hint').textContent.includes('Explorer tab'), 'tabs inside window header');
+    check(!document.querySelector('.window-controls, #workspace-title') &&
+          document.querySelector('.workspace-header').getBoundingClientRect().height < 65,
+          'compact header without window decoration');
     check(document.activeElement.id !== 'command', 'no automatic input focus');
     const examples = [...document.querySelectorAll('#output .terminal-example')];
     check(examples.length === 3 && examples.every(button => button.tagName === 'BUTTON'), 'clickable welcome examples');
