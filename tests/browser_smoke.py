@@ -227,13 +227,22 @@ MOBILE_START = r"""
   const result = document.querySelector('#smoke-results');
   for (let i = 0; i < 80 && !document.querySelector('#output').textContent.includes('Explore projects'); i++)
     await new Promise(resolve => setTimeout(resolve, 50));
-  result.textContent = !document.querySelector('#shell-panel').hidden &&
+  const toggle = document.querySelector('#quick-command-toggle');
+  const menu = document.querySelector('#quick-commands');
+  const initialLayout = !document.querySelector('#shell-panel').hidden &&
     document.activeElement.id !== 'command' &&
     getComputedStyle(document.querySelector('#command-hint')).display === 'none' &&
-    document.querySelector('#quick-command-toggle').getAttribute('aria-expanded') === 'false' &&
-    matchMedia('(max-width: 36rem)').matches
+    toggle.getAttribute('aria-expanded') === 'false' &&
+    matchMedia('(max-width: 36rem)').matches;
+  toggle.click();
+  const menuBounds = menu.getBoundingClientRect();
+  const mobileMenu = toggle.getAttribute('aria-expanded') === 'true' &&
+    menuBounds.bottom < toggle.getBoundingClientRect().top &&
+    menuBounds.width < innerWidth &&
+    menu.scrollHeight > menu.clientHeight;
+  result.textContent = initialLayout && mobileMenu
       ? 'PASS mobile terminal starts without input focus'
-      : 'FAIL mobile terminal initial focus';
+      : 'FAIL mobile terminal or command menu layout';
 })();
 </script>
 """
