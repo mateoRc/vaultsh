@@ -11,6 +11,10 @@ type externalStub struct {
 	summary       MetricsSummary
 	dashboard     string
 	metricsErr    error
+	dashboardArgs *struct {
+		windowHours    int
+		includeInvalid bool
+	}
 }
 
 func (s externalStub) Search(string) ([]SearchResult, error) {
@@ -21,8 +25,46 @@ func (s externalStub) Summary() (MetricsSummary, error) {
 	return s.summary, s.metricsErr
 }
 
-func (s externalStub) Dashboard() (string, error) {
+func (s externalStub) Dashboard(windowHours int, includeInvalid bool) (string, error) {
+	if s.dashboardArgs != nil {
+		s.dashboardArgs.windowHours = windowHours
+		s.dashboardArgs.includeInvalid = includeInvalid
+	}
 	return s.dashboard, s.metricsErr
+}
+
+func TestDashboardWindowAndInvalidFlag(t *testing.T) {
+	for _, test := range []struct {
+		name           string
+		args           []string
+		windowHours    int
+		includeInvalid bool
+		exitCode       int
+	}{
+		{name: "default", windowHours: 24},
+		{name: "week", args: []string{"--window", "7d"}, windowHours: 168},
+		{name: "month", args: []string{"--window", "30d"}, windowHours: 720},
+		{name: "all retained", args: []string{"--window", "all"}, windowHours: 0},
+		{name: "include invalid", args: []string{"--include-invalid", "--window", "all"}, includeInvalid: true},
+		{name: "bad window", args: []string{"--window", "forever"}, exitCode: ExitUsage},
+		{name: "duplicate flag", args: []string{"--include-invalid", "--include-invalid"}, exitCode: ExitUsage},
+	} {
+		t.Run(test.name, func(t *testing.T) {
+			seen := &struct {
+				windowHours    int
+				includeInvalid bool
+			}{}
+			result := NewDashboard(externalStub{dashboard: "Forge dashboard", dashboardArgs: seen}, nil, nil, nil).
+				Execute(test.args, Input{})
+			if result.ExitCode != test.exitCode {
+				t.Fatalf("exit code = %d, want %d", result.ExitCode, test.exitCode)
+			}
+			if test.exitCode == ExitSuccess &&
+				(seen.windowHours != test.windowHours || seen.includeInvalid != test.includeInvalid) {
+				t.Fatalf("dashboard options = %+v", seen)
+			}
+		})
+	}
 }
 
 func TestSearchFormatsAtlasResults(t *testing.T) {

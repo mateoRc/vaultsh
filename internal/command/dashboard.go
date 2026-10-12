@@ -57,18 +57,19 @@ func (Dashboard) Description() string {
 }
 
 func (Dashboard) Usage() string {
-	return "dashboard"
+	return "dashboard [--window 24h|7d|30d|all] [--include-invalid]"
 }
 
 func (Dashboard) Help() string {
-	return "Renders persisted activity, system status, deployment, and Sentinel data."
+	return "Defaults to the last 24 hours; all includes every retained event. Unknown command names are hidden unless --include-invalid is set."
 }
 
 func (d Dashboard) Execute(args []string, _ Input) Result {
-	if len(args) != 0 {
-		return Result{Output: "usage: dashboard", ExitCode: ExitUsage}
+	windowHours, includeInvalid, ok := dashboardOptions(args)
+	if !ok {
+		return Result{Output: "usage: " + d.Usage(), ExitCode: ExitUsage}
 	}
-	output, err := d.metrics.Dashboard()
+	output, err := d.metrics.Dashboard(windowHours, includeInvalid)
 	if err != nil {
 		return Result{Output: "dashboard unavailable", ExitCode: ExitFailure}
 	}
@@ -88,6 +89,42 @@ func (d Dashboard) Execute(args []string, _ Input) Result {
 		}
 	}
 	return Result{Output: output, ExitCode: ExitSuccess}
+}
+
+func dashboardOptions(args []string) (int, bool, bool) {
+	windowHours := 24
+	includeInvalid := false
+	windowSet := false
+	for index := 0; index < len(args); index++ {
+		switch args[index] {
+		case "--include-invalid":
+			if includeInvalid {
+				return 0, false, false
+			}
+			includeInvalid = true
+		case "--window":
+			if windowSet || index+1 >= len(args) {
+				return 0, false, false
+			}
+			index++
+			windowSet = true
+			switch args[index] {
+			case "24h":
+				windowHours = 24
+			case "7d":
+				windowHours = 168
+			case "30d":
+				windowHours = 720
+			case "all":
+				windowHours = 0
+			default:
+				return 0, false, false
+			}
+		default:
+			return 0, false, false
+		}
+	}
+	return windowHours, includeInvalid, true
 }
 
 func formatSystemStatus(status SystemStatus) string {

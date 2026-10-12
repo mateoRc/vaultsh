@@ -54,7 +54,7 @@ func (unavailableServices) Summary() (command.MetricsSummary, error) {
 	return command.MetricsSummary{}, context.DeadlineExceeded
 }
 
-func (unavailableServices) Dashboard() (string, error) {
+func (unavailableServices) Dashboard(int, bool) (string, error) {
 	return "", context.DeadlineExceeded
 }
 

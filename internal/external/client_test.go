@@ -49,3 +49,21 @@ func TestForgeRequestsSendBearerToken(t *testing.T) {
 		t.Fatal(err)
 	}
 }
+
+func TestDashboardSendsWindowAndInvalidFlag(t *testing.T) {
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if r.URL.Path != "/dashboard" || r.URL.Query().Get("window") != "all" ||
+			r.URL.Query().Get("include_invalid") != "true" ||
+			r.Header.Get("Authorization") != "Bearer forge-secret" {
+			t.Errorf("unexpected dashboard request: %s", r.URL.String())
+		}
+		_, _ = w.Write([]byte("ALL TIME"))
+	}))
+	defer server.Close()
+
+	client := NewClient("", server.URL, "", "forge-secret")
+	output, err := client.Dashboard(0, true)
+	if err != nil || output != "ALL TIME" {
+		t.Fatalf("dashboard = %q, %v", output, err)
+	}
+}

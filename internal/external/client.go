@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"net/http"
 	"net/url"
+	"strconv"
 	"strings"
 	"time"
 
@@ -13,12 +14,13 @@ import (
 )
 
 type Client struct {
-	atlasURL   string
-	forgeURL   string
-	atlasToken string
-	forgeToken string
-	http       *http.Client
-	startedAt  time.Time
+	atlasURL     string
+	forgeURL     string
+	atlasToken   string
+	forgeToken   string
+	http         *http.Client
+	analyticsHTTP *http.Client
+	startedAt    time.Time
 }
 
 type searchResponse struct {
@@ -39,12 +41,13 @@ type serviceStatusResponse struct {
 
 func NewClient(atlasURL, forgeURL, atlasToken, forgeToken string) *Client {
 	return &Client{
-		atlasURL:   strings.TrimRight(atlasURL, "/"),
-		forgeURL:   strings.TrimRight(forgeURL, "/"),
-		atlasToken: atlasToken,
-		forgeToken: forgeToken,
-		http:       &http.Client{Timeout: 300 * time.Millisecond},
-		startedAt:  time.Now(),
+		atlasURL:     strings.TrimRight(atlasURL, "/"),
+		forgeURL:     strings.TrimRight(forgeURL, "/"),
+		atlasToken:   atlasToken,
+		forgeToken:   forgeToken,
+		http:         &http.Client{Timeout: 300 * time.Millisecond},
+		analyticsHTTP: &http.Client{Timeout: 10 * time.Second},
+		startedAt:    time.Now(),
 	}
 }
 
@@ -77,12 +80,25 @@ func (c *Client) Summary() (command.MetricsSummary, error) {
 	return summary, err
 }
 
-func (c *Client) Dashboard() (string, error) {
+func (c *Client) Dashboard(windowHours int, includeInvalid bool) (string, error) {
 	if c.forgeURL == "" {
 		return "", fmt.Errorf("Forge URL is not configured")
 	}
 
-	response, err := c.get(c.forgeURL+"/dashboard", c.forgeToken)
+	endpoint := c.forgeURL + "/dashboard"
+	query := url.Values{}
+	if windowHours == 0 {
+		query.Set("window", "all")
+	} else if windowHours != 24 {
+		query.Set("hours", strconv.Itoa(windowHours))
+	}
+	if includeInvalid {
+		query.Set("include_invalid", "true")
+	}
+	if len(query) > 0 {
+		endpoint += "?" + query.Encode()
+	}
+	response, err := c.getWithClient(c.analyticsHTTP, endpoint, c.forgeToken)
 	if err != nil {
 		return "", err
 	}
@@ -177,12 +193,16 @@ func (c *Client) getJSON(baseURL, path string, target any) error {
 }
 
 func (c *Client) get(endpoint, token string) (*http.Response, error) {
+	return c.getWithClient(c.http, endpoint, token)
+}
+
+func (c *Client) getWithClient(client *http.Client, endpoint, token string) (*http.Response, error) {
 	request, err := http.NewRequest(http.MethodGet, endpoint, nil)
 	if err != nil {
 		return nil, err
 	}
 	request.Header.Set("Authorization", "Bearer "+token)
-	return c.http.Do(request)
+	return client.Do(request)
 }
 
 func (c *Client) probe(baseURL string) (bool, time.Duration) {

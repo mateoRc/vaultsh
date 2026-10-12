@@ -18,7 +18,7 @@ type MetricsSummary struct {
 
 type MetricsService interface {
 	Summary() (MetricsSummary, error)
-	Dashboard() (string, error)
+	Dashboard(windowHours int, includeInvalid bool) (string, error)
 }
 
 type Metrics struct {
