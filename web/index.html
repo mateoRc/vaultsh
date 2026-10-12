@@ -18,7 +18,7 @@
   <link rel="canonical" href="https://mateolabs.dev/vault/">
   <link rel="icon" href="/vault/favicon.svg" type="image/svg+xml">
   <title>Vaultsh | Backend Lab engineering showcase</title>
-  <link rel="stylesheet" href="style.css?v=20261012c">
+  <link rel="stylesheet" href="style.css?v=20261012d">
   <link rel="stylesheet" href="mermaid.css?v=20261011a">
 </head>
 <body>
@@ -111,9 +111,9 @@
         <aside class="desktop-sidebar" aria-label="Project tree">
           <div class="tree-heading">
             <div><strong>Project tree</strong><span id="gui-tree-location" class="tree-location">Current: /projects</span></div>
-            <button id="gui-tree-toggle" class="tree-toggle" type="button" aria-controls="gui-tree" aria-expanded="true">Hide tree</button>
+            <button id="gui-tree-toggle" class="tree-toggle" type="button" aria-controls="gui-tree" aria-expanded="false">Show tree</button>
           </div>
-          <nav id="gui-tree" class="tree-nav" aria-label="Project files"></nav>
+          <nav id="gui-tree" class="tree-nav" aria-label="Project files" hidden></nav>
         </aside>
         <div class="desktop-content">
           <div class="desktop-location">
@@ -136,6 +136,6 @@
 
   </main>
   <script src="terminal.js?v=20261011c" defer></script>
-  <script src="gui.js?v=20261012d" defer></script>
+  <script src="gui.js?v=20261012e" defer></script>
 </body>
 </html>

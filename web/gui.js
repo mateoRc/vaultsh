@@ -15,12 +15,11 @@ function initGui() {
   const tree = document.querySelector("#gui-tree");
   const treeLocation = document.querySelector("#gui-tree-location");
   const treeToggle = document.querySelector("#gui-tree-toggle");
-  const sidebar = document.querySelector(".desktop-sidebar");
   if (!shellTab || !guiTab || !shellPanel || !guiPanel ||
       !serviceStatuses ||
       !breadcrumbs || !count || !guiNav || !back || !retry ||
       !folders || !documentView || !message || !tree ||
-      !treeLocation || !treeToggle || !sidebar) return;
+      !treeLocation || !treeToggle) return;
 
   let mode = "shell";
   let currentPath = "/projects";
@@ -82,9 +81,10 @@ function initGui() {
     });
   }
   treeToggle.addEventListener("click", () => {
-    const collapsed = sidebar.classList.toggle("tree-collapsed");
-    treeToggle.setAttribute("aria-expanded", String(!collapsed));
-    treeToggle.textContent = collapsed ? "Show tree" : "Hide tree";
+    tree.hidden = !tree.hidden;
+    treeToggle.setAttribute("aria-expanded", String(!tree.hidden));
+    treeToggle.textContent = tree.hidden ? "Show tree" : "Hide tree";
+    if (!tree.hidden) renderTree();
   });
   back.addEventListener("click", () => navigate(parentPath(currentPath)));
   retry.addEventListener("click", () => navigate(retryPath));

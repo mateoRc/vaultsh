@@ -79,8 +79,13 @@ SMOKE = r"""
     check(![...document.querySelectorAll('#output .output-result')].at(-1).textContent.includes('## Component ownership'), 'architecture excerpt boundary');
     document.querySelector('#gui-tab').click();
     await wait(() => document.querySelector('#gui-breadcrumbs').dataset.path === '/projects');
+    check(document.querySelector('#gui-tree').hidden &&
+          document.querySelector('#gui-tree-toggle').getAttribute('aria-expanded') === 'false' &&
+          document.querySelector('#gui-tree-location').textContent.includes('/projects'), 'tree closed by default');
+    document.querySelector('#gui-tree-toggle').click();
     await wait(() => document.querySelector('[data-gui-path="/docs"]'));
     check(document.querySelector('#gui-tree-location').textContent.includes('/projects') &&
+          !document.querySelector('#gui-tree').hidden &&
           document.querySelector('[data-gui-path="/projects"]').getAttribute('aria-current') === 'page', 'project tree and current folder');
     check(document.querySelector('.gui-item strong').textContent === 'Overview', 'overview first');
     check(getComputedStyle(document.querySelector('.desktop-main')).display === 'grid', 'desktop layout');
@@ -185,12 +190,14 @@ DEEP = r"""
     await new Promise(resolve => setTimeout(resolve, 50));
   if (!document.querySelector('#gui-tree-location').textContent.includes('/cv/experience.md') ||
       !document.querySelector('[data-gui-path="/cv/experience.md"]') ||
+      !document.querySelector('#gui-tree').hidden ||
+      document.querySelector('#gui-tree-toggle').getAttribute('aria-expanded') !== 'false' ||
       getComputedStyle(document.querySelector('#gui-tree-toggle')).display === 'none') {
     result.textContent = 'FAIL mobile project tree'; return;
   }
   document.querySelector('#gui-tree-toggle').click();
-  if (document.querySelector('#gui-tree-toggle').getAttribute('aria-expanded') !== 'false' ||
-      getComputedStyle(document.querySelector('#gui-tree')).display !== 'none') {
+  if (document.querySelector('#gui-tree-toggle').getAttribute('aria-expanded') !== 'true' ||
+      getComputedStyle(document.querySelector('#gui-tree')).display === 'none') {
     result.textContent = 'FAIL mobile tree toggle'; return;
   }
   if (!sessionStorage.getItem('smoke-reloaded')) {

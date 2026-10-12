@@ -965,7 +965,16 @@ h1::after {
   overflow-wrap: anywhere;
 }
 
-.tree-toggle { display: none; }
+.tree-toggle {
+  flex: none;
+  min-height: 2.5rem;
+  border: 1.5px solid #1d1f1e;
+  border-radius: 0.25rem;
+  padding: 0.4rem 0.6rem;
+  background: #fffdf7;
+  font: 800 0.7rem/1 ui-monospace, SFMono-Regular, Consolas, monospace;
+  cursor: pointer;
+}
 
 .tree-nav {
   min-width: 0;
@@ -1259,10 +1268,9 @@ h1::after {
   .desktop-main { display: block; }
   .desktop-sidebar { border-right: 0; border-bottom: 2px solid #1d1f1e; padding: 0.5rem; }
   .tree-heading { align-items: center; }
-  .tree-toggle { display: block; flex: none; min-height: 2.75rem; border: 1.5px solid #1d1f1e; border-radius: 0.25rem; padding: 0.4rem 0.6rem; background: #fffdf7; font: 800 0.7rem/1 ui-monospace, SFMono-Regular, Consolas, monospace; }
+  .tree-toggle { min-height: 2.75rem; }
   .tree-nav { max-height: 16rem; }
   .tree-link, .tree-disclosure, .tree-disclosure-spacer { min-height: 2.75rem; }
-  .desktop-sidebar.tree-collapsed .tree-nav { display: none; }
   .desktop-content { min-height: 22rem; padding: 1rem; }
   .desktop-location { gap: 0.55rem; }
   #gui-count { display: none; }
