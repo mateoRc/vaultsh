@@ -35,6 +35,9 @@ function initGui() {
   let treeError = "";
   folders.tabIndex = -1;
   documentView.tabIndex = -1;
+  tree.hidden = window.matchMedia("(max-width: 36rem)").matches;
+  treeToggle.setAttribute("aria-expanded", String(!tree.hidden));
+  treeToggle.textContent = tree.hidden ? "Show tree" : "Hide tree";
 
   function documentURL(path, fragment = "") {
     const url = new URL(window.location.href);

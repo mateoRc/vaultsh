@@ -92,11 +92,14 @@ SMOKE = r"""
     check(![...document.querySelectorAll('#output .output-result')].at(-1).textContent.includes('## Component ownership'), 'architecture excerpt boundary');
     document.querySelector('#gui-tab').click();
     await wait(() => document.querySelector('#gui-breadcrumbs').dataset.path === '/projects');
-    check(document.querySelector('#gui-tree').hidden &&
-          document.querySelector('#gui-tree-toggle').getAttribute('aria-expanded') === 'false' &&
-          document.querySelector('#gui-tree-location').textContent.includes('/projects'), 'tree closed by default');
-    document.querySelector('#gui-tree-toggle').click();
     await wait(() => document.querySelector('[data-gui-path="/docs"]'));
+    check(!document.querySelector('#gui-tree').hidden &&
+          document.querySelector('#gui-tree-toggle').getAttribute('aria-expanded') === 'true' &&
+          document.querySelector('#gui-tree-location').textContent.includes('/projects'), 'desktop tree open by default');
+    document.querySelector('#gui-tree-toggle').click();
+    check(document.querySelector('#gui-tree').hidden &&
+          document.querySelector('#gui-tree-toggle').getAttribute('aria-expanded') === 'false', 'desktop tree can close');
+    document.querySelector('#gui-tree-toggle').click();
     check(document.querySelector('#gui-tree-location').textContent.includes('/projects') &&
           !document.querySelector('#gui-tree').hidden &&
           document.querySelector('[data-gui-path="/projects"]').getAttribute('aria-current') === 'page', 'project tree and current folder');
