@@ -111,6 +111,14 @@ func newSessionManager(
 func (m *SessionManager) Execute(
 	sessionID,
 	line string,
+) (command.Result, string, string, error) {
+	return m.ExecuteWithOptions(sessionID, line, false)
+}
+
+func (m *SessionManager) ExecuteWithOptions(
+	sessionID,
+	line string,
+	automaticWelcome bool,
 ) (
 	result command.Result,
 	returnedSessionID string,
@@ -124,6 +132,7 @@ func (m *SessionManager) Execute(
 
 	current.mu.Lock()
 	defer current.mu.Unlock()
+	recordEvent := !automaticWelcome || line != "welcome"
 	defer func() {
 		current.lastActive = m.now()
 	}()
@@ -140,7 +149,7 @@ func (m *SessionManager) Execute(
 		returnedSessionID = sessionID
 		currentDirectory = current.engine.context.WorkingDirectory().Path()
 		err = nil
-		if name := commandName(line); name != "" && m.deps.Events != nil {
+		if name := commandName(line); recordEvent && name != "" && m.deps.Events != nil {
 			_ = m.deps.Events.Record(
 				"vault",
 				"command.runtime_error",
@@ -152,7 +161,7 @@ func (m *SessionManager) Execute(
 	}()
 
 	result = current.engine.Execute(line)
-	if name := commandName(line); name != "" && m.deps.Events != nil {
+	if name := commandName(line); recordEvent && name != "" && m.deps.Events != nil {
 		_ = m.deps.Events.Record(
 			"vault",
 			"command.executed",

@@ -211,7 +211,7 @@ function initTerminal() {
 
     if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
       command.value = autoWelcomeCommand;
-      submitCommandForm();
+      submitCommandForm(true);
       return;
     }
 
@@ -224,14 +224,18 @@ function initTerminal() {
       if (nextIndex >= autoWelcomeCommand.length) {
         window.clearInterval(typing);
         command.readOnly = false;
-        submitCommandForm();
+        submitCommandForm(true);
       }
     }, autoWelcomeKeystrokeMilliseconds);
   }
 
-  function submitCommandForm() {
+  function submitCommandForm(automaticWelcome = false) {
     form.dispatchEvent(
-      new Event("submit", { bubbles: true, cancelable: true }),
+      new CustomEvent("submit", {
+        bubbles: true,
+        cancelable: true,
+        detail: { automaticWelcome },
+      }),
     );
   }
 
@@ -265,7 +269,7 @@ function initTerminal() {
     }
     command.value = "";
     try {
-      await execute(line);
+      await execute(line, event.detail?.automaticWelcome === true);
     } finally {
       if (submittedFromInput) {
         document.removeEventListener("focusin", markFocusMove, true);
@@ -379,7 +383,7 @@ function initTerminal() {
     }
   }
 
-  async function execute(line) {
+  async function execute(line, automaticWelcome = false) {
     if (running) {
       return;
     }
@@ -399,7 +403,11 @@ function initTerminal() {
       const response = await fetchWithTimeout(endpoints.execute, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ line, session_id: sessionId }),
+        body: JSON.stringify({
+          line,
+          session_id: sessionId,
+          automatic_welcome: automaticWelcome && line === autoWelcomeCommand,
+        }),
       }, 15000);
       if (!response.ok) {
         throw new Error(await friendlyError(response));

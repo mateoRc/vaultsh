@@ -49,8 +49,9 @@ type HandlerConfig struct {
 }
 
 type execRequest struct {
-	Line      string `json:"line"`
-	SessionID string `json:"session_id,omitempty"`
+	Line             string `json:"line"`
+	SessionID        string `json:"session_id,omitempty"`
+	AutomaticWelcome bool   `json:"automatic_welcome,omitempty"`
 }
 
 type execResponse struct {
@@ -224,9 +225,10 @@ func exec(w http.ResponseWriter, r *http.Request, sessions *shell.SessionManager
 		return
 	}
 
-	result, sessionID, currentDirectory, err := sessions.Execute(
+	result, sessionID, currentDirectory, err := sessions.ExecuteWithOptions(
 		request.SessionID,
 		request.Line,
+		request.AutomaticWelcome,
 	)
 	if err != nil {
 		writeSessionError(w, err)

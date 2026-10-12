@@ -264,6 +264,7 @@ class Handler(BaseHTTPRequestHandler):
     fail_next = False
     fail_complete = False
     fail_exec = False
+    automatic_welcome_requests = 0
 
     def log_message(self, *_args):
         pass
@@ -321,6 +322,8 @@ class Handler(BaseHTTPRequestHandler):
                 Handler.fail_exec = False
                 return self.send_error(503)
             line = body["line"]
+            if line == "welcome" and body.get("automatic_welcome") is True:
+                Handler.automatic_welcome_requests += 1
             if line == "slow":
                 time.sleep(0.2)
             if line == "welcome":
@@ -375,6 +378,8 @@ def main():
                 print(f"{width}px: {marker}")
                 if completed.returncode or expected not in marker:
                     raise SystemExit(f"Browser smoke failed: {completed.stdout[-1300:]} {completed.stderr[-600:]}")
+                if query == "smoke=main" and Handler.automatic_welcome_requests != 1:
+                    raise SystemExit("Automatic welcome request was not marked")
                 if (screenshot_dir := os.environ.get("VAULTSH_SCREENSHOTS")) and "smoke=diagram" not in query:
                     screenshot = Path(screenshot_dir) / f"vaultsh-{width}.png"
                     screenshot.parent.mkdir(parents=True, exist_ok=True)

@@ -14,6 +14,7 @@ type eventRecorderStub struct {
 	event    string
 	name     string
 	exitCode int
+	calls    int
 }
 
 func (r *eventRecorderStub) Record(
@@ -23,11 +24,35 @@ func (r *eventRecorderStub) Record(
 	_ int64,
 	exitCode int,
 ) error {
+	r.calls++
 	r.service = service
 	r.event = event
 	r.name = name
 	r.exitCode = exitCode
 	return nil
+}
+
+func TestAutomaticWelcomeSkipsTelemetryButManualWelcomeIsRecorded(t *testing.T) {
+	recorder := &eventRecorderStub{}
+	manager := NewSessionManagerWithDependencies(
+		filesystem.NewDirectory(""),
+		Dependencies{Events: recorder},
+	)
+
+	automatic, sessionID, _, err := manager.ExecuteWithOptions("", "welcome", true)
+	if err != nil || automatic.ExitCode != command.ExitSuccess || recorder.calls != 0 {
+		t.Fatalf("automatic welcome = %#v, error = %v, telemetry = %#v", automatic, err, recorder)
+	}
+
+	manual, _, _, err := manager.Execute(sessionID, "welcome")
+	if err != nil || manual.ExitCode != command.ExitSuccess || recorder.calls != 1 || recorder.name != "welcome" {
+		t.Fatalf("manual welcome = %#v, error = %v, telemetry = %#v", manual, err, recorder)
+	}
+
+	other, _, _, err := manager.ExecuteWithOptions(sessionID, "about", true)
+	if err != nil || other.ExitCode != command.ExitSuccess || recorder.calls != 2 || recorder.name != "about" {
+		t.Fatalf("marked about = %#v, error = %v, telemetry = %#v", other, err, recorder)
+	}
 }
 
 type unavailableServices struct{}
