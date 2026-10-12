@@ -20,7 +20,7 @@ func (Welcome) Execute(args []string, _ Input) Result {
 	}
 
 	return Result{
-		Output: "I built a portfolio, so naturally I built a shell first.\n\n" +
+		Output: "I wanted to build a portfolio, so naturally I built a shell first.\n\n" +
 			"Vaultsh opens Backend Lab: a virtual shell connected to search, telemetry, and deployment docs.\n\n" +
 			"Explore projects: head -n 11 /projects/overview.md\n" +
 			"View architecture: head -n 26 /docs/architecture/overview.md\n" +
