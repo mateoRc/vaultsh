@@ -28,7 +28,6 @@ EXCERPTS = (
 
 def verify_excerpts():
     sources = (
-        WEB / "index.html",
         WEB / "terminal.js",
         ROOT / "internal" / "command" / "welcome.go",
         CONTENT / "README.md",
@@ -69,10 +68,15 @@ SMOKE = r"""
     check(examples.length === 3 && examples.every(button => button.tagName === 'BUTTON'), 'clickable welcome examples');
     check(examples[0].textContent === 'head -n 11 /projects/overview.md' &&
           examples[1].textContent === 'head -n 26 /docs/architecture/overview.md', 'welcome excerpts');
-    check([...document.querySelectorAll('#quick-commands [data-command]')].slice(0, 2)
-      .map(button => button.dataset.command).join('|') === examples.slice(0, 2).map(button => button.textContent).join('|'), 'shortcut consistency');
     const menu = document.querySelector('#quick-commands');
     const menuToggle = document.querySelector('#quick-command-toggle');
+    const shortcuts = [...menu.querySelectorAll('[data-command]')].map(button => button.dataset.command);
+    check(shortcuts[0] === 'tree -L 1 /projects' &&
+          shortcuts.some(line => line === 'metrics | head -n 5') &&
+          shortcuts.filter(line => line.startsWith('search ')).length >= 2 &&
+          shortcuts.every(line => !line.startsWith('cat ') &&
+            (!line.startsWith('search ') || /\| head -n 2$/.test(line))),
+          'short, focused command shortcuts');
     check(menuToggle.getAttribute('aria-expanded') === 'false' && menu.inert &&
           menu.querySelectorAll('button').length > 10, 'compact command menu starts closed');
     menuToggle.click();
@@ -84,6 +88,10 @@ SMOKE = r"""
     check(menu.scrollTop > 0, 'command menu can scroll');
     menu.querySelector('button').dispatchEvent(new KeyboardEvent('keydown', {key: 'Escape', bubbles: true}));
     check(menuToggle.getAttribute('aria-expanded') === 'false' && menu.inert, 'Escape closes command menu');
+    menuToggle.click();
+    menu.querySelector('button').click();
+    await wait(() => [...document.querySelectorAll('#output .output-command')].at(-1)?.textContent.includes('tree -L 1 /projects'));
+    check(menuToggle.getAttribute('aria-expanded') === 'false', 'project map shortcut runs and closes menu');
     examples[0].click();
     await wait(() => [...document.querySelectorAll('#output .output-result')].at(-1)?.textContent.includes('**Lab** owns Docker Compose'));
     check(![...document.querySelectorAll('#output .output-result')].at(-1).textContent.includes('## Design decisions'), 'project excerpt boundary');

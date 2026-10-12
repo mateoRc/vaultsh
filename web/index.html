@@ -90,19 +90,20 @@
             aria-hidden="true"
             inert
           >
-            <button type="button" data-command="head -n 11 /projects/overview.md">Explore projects</button>
-            <button type="button" data-command="head -n 26 /docs/architecture/overview.md">View architecture</button>
-            <button type="button" data-command="cat /cv/experience.md">Experience</button>
-            <button type="button" data-command="cat /cv/skills.md">Skills</button>
-            <button type="button" data-command="cat /docs/api.md">API reference</button>
-            <button type="button" data-command="cat /docs/commands.md">Command reference</button>
-            <button type="button" data-command="cat /docs/events.md">Telemetry events</button>
-            <button type="button" data-command="dashboard">Live dashboard</button>
-            <button type="button" data-command="metrics">Metrics</button>
-            <button type="button" data-command="deployments">Deployments</button>
-            <button type="button" data-command="about">About Vaultsh</button>
+            <button type="button" data-command="tree -L 1 /projects">Project map</button>
+            <button type="button" data-command="head -n 11 /projects/overview.md">System overview</button>
+            <button type="button" data-command="head -n 4 /docs/architecture/overview.md">Architecture intro</button>
+            <button type="button" data-command="head -n 6 /cv/experience.md">Current role</button>
+            <button type="button" data-command="grep 'Primary backend stacks' /cv/skills.md">Backend stack</button>
+            <button type="button" data-command="grep 'Cloud and delivery' /cv/skills.md">Cloud toolkit</button>
+            <button type="button" data-command="search Kafka | head -n 2">Search Kafka</button>
+            <button type="button" data-command="search observability | head -n 2">Search observability</button>
+            <button type="button" data-command="search rollback | head -n 2">Search rollback</button>
+            <button type="button" data-command="grep -i 'Defaults are|may remove' /docs/architecture/forge.md">Telemetry limits</button>
+            <button type="button" data-command="metrics | head -n 5">Forge pulse</button>
+            <button type="button" data-command="deployments">Latest release</button>
+            <button type="button" data-command="help search">Search tips</button>
             <button type="button" data-command="contact">Contact</button>
-            <button type="button" data-command="help">Help</button>
           </div>
           <div class="touch-actions">
             <button id="clear-command" type="button">Clear</button>
