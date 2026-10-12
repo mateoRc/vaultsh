@@ -77,7 +77,7 @@ function initTerminal() {
   let suggestionIndex = 0;
   let running = false;
   let allowTabExit = false;
-  quickCommands.inert = false;
+  quickCommands.inert = true;
 
   updatePrompt();
   refreshVaultStatus();
@@ -281,6 +281,17 @@ function initTerminal() {
 
   quickCommandToggle.addEventListener("click", () => {
     setQuickCommandsExpanded(isQuickCommandsCollapsed());
+  });
+  quickCommandToggle.addEventListener("keydown", (event) => {
+    if (event.key !== "ArrowDown") return;
+    event.preventDefault();
+    setQuickCommandsExpanded(true);
+    quickCommands.querySelector("button")?.focus();
+  });
+  document.addEventListener("pointerdown", (event) => {
+    if (!isQuickCommandsCollapsed() && !quickCommands.parentElement.contains(event.target)) {
+      setQuickCommandsExpanded(false);
+    }
   });
 
   for (const button of actionButtons) {

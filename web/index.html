@@ -18,7 +18,7 @@
   <link rel="canonical" href="https://mateolabs.dev/vault/">
   <link rel="icon" href="/vault/favicon.svg" type="image/svg+xml">
   <title>Vaultsh | Backend Lab engineering showcase</title>
-  <link rel="stylesheet" href="style.css?v=20261012d">
+  <link rel="stylesheet" href="style.css?v=20261012e">
   <link rel="stylesheet" href="mermaid.css?v=20261011a">
 </head>
 <body>
@@ -78,25 +78,35 @@
             id="quick-command-toggle"
             class="quick-command-toggle"
             type="button"
-            aria-expanded="true"
+            aria-expanded="false"
             aria-controls="quick-commands"
           >
             Commands
           </button>
-          <div class="touch-actions">
-            <button id="clear-command" type="button">Clear</button>
-            <button id="run-command" type="submit" form="command-form">Run</button>
-          </div>
           <div
             id="quick-commands"
-            class="quick-commands"
-            aria-label="Suggested commands"
-            aria-hidden="false"
+            class="quick-commands quick-commands--collapsed"
+            aria-label="Commands"
+            aria-hidden="true"
+            inert
           >
             <button type="button" data-command="head -n 11 /projects/overview.md">Explore projects</button>
             <button type="button" data-command="head -n 26 /docs/architecture/overview.md">View architecture</button>
+            <button type="button" data-command="cat /cv/experience.md">Experience</button>
+            <button type="button" data-command="cat /cv/skills.md">Skills</button>
+            <button type="button" data-command="cat /docs/api.md">API reference</button>
+            <button type="button" data-command="cat /docs/commands.md">Command reference</button>
+            <button type="button" data-command="cat /docs/events.md">Telemetry events</button>
             <button type="button" data-command="dashboard">Live dashboard</button>
+            <button type="button" data-command="metrics">Metrics</button>
+            <button type="button" data-command="deployments">Deployments</button>
+            <button type="button" data-command="about">About Vaultsh</button>
+            <button type="button" data-command="contact">Contact</button>
             <button type="button" data-command="help">Help</button>
+          </div>
+          <div class="touch-actions">
+            <button id="clear-command" type="button">Clear</button>
+            <button id="run-command" type="submit" form="command-form">Run</button>
           </div>
         </div>
       </div>
@@ -135,7 +145,7 @@
     </div>
 
   </main>
-  <script src="terminal.js?v=20261011c" defer></script>
+  <script src="terminal.js?v=20261012d" defer></script>
   <script src="gui.js?v=20261012e" defer></script>
 </body>
 </html>

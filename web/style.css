@@ -315,6 +315,7 @@ h1::after {
 }
 
 .quick-command-drawer {
+  position: relative;
   display: flex;
   align-items: center;
   flex-wrap: wrap;
@@ -323,21 +324,21 @@ h1::after {
 }
 
 .quick-command-toggle {
-  min-height: 1.9rem;
+  min-height: 2.25rem;
   appearance: none;
   border: 1px solid #59615b;
-  border-radius: 999px;
-  padding: 0.25rem 0.6rem;
+  border-radius: 0.3rem;
+  padding: 0.35rem 0.65rem;
   cursor: pointer;
   background: #202321;
   color: #c8d0ca;
-  font: 700 0.65rem/1 ui-monospace, SFMono-Regular, Consolas, monospace;
+  font: 700 0.7rem/1 ui-monospace, SFMono-Regular, Consolas, monospace;
 }
 
 .quick-command-toggle::after {
   display: inline-block;
   margin-left: 0.35rem;
-  content: "+";
+  content: "▾";
   transition: transform 150ms ease;
 }
 
@@ -348,29 +349,40 @@ h1::after {
 }
 
 .quick-command-toggle[aria-expanded="true"]::after {
-  transform: rotate(45deg);
+  transform: rotate(180deg);
 }
 
 .quick-commands {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.35rem;
-  max-height: 18rem;
+  position: absolute;
+  z-index: 3;
+  bottom: calc(100% + 0.45rem);
+  left: 0;
+  display: grid;
+  gap: 0.1rem;
+  width: min(19rem, calc(100vw - 3rem));
+  max-height: min(15rem, 40svh);
+  border: 1.5px solid #f7c843;
+  border-radius: 0.35rem;
+  padding: 0.35rem;
+  background: #202321;
+  box-shadow: 3px 3px 0 #0e100f;
   opacity: 1;
-  overflow: hidden;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  scrollbar-color: #69746b #202321;
+  scrollbar-width: thin;
+  visibility: visible;
   transform: translateY(0);
   transition:
-    max-height 220ms ease,
     opacity 160ms ease,
     transform 180ms ease;
 }
 
 .quick-commands--collapsed {
-  gap: 0;
-  max-height: 0;
   opacity: 0;
   pointer-events: none;
-  transform: translateY(-0.3rem);
+  visibility: hidden;
+  transform: translateY(0.3rem);
 }
 
 .quick-commands--instant,
@@ -415,17 +427,17 @@ h1::after {
 }
 
 .quick-commands button {
-  transform: translateY(0);
-  transition:
-    border-color 150ms ease,
-    color 150ms ease,
-    opacity 160ms ease,
-    transform 180ms ease;
+  width: 100%;
+  min-height: 2.25rem;
+  border-color: transparent;
+  border-radius: 0.22rem;
+  background: transparent;
+  font-size: 0.72rem;
 }
 
-.quick-commands--collapsed button {
-  opacity: 0;
-  transform: translateY(-0.25rem);
+.quick-commands button:hover,
+.quick-commands button:focus-visible {
+  background: #303832;
 }
 
 #command-form {
@@ -656,10 +668,6 @@ h1::after {
 @media (max-width: 36rem) {
   .quick-command-drawer {
     align-items: flex-start;
-  }
-
-  .quick-commands {
-    flex: 1 1 100%;
   }
 
   .touch-actions {
@@ -1283,8 +1291,7 @@ h1::after {
   .gui-breadcrumbs button:not(:disabled) { min-height: 2.75rem; }
   .gui-breadcrumbs button:last-child { max-width: 55vw; }
   .markdown-body { font-size: 1rem; line-height: 1.65; }
-  .quick-commands { display: grid; grid-template-columns: minmax(0, 1fr); width: 100%; }
-  .quick-commands button { width: 100%; }
+  .command-hint { display: none; }
   .desktop-footer span:last-child { display: none; }
 }
 

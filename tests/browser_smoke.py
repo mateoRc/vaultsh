@@ -71,6 +71,19 @@ SMOKE = r"""
           examples[1].textContent === 'head -n 26 /docs/architecture/overview.md', 'welcome excerpts');
     check([...document.querySelectorAll('#quick-commands [data-command]')].slice(0, 2)
       .map(button => button.dataset.command).join('|') === examples.slice(0, 2).map(button => button.textContent).join('|'), 'shortcut consistency');
+    const menu = document.querySelector('#quick-commands');
+    const menuToggle = document.querySelector('#quick-command-toggle');
+    check(menuToggle.getAttribute('aria-expanded') === 'false' && menu.inert &&
+          menu.querySelectorAll('button').length > 10, 'compact command menu starts closed');
+    menuToggle.click();
+    check(menuToggle.getAttribute('aria-expanded') === 'true' && !menu.inert &&
+          getComputedStyle(menu).overflowY === 'auto' && menu.scrollHeight > menu.clientHeight &&
+          menu.getBoundingClientRect().bottom < menuToggle.getBoundingClientRect().top,
+          'command menu opens upward and scrolls');
+    menu.scrollTop = menu.scrollHeight;
+    check(menu.scrollTop > 0, 'command menu can scroll');
+    menu.querySelector('button').dispatchEvent(new KeyboardEvent('keydown', {key: 'Escape', bubbles: true}));
+    check(menuToggle.getAttribute('aria-expanded') === 'false' && menu.inert, 'Escape closes command menu');
     examples[0].click();
     await wait(() => [...document.querySelectorAll('#output .output-result')].at(-1)?.textContent.includes('**Lab** owns Docker Compose'));
     check(![...document.querySelectorAll('#output .output-result')].at(-1).textContent.includes('## Design decisions'), 'project excerpt boundary');
@@ -216,6 +229,8 @@ MOBILE_START = r"""
     await new Promise(resolve => setTimeout(resolve, 50));
   result.textContent = !document.querySelector('#shell-panel').hidden &&
     document.activeElement.id !== 'command' &&
+    getComputedStyle(document.querySelector('#command-hint')).display === 'none' &&
+    document.querySelector('#quick-command-toggle').getAttribute('aria-expanded') === 'false' &&
     matchMedia('(max-width: 36rem)').matches
       ? 'PASS mobile terminal starts without input focus'
       : 'FAIL mobile terminal initial focus';
