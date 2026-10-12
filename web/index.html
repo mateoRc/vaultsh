@@ -117,11 +117,12 @@
         <nav id="gui-breadcrumbs" class="gui-breadcrumbs" aria-label="Current folder"></nav>
       </div>
       <div class="desktop-main">
-        <aside class="desktop-sidebar" aria-label="Quick locations">
-          <button type="button" data-gui-path="/projects"><span aria-hidden="true">▦</span> Projects</button>
-          <button type="button" data-gui-path="/docs"><span aria-hidden="true">▤</span> Docs</button>
-          <button type="button" data-gui-path="/cv"><span aria-hidden="true">▣</span> Profile</button>
-          <button class="sidebar-contact" type="button" data-gui-path="/cv/contact.md">Contact ↗</button>
+        <aside class="desktop-sidebar" aria-label="Project tree">
+          <div class="tree-heading">
+            <div><strong>Project tree</strong><span id="gui-tree-location" class="tree-location">Current: /projects</span></div>
+            <button id="gui-tree-toggle" class="tree-toggle" type="button" aria-controls="gui-tree" aria-expanded="true">Hide tree</button>
+          </div>
+          <nav id="gui-tree" class="tree-nav" aria-label="Project files"></nav>
         </aside>
         <div class="desktop-content">
           <div class="desktop-location">
@@ -144,6 +145,6 @@
 
   </main>
   <script src="terminal.js?v=20261011c" defer></script>
-  <script src="gui.js?v=20261012a" defer></script>
+  <script src="gui.js?v=20261012b" defer></script>
 </body>
 </html>

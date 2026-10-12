@@ -11,10 +11,14 @@ function initGui() {
   const folders = document.querySelector("#gui-folders");
   const documentView = document.querySelector("#gui-document");
   const message = document.querySelector("#gui-message");
-  const shortcuts = document.querySelectorAll("[data-gui-path]");
+  const tree = document.querySelector("#gui-tree");
+  const treeLocation = document.querySelector("#gui-tree-location");
+  const treeToggle = document.querySelector("#gui-tree-toggle");
+  const sidebar = document.querySelector(".desktop-sidebar");
   if (!shellTab || !guiTab || !shellPanel || !guiPanel ||
       !breadcrumbs || !count || !guiNav || !back || !retry ||
-      !folders || !documentView || !message) return;
+      !folders || !documentView || !message || !tree ||
+      !treeLocation || !treeToggle || !sidebar) return;
 
   let mode = "shell";
   let currentPath = "/projects";
@@ -24,6 +28,10 @@ function initGui() {
   let retryPath = currentPath;
   let mermaidModule;
   let diagramSerial = 0;
+  const treeDirectories = new Map();
+  const treeRequests = new Map();
+  const expandedDirectories = new Set(["/"]);
+  let treeError = "";
   folders.tabIndex = -1;
   documentView.tabIndex = -1;
 
@@ -70,9 +78,11 @@ function initGui() {
       }
     });
   }
-  for (const shortcut of shortcuts) {
-    shortcut.addEventListener("click", () => navigate(shortcut.dataset.guiPath));
-  }
+  treeToggle.addEventListener("click", () => {
+    const collapsed = sidebar.classList.toggle("tree-collapsed");
+    treeToggle.setAttribute("aria-expanded", String(!collapsed));
+    treeToggle.textContent = collapsed ? "Show tree" : "Hide tree";
+  });
   back.addEventListener("click", () => navigate(parentPath(currentPath)));
   retry.addEventListener("click", () => navigate(retryPath));
   window.addEventListener("popstate", () => {
@@ -113,9 +123,11 @@ function initGui() {
       if (options.history !== "none") window.history[options.history === "replace" ? "replaceState" : "pushState"]({}, "", documentURL(item.path, options.fragment));
       guiNav.hidden = item.path === "/";
       renderBreadcrumbs(item.path);
-      renderShortcuts(item.path);
+      treeLocation.textContent = `Current: ${item.path}`;
+      if (item.kind === "directory") treeDirectories.set(item.path, item);
       if (item.kind === "directory") renderDirectory(item);
       else renderFile(item);
+      syncTree(item.path, item.kind);
       message.textContent = "";
       if (options.fragment) focusFragment(options.fragment);
       else if (options.focus !== false) {
@@ -160,13 +172,132 @@ function initGui() {
     }
   }
 
-  function renderShortcuts(path) {
-    for (const shortcut of shortcuts) {
-      const target = shortcut.dataset.guiPath;
-      shortcut.classList.toggle("is-current", path === target || (target === "/cv" && path.startsWith("/cv/")) ||
-        (target === "/projects" && path.startsWith("/projects/")) ||
-        (target === "/docs" && path.startsWith("/docs/")));
+  function sortEntries(children) {
+    return children.slice().sort((a, b) =>
+      a.name === "overview.md" ? -1 : b.name === "overview.md" ? 1 :
+      (a.kind === b.kind ? a.name.localeCompare(b.name) : a.kind === "directory" ? -1 : 1));
+  }
+
+  async function loadTreeDirectory(path) {
+    if (treeDirectories.has(path)) return treeDirectories.get(path);
+    if (treeRequests.has(path)) return treeRequests.get(path);
+    const request = (async () => {
+      const controller = new AbortController();
+      const timeout = window.setTimeout(() => controller.abort(), 8000);
+      try {
+        const url = new URL("/api/browse", window.location.origin);
+        url.searchParams.set("path", path);
+        const response = await fetch(url, { cache: "no-store", signal: controller.signal });
+        if (!response.ok) throw new Error("Project tree is unavailable.");
+        const item = await response.json();
+        if (item.path !== path || item.kind !== "directory" || !Array.isArray(item.children))
+          throw new Error("Invalid project tree response.");
+        treeDirectories.set(path, item);
+        return item;
+      } finally {
+        window.clearTimeout(timeout);
+        treeRequests.delete(path);
+      }
+    })();
+    treeRequests.set(path, request);
+    return request;
+  }
+
+  async function syncTree(path, kind) {
+    const parts = (kind === "file" ? parentPath(path) : path).split("/").filter(Boolean);
+    const directories = ["/"];
+    let next = "";
+    for (const part of parts) {
+      next += "/" + part;
+      directories.push(next);
+      expandedDirectories.add(next);
     }
+    treeError = "";
+    renderTree();
+    try {
+      for (const directory of directories) {
+        await loadTreeDirectory(directory);
+        renderTree();
+      }
+    } catch (error) {
+      treeError = error.message || "Project tree is unavailable.";
+      renderTree();
+    }
+  }
+
+  function renderTree() {
+    const list = document.createElement("ul");
+    list.className = "tree-list";
+    list.append(treeNode({ name: "Backend Lab", kind: "directory", path: "/" }));
+    tree.replaceChildren(list);
+    const selected = [...tree.querySelectorAll('[aria-current="page"]')][0];
+    if (selected) {
+      const bounds = selected.getBoundingClientRect();
+      const viewport = tree.getBoundingClientRect();
+      if (bounds.bottom > viewport.bottom) tree.scrollTop += bounds.bottom - viewport.bottom + 8;
+      else if (bounds.top < viewport.top) tree.scrollTop -= viewport.top - bounds.top + 8;
+    }
+  }
+
+  function treeNode(item) {
+    const node = document.createElement("li");
+    node.className = "tree-node";
+    const row = document.createElement("div");
+    row.className = "tree-row";
+    if (item.kind === "directory" && item.path !== "/") {
+      const toggle = document.createElement("button");
+      toggle.type = "button";
+      toggle.className = "tree-disclosure";
+      toggle.textContent = expandedDirectories.has(item.path) ? "−" : "+";
+      toggle.setAttribute("aria-label", `${expandedDirectories.has(item.path) ? "Collapse" : "Expand"} ${item.name}`);
+      toggle.setAttribute("aria-expanded", String(expandedDirectories.has(item.path)));
+      toggle.addEventListener("click", async () => {
+        if (expandedDirectories.has(item.path)) expandedDirectories.delete(item.path);
+        else {
+          expandedDirectories.add(item.path);
+          try { await loadTreeDirectory(item.path); treeError = ""; }
+          catch (error) { treeError = error.message || "Project tree is unavailable."; }
+        }
+        renderTree();
+        tree.querySelectorAll(".tree-disclosure").forEach(button => {
+          if (button.nextElementSibling?.dataset.guiPath === item.path) button.focus({ preventScroll: true });
+        });
+      });
+      row.append(toggle);
+    } else {
+      const spacer = document.createElement("span");
+      spacer.className = "tree-disclosure-spacer";
+      spacer.setAttribute("aria-hidden", "true");
+      row.append(spacer);
+    }
+    const link = document.createElement("button");
+    link.type = "button";
+    link.className = `tree-link tree-link--${item.kind}`;
+    link.dataset.guiPath = item.path;
+    link.title = item.path;
+    link.textContent = item.name;
+    if (item.path === currentPath) link.setAttribute("aria-current", "page");
+    link.addEventListener("click", () => navigate(item.path));
+    row.append(link);
+    node.append(row);
+    if (item.kind === "directory" && expandedDirectories.has(item.path)) {
+      const children = document.createElement("ul");
+      children.className = "tree-list tree-children";
+      const directory = treeDirectories.get(item.path);
+      if (directory) {
+        for (const child of sortEntries(directory.children || [])) children.append(treeNode(child));
+        if (!directory.children?.length) treeNote(children, "Empty folder");
+      } else treeNote(children, treeError || "Loading…");
+      node.append(children);
+    }
+    return node;
+  }
+
+  function treeNote(list, label) {
+    const note = document.createElement("li");
+    note.className = "tree-note";
+    note.textContent = label;
+    list.append(note);
   }
 
   function renderDirectory(item) {
@@ -174,9 +305,7 @@ function initGui() {
     documentView.replaceChildren();
     folders.hidden = false;
     folders.replaceChildren();
-    const children = (item.children || []).slice().sort((a, b) =>
-      a.name === "overview.md" ? -1 : b.name === "overview.md" ? 1 :
-      (a.kind === b.kind ? a.name.localeCompare(b.name) : a.kind === "directory" ? -1 : 1));
+    const children = sortEntries(item.children || []);
     count.textContent = `${children.length} item${children.length === 1 ? "" : "s"}`;
     if (!children.length) {
       const empty = document.createElement("p");

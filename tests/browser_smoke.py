@@ -76,12 +76,15 @@ SMOKE = r"""
     check(![...document.querySelectorAll('#output .output-result')].at(-1).textContent.includes('## Component ownership'), 'architecture excerpt boundary');
     document.querySelector('#gui-tab').click();
     await wait(() => document.querySelector('#gui-breadcrumbs').dataset.path === '/projects');
-    check(!document.querySelector('#gui-location') &&
-          !document.querySelector('.desktop-bar-end'), 'single path and clean window header');
+    await wait(() => document.querySelector('[data-gui-path="/docs"]'));
+    check(document.querySelector('#gui-tree-location').textContent.includes('/projects') &&
+          document.querySelector('[data-gui-path="/projects"]').getAttribute('aria-current') === 'page', 'project tree and current folder');
     check(document.querySelector('.gui-item strong').textContent === 'Overview', 'overview first');
     check(getComputedStyle(document.querySelector('.desktop-main')).display === 'grid', 'desktop layout');
     document.querySelector('.gui-item').click();
     await wait(() => document.querySelector('#gui-breadcrumbs').dataset.path === '/projects/overview.md');
+    check(document.querySelector('[data-gui-path="/projects/overview.md"]').getAttribute('aria-current') === 'page' &&
+          document.querySelector('#gui-tree-location').textContent.includes('/projects/overview.md'), 'current file in tree');
     check(location.search.includes('overview.md'), 'shareable URL');
     [...document.querySelectorAll('.markdown-body a')].find(a => a.textContent === 'Architecture').click();
     await wait(() => document.querySelector('#gui-breadcrumbs').dataset.path === '/docs/architecture/overview.md');
@@ -94,9 +97,16 @@ SMOKE = r"""
     check(document.querySelector('#gui-tab').getAttribute('aria-selected') === 'true', 'browser Forward and tab state');
     document.querySelector('[data-gui-path="/docs"]').click();
     await wait(() => document.querySelector('#gui-breadcrumbs').dataset.path === '/docs');
-    [...document.querySelectorAll('.gui-item')].find(e => e.textContent.includes('Architecture')).click();
+    await wait(() => document.querySelector('[data-gui-path="/docs/architecture"]'));
+    check(document.querySelector('[data-gui-path="/docs"]').getAttribute('aria-current') === 'page', 'tree folder navigation');
+    document.querySelector('[data-gui-path="/docs"]').previousElementSibling.click();
+    check(!document.querySelector('[data-gui-path="/docs/architecture"]'), 'tree folder collapse');
+    document.querySelector('[data-gui-path="/docs"]').previousElementSibling.click();
+    await wait(() => document.querySelector('[data-gui-path="/docs/architecture"]'));
+    document.querySelector('[data-gui-path="/docs/architecture"]').click();
     await wait(() => document.querySelector('#gui-breadcrumbs').dataset.path === '/docs/architecture');
-    [...document.querySelectorAll('.gui-item')].find(e => e.textContent.includes('Vaultsh')).click();
+    await wait(() => document.querySelector('[data-gui-path="/docs/architecture/vaultsh.md"]'));
+    document.querySelector('[data-gui-path="/docs/architecture/vaultsh.md"]').click();
     await wait(() => document.querySelector('#gui-breadcrumbs').dataset.path === '/docs/architecture/vaultsh.md');
     [...document.querySelectorAll('.markdown-body a')].find(a => a.textContent === 'browse API').click();
     await wait(() => document.querySelector('#gui-breadcrumbs').dataset.path === '/docs/api.md');
@@ -167,6 +177,18 @@ DEEP = r"""
       document.documentElement.scrollWidth > innerWidth + 1 ||
       document.activeElement.id === 'command') {
     result.textContent = 'FAIL mobile layout'; return;
+  }
+  for (let i = 0; i < 80 && !document.querySelector('[data-gui-path="/cv/experience.md"]'); i++)
+    await new Promise(resolve => setTimeout(resolve, 50));
+  if (!document.querySelector('#gui-tree-location').textContent.includes('/cv/experience.md') ||
+      !document.querySelector('[data-gui-path="/cv/experience.md"]') ||
+      getComputedStyle(document.querySelector('#gui-tree-toggle')).display === 'none') {
+    result.textContent = 'FAIL mobile project tree'; return;
+  }
+  document.querySelector('#gui-tree-toggle').click();
+  if (document.querySelector('#gui-tree-toggle').getAttribute('aria-expanded') !== 'false' ||
+      getComputedStyle(document.querySelector('#gui-tree')).display !== 'none') {
+    result.textContent = 'FAIL mobile tree toggle'; return;
   }
   if (!sessionStorage.getItem('smoke-reloaded')) {
     sessionStorage.setItem('smoke-reloaded', 'yes'); location.reload(); return;
