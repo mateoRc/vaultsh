@@ -58,6 +58,8 @@ SMOKE = r"""
   try {
     await wait(() => document.querySelector('#output').textContent.includes('Explore projects'));
     check(!document.querySelector('#shell-panel').hidden, 'terminal default');
+    check(document.querySelector('.workspace > .mode-row .mode-switch') &&
+          document.querySelector('.intro-hint').textContent.includes('Explorer tab'), 'window tabs and Explorer hint');
     check(document.activeElement.id !== 'command', 'no automatic input focus');
     const examples = [...document.querySelectorAll('#output .terminal-example')];
     check(examples.length === 3 && examples.every(button => button.tagName === 'BUTTON'), 'clickable welcome examples');
@@ -72,36 +74,38 @@ SMOKE = r"""
     await wait(() => [...document.querySelectorAll('#output .output-result')].at(-1)?.textContent.includes('inside the private Compose networks.'));
     check(![...document.querySelectorAll('#output .output-result')].at(-1).textContent.includes('## Component ownership'), 'architecture excerpt boundary');
     document.querySelector('#gui-tab').click();
-    await wait(() => document.querySelector('#gui-location').textContent === '/projects');
+    await wait(() => document.querySelector('#gui-breadcrumbs').dataset.path === '/projects');
+    check(!document.querySelector('#gui-location') &&
+          !document.querySelector('.desktop-bar-end'), 'single path and clean window header');
     check(document.querySelector('.gui-item strong').textContent === 'Overview', 'overview first');
     check(getComputedStyle(document.querySelector('.desktop-main')).display === 'grid', 'desktop layout');
     document.querySelector('.gui-item').click();
-    await wait(() => document.querySelector('#gui-location').textContent === '/projects/overview.md');
+    await wait(() => document.querySelector('#gui-breadcrumbs').dataset.path === '/projects/overview.md');
     check(location.search.includes('overview.md'), 'shareable URL');
     [...document.querySelectorAll('.markdown-body a')].find(a => a.textContent === 'Architecture').click();
-    await wait(() => document.querySelector('#gui-location').textContent === '/docs/architecture/overview.md');
+    await wait(() => document.querySelector('#gui-breadcrumbs').dataset.path === '/docs/architecture/overview.md');
     check(document.querySelector('.markdown-body h1').textContent === 'Backend Lab Architecture', 'relative link');
     history.back();
-    await wait(() => document.querySelector('#gui-location').textContent === '/projects/overview.md');
+    await wait(() => document.querySelector('#gui-breadcrumbs').dataset.path === '/projects/overview.md');
     check(document.querySelector('.markdown-body h1').textContent.includes('Backend Lab'), 'browser Back');
     history.forward();
-    await wait(() => document.querySelector('#gui-location').textContent === '/docs/architecture/overview.md');
+    await wait(() => document.querySelector('#gui-breadcrumbs').dataset.path === '/docs/architecture/overview.md');
     check(document.querySelector('#gui-tab').getAttribute('aria-selected') === 'true', 'browser Forward and tab state');
     document.querySelector('[data-gui-path="/docs"]').click();
-    await wait(() => document.querySelector('#gui-location').textContent === '/docs');
+    await wait(() => document.querySelector('#gui-breadcrumbs').dataset.path === '/docs');
     [...document.querySelectorAll('.gui-item')].find(e => e.textContent.includes('Architecture')).click();
-    await wait(() => document.querySelector('#gui-location').textContent === '/docs/architecture');
+    await wait(() => document.querySelector('#gui-breadcrumbs').dataset.path === '/docs/architecture');
     [...document.querySelectorAll('.gui-item')].find(e => e.textContent.includes('Vaultsh')).click();
-    await wait(() => document.querySelector('#gui-location').textContent === '/docs/architecture/vaultsh.md');
+    await wait(() => document.querySelector('#gui-breadcrumbs').dataset.path === '/docs/architecture/vaultsh.md');
     [...document.querySelectorAll('.markdown-body a')].find(a => a.textContent === 'browse API').click();
-    await wait(() => document.querySelector('#gui-location').textContent === '/docs/api.md');
+    await wait(() => document.querySelector('#gui-breadcrumbs').dataset.path === '/docs/api.md');
     check(location.hash === '#browse-content' && document.activeElement.id === 'browse-content', 'relative fragment');
     await fetch('/api/fail-next');
     document.querySelector('[data-gui-path="/projects"]').click();
     await wait(() => !document.querySelector('#gui-retry').hidden);
     check(document.querySelector('#gui-message').textContent.includes('unavailable'), 'browse error');
     document.querySelector('#gui-retry').click();
-    await wait(() => document.querySelector('#gui-location').textContent === '/projects');
+    await wait(() => document.querySelector('#gui-breadcrumbs').dataset.path === '/projects');
     check(document.querySelector('#gui-retry').hidden, 'browse retry');
     document.querySelector('#shell-tab').click();
     const input = document.querySelector('#command');
@@ -150,9 +154,9 @@ DEEP = r"""
 <pre id="smoke-results">RUNNING</pre><script>
 (async () => {
   const result = document.querySelector('#smoke-results');
-  for (let i = 0; i < 80 && document.querySelector('#gui-location').textContent !== '/cv/experience.md'; i++)
+  for (let i = 0; i < 80 && document.querySelector('#gui-breadcrumbs').dataset.path !== '/cv/experience.md'; i++)
     await new Promise(resolve => setTimeout(resolve, 50));
-  if (document.querySelector('#gui-location').textContent !== '/cv/experience.md' ||
+  if (document.querySelector('#gui-breadcrumbs').dataset.path !== '/cv/experience.md' ||
       document.querySelector('#gui-panel').hidden ||
       !document.querySelector('#gui-document').textContent.includes('ReversingLabs')) {
     result.textContent = 'FAIL direct document load'; return;

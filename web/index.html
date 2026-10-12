@@ -18,25 +18,27 @@
   <link rel="canonical" href="https://mateolabs.dev/vault/">
   <link rel="icon" href="/vault/favicon.svg" type="image/svg+xml">
   <title>Vaultsh | Backend Lab engineering showcase</title>
-  <link rel="stylesheet" href="style.css?v=20261011c">
+  <link rel="stylesheet" href="style.css?v=20261012a">
   <link rel="stylesheet" href="mermaid.css?v=20261011a">
 </head>
 <body>
   <main class="page">
     <header class="intro">
       <h1><span class="product-name">Vault</span><span class="shell-suffix">sh</span></h1>
+      <p class="intro-hint">Prefer clicking through? Switch to the Explorer tab to browse projects and documents.</p>
     </header>
 
     <noscript><p class="static-summary">Backend Lab connects Vaultsh's read-only virtual shell with Atlas search, Forge telemetry, and Sentinel CI assessment. Read the <a href="https://github.com/mateoRc/lab/blob/main/content/projects/overview.md">project overview</a>, <a href="https://github.com/mateoRc/lab/blob/main/content/docs/architecture/overview.md">architecture</a>, or <a href="https://github.com/mateoRc/lab">source code</a>.</p></noscript>
 
+    <p id="offline-summary" class="static-summary" hidden>Backend Lab connects Vaultsh's virtual shell, Atlas search, Forge telemetry, and Sentinel CI assessment. Services are unavailable right now; read the <a href="https://github.com/mateoRc/lab/blob/main/content/projects/overview.md">project overview</a>, <a href="https://github.com/mateoRc/lab/blob/main/content/docs/architecture/overview.md">architecture</a>, or <a href="https://github.com/mateoRc/lab">source</a>.</p>
+
+    <div class="workspace">
     <div class="mode-row">
       <div class="mode-switch" role="tablist" aria-label="Portfolio view">
         <button id="shell-tab" class="mode-tab" type="button" role="tab" aria-selected="true" aria-controls="shell-panel">vaultsh <span class="mode-icon mode-icon--terminal" aria-hidden="true">&gt;_</span></button>
         <button id="gui-tab" class="mode-tab" type="button" role="tab" aria-selected="false" aria-controls="gui-panel" tabindex="-1">explorer <svg class="mode-icon mode-icon--desktop" viewBox="0 0 20 20" fill="none" aria-hidden="true"><rect x="2" y="3" width="16" height="14" rx="1.5" stroke="currentColor" stroke-width="1.8"/><path d="M2 7h16M5 5h1M8 5h1M5 10h5v4H5zM12 10h3M12 13h3" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
       </div>
     </div>
-    <p id="offline-summary" class="static-summary" hidden>Backend Lab connects Vaultsh's virtual shell, Atlas search, Forge telemetry, and Sentinel CI assessment. Services are unavailable right now; read the <a href="https://github.com/mateoRc/lab/blob/main/content/projects/overview.md">project overview</a>, <a href="https://github.com/mateoRc/lab/blob/main/content/docs/architecture/overview.md">architecture</a>, or <a href="https://github.com/mateoRc/lab">source</a>.</p>
-
     <section id="shell-panel" class="terminal" role="tabpanel" aria-labelledby="shell-tab" aria-label="Interactive portfolio terminal">
       <header class="terminal-bar">
         <div class="window-controls" aria-hidden="true">
@@ -109,7 +111,6 @@
       <header class="desktop-bar">
         <div class="window-controls" aria-hidden="true"><span></span><span></span><span></span></div>
         <span>Project Explorer</span>
-        <span class="desktop-bar-end">READ ONLY · 2026</span>
       </header>
       <div class="desktop-toolbar">
         <div class="desktop-toolbar-title"><span class="desktop-mark" aria-hidden="true"><svg viewBox="0 0 20 20" fill="none"><rect x="2" y="3" width="16" height="14" rx="1.5" stroke="currentColor" stroke-width="1.8"/><path d="M2 7h16M5 5h1M8 5h1M5 10h5v4H5zM12 10h3M12 13h3" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg></span><div><strong>Backend Lab</strong><small>Projects and engineering decisions</small></div></div>
@@ -124,7 +125,6 @@
         </aside>
         <div class="desktop-content">
           <div class="desktop-location">
-            <span id="gui-location">/</span>
             <div class="desktop-location-actions">
               <span id="gui-count"></span>
               <nav id="gui-nav" class="gui-nav" aria-label="Explorer navigation" hidden>
@@ -140,9 +140,10 @@
       </div>
       <footer class="desktop-footer"><span>VAULTSH EXPLORER</span><span>Double click? Single click works here.</span></footer>
     </section>
+    </div>
 
   </main>
   <script src="terminal.js?v=20261011c" defer></script>
-  <script src="gui.js?v=20261011c" defer></script>
+  <script src="gui.js?v=20261012a" defer></script>
 </body>
 </html>

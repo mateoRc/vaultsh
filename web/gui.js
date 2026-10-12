@@ -4,7 +4,6 @@ function initGui() {
   const shellPanel = document.querySelector("#shell-panel");
   const guiPanel = document.querySelector("#gui-panel");
   const breadcrumbs = document.querySelector("#gui-breadcrumbs");
-  const location = document.querySelector("#gui-location");
   const count = document.querySelector("#gui-count");
   const guiNav = document.querySelector("#gui-nav");
   const back = document.querySelector("#gui-back");
@@ -14,7 +13,7 @@ function initGui() {
   const message = document.querySelector("#gui-message");
   const shortcuts = document.querySelectorAll("[data-gui-path]");
   if (!shellTab || !guiTab || !shellPanel || !guiPanel ||
-      !breadcrumbs || !location || !count || !guiNav || !back || !retry ||
+      !breadcrumbs || !count || !guiNav || !back || !retry ||
       !folders || !documentView || !message) return;
 
   let mode = "shell";
@@ -52,7 +51,6 @@ function initGui() {
     guiTab.setAttribute("aria-selected", String(desktop));
     shellTab.tabIndex = desktop ? -1 : 0;
     guiTab.tabIndex = desktop ? 0 : -1;
-    document.querySelector(".mode-switch").classList.toggle("mode-switch--desktop", desktop);
     if (focus) (desktop ? guiTab : shellTab).focus();
     if (desktop && !hasLoaded) {
       hasLoaded = true;
@@ -113,8 +111,6 @@ function initGui() {
       if (!validPath(item.path) || !["directory", "file"].includes(item.kind)) throw new Error("Invalid document response.");
       currentPath = item.path;
       if (options.history !== "none") window.history[options.history === "replace" ? "replaceState" : "pushState"]({}, "", documentURL(item.path, options.fragment));
-      location.textContent = item.path;
-      location.title = item.path;
       guiNav.hidden = item.path === "/";
       renderBreadcrumbs(item.path);
       renderShortcuts(item.path);
@@ -138,6 +134,7 @@ function initGui() {
   }
 
   function renderBreadcrumbs(path) {
+    breadcrumbs.dataset.path = path;
     breadcrumbs.replaceChildren();
     const parts = path.split("/").filter(Boolean);
     if (!parts.length) addCrumb("Home", "/");
