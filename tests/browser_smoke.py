@@ -20,28 +20,6 @@ from urllib.parse import parse_qs, urlsplit
 ROOT = Path(__file__).resolve().parents[1]
 WEB = ROOT / "web"
 CONTENT = ROOT.parent / "lab" / "content"
-EXCERPTS = (
-    ("head -n 11 /projects/overview.md", "## Components"),
-    ("head -n 26 /docs/architecture/overview.md", "## Runtime topology"),
-)
-
-
-def verify_excerpts():
-    sources = (
-        WEB / "terminal.js",
-        ROOT / "internal" / "command" / "welcome.go",
-        CONTENT / "README.md",
-    )
-    for command, section in EXCERPTS:
-        count, path = re.fullmatch(r"head -n (\d+) (/[\w/.-]+\.md)", command).groups()
-        lines = (CONTENT / path.lstrip("/")).read_text(encoding="utf-8").splitlines()
-        excerpt = lines[:int(count)]
-        assert len(excerpt) < len(lines) and lines[int(count)] == "", command
-        assert section in excerpt and excerpt.count("```mermaid") == excerpt.count("```"), command
-        for source in sources:
-            assert command in source.read_text(encoding="utf-8"), f"{command} missing from {source}"
-    print("Command excerpts: PASS complete sections and matching suggestions")
-
 SMOKE = r"""
 <pre id="smoke-results">RUNNING</pre><script>
 (async () => {
@@ -55,7 +33,7 @@ SMOKE = r"""
     throw Error('timed out waiting for UI: ' + document.querySelector('#output').textContent.slice(-600));
   };
   try {
-    await wait(() => document.querySelector('#output').textContent.includes('Explore projects'));
+    await wait(() => document.querySelector('#output').textContent.includes('Browse projects'));
     check(!document.querySelector('#shell-panel').hidden, 'terminal default');
     check(document.querySelector('.workspace > .workspace-header .mode-switch') &&
           getComputedStyle(document.querySelector('.workspace-header')).backgroundColor === 'rgb(247, 200, 67)' &&
@@ -65,9 +43,9 @@ SMOKE = r"""
           'compact header without window decoration');
     check(document.activeElement.id !== 'command', 'no automatic input focus');
     const examples = [...document.querySelectorAll('#output .terminal-example')];
-    check(examples.length === 3 && examples.every(button => button.tagName === 'BUTTON'), 'clickable welcome examples');
-    check(examples[0].textContent === 'head -n 11 /projects/overview.md' &&
-          examples[1].textContent === 'head -n 26 /docs/architecture/overview.md', 'welcome excerpts');
+    check(examples.length === 2 && examples.every(button => button.tagName === 'BUTTON'), 'clickable welcome examples');
+    check(examples[0].textContent === 'ls /projects' &&
+          examples[1].textContent === 'help search', 'concise welcome examples');
     const menu = document.querySelector('#quick-commands');
     const menuToggle = document.querySelector('#quick-command-toggle');
     const shortcuts = [...menu.querySelectorAll('[data-command]')].map(button => button.dataset.command);
@@ -93,11 +71,13 @@ SMOKE = r"""
     await wait(() => [...document.querySelectorAll('#output .output-command')].at(-1)?.textContent.includes('tree -L 1 /projects'));
     check(menuToggle.getAttribute('aria-expanded') === 'false', 'project map shortcut runs and closes menu');
     examples[0].click();
-    await wait(() => [...document.querySelectorAll('#output .output-result')].at(-1)?.textContent.includes('**Lab** owns Docker Compose'));
-    check(![...document.querySelectorAll('#output .output-result')].at(-1).textContent.includes('## Design decisions'), 'project excerpt boundary');
+    await wait(() => [...document.querySelectorAll('#output .output-result')].at(-1)?.textContent.includes('vaultsh.md'));
+    check([...document.querySelectorAll('#output .output-result')].at(-1).textContent.trim().split('\n').length <= 6,
+          'project example stays short');
     document.querySelectorAll('#output .terminal-example')[1].click();
-    await wait(() => [...document.querySelectorAll('#output .output-result')].at(-1)?.textContent.includes('inside the private Compose networks.'));
-    check(![...document.querySelectorAll('#output .output-result')].at(-1).textContent.includes('## Component ownership'), 'architecture excerpt boundary');
+    await wait(() => [...document.querySelectorAll('#output .output-result')].at(-1)?.textContent.includes('Usage: search <query>'));
+    check([...document.querySelectorAll('#output .output-result')].at(-1).textContent.trim().split('\n').length <= 3,
+          'help example stays short');
     document.querySelector('#gui-tab').click();
     await wait(() => document.querySelector('#gui-breadcrumbs').dataset.path === '/projects');
     await wait(() => document.querySelector('[data-gui-path="/docs"]'));
@@ -236,7 +216,7 @@ MOBILE_START = r"""
 <pre id="smoke-results">RUNNING</pre><script>
 (async () => {
   const result = document.querySelector('#smoke-results');
-  for (let i = 0; i < 80 && !document.querySelector('#output').textContent.includes('Explore projects'); i++)
+  for (let i = 0; i < 80 && !document.querySelector('#output').textContent.includes('Browse projects'); i++)
     await new Promise(resolve => setTimeout(resolve, 50));
   const toggle = document.querySelector('#quick-command-toggle');
   const menu = document.querySelector('#quick-commands');
@@ -344,9 +324,11 @@ class Handler(BaseHTTPRequestHandler):
             if line == "slow":
                 time.sleep(0.2)
             if line == "welcome":
-                output = ("Explore projects: head -n 11 /projects/overview.md\n"
-                          "View architecture: head -n 26 /docs/architecture/overview.md\n"
-                          "Live dashboard: dashboard")
+                output = "Browse projects: ls /projects\nLearn search: help search"
+            elif line == "ls /projects":
+                output = "\n".join(sorted(path.name for path in (CONTENT / "projects").iterdir()))
+            elif line == "help search":
+                output = 'Usage: search <query>\nSearch portfolio content with the Atlas search engine\nExample: search "distributed systems"'
             elif match := re.fullmatch(r"head -n (\d+) (/[\w/.-]+\.md)", line):
                 target = CONTENT / match[2].lstrip("/")
                 output = "\n".join(target.read_text(encoding="utf-8").splitlines()[:int(match[1])])
@@ -367,7 +349,6 @@ class Handler(BaseHTTPRequestHandler):
 
 
 def main():
-    verify_excerpts()
     browser = os.environ.get("BROWSER") or next((str(path) for path in (
         Path(r"C:\Program Files\Google\Chrome\Application\chrome.exe"),
         Path(r"C:\Program Files (x86)\Microsoft\Edge\Application\msedge.exe"),

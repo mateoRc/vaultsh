@@ -63,10 +63,8 @@ function initTerminal() {
   const statusTimeoutMilliseconds = 3000;
   const statusRefreshMilliseconds = 10000;
   const suggestions = [
-    ["Explore projects", "head -n 11 /projects/overview.md"],
-    ["View architecture", "head -n 26 /docs/architecture/overview.md"],
-    ["Live dashboard", "dashboard"],
-    ["See commands", "help"],
+    ["Browse projects", "ls /projects"],
+    ["Learn search", "help search"],
   ];
   const maxOutputEntries = 100;
   let outputEntries = output.textContent ? [{ welcome: output.textContent }] : [];
