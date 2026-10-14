@@ -30,6 +30,8 @@ func TestForgeRequestsSendBearerToken(t *testing.T) {
 		switch r.URL.Path {
 		case "/events":
 			w.WriteHeader(http.StatusNoContent)
+		case "/visits":
+			w.WriteHeader(http.StatusNoContent)
 		case "/summary":
 			w.Header().Set("Content-Type", "application/json")
 			_, _ = w.Write([]byte(
@@ -43,6 +45,9 @@ func TestForgeRequestsSendBearerToken(t *testing.T) {
 
 	client := NewClient("", server.URL, "", "forge-secret")
 	if err := client.Record("vault", "command.executed", "ls", 1, 0); err != nil {
+		t.Fatal(err)
+	}
+	if err := client.RecordVisit("12345678-1234-4123-8123-123456789abc"); err != nil {
 		t.Fatal(err)
 	}
 	if _, err := client.Summary(); err != nil {

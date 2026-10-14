@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"errors"
 	"net/http"
+	"regexp"
 	"strings"
 
 	"github.com/mateom/vaultsh/internal/command"
@@ -82,6 +83,16 @@ type StatusProvider interface {
 	Availability() (atlas bool, forge bool)
 }
 
+type VisitorRecorder interface {
+	RecordVisit(visitorID string) error
+}
+
+var visitorIDPattern = regexp.MustCompile(`^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$`)
+
+type visitRequest struct {
+	VisitorID string `json:"visitor_id"`
+}
+
 func NewHandler(sessions *shell.SessionManager) http.Handler {
 	return NewHandlerWithStatus(sessions, nil)
 }
@@ -107,6 +118,23 @@ func NewHandlerWithConfig(
 	mux.HandleFunc("GET /", redirectToVault)
 	mux.HandleFunc("GET /healthz", health)
 	mux.HandleFunc("GET /api/status", limited(statusLimit, statusHandler(status)))
+	mux.HandleFunc("POST /api/visit", limited(statusLimit, func(w http.ResponseWriter, r *http.Request) {
+		r.Body = http.MaxBytesReader(w, r.Body, maxRequestBodyBytes)
+		var request visitRequest
+		if !decodeRequest(w, r, &request) {
+			return
+		}
+		if !visitorIDPattern.MatchString(request.VisitorID) {
+			http.Error(w, "invalid visitor ID", http.StatusBadRequest)
+			return
+		}
+		recorder, ok := status.(VisitorRecorder)
+		if !ok || recorder.RecordVisit(request.VisitorID) != nil {
+			http.Error(w, "analytics unavailable", http.StatusServiceUnavailable)
+			return
+		}
+		w.WriteHeader(http.StatusNoContent)
+	}))
 	mux.HandleFunc("GET /api/browse", limited(statusLimit, func(w http.ResponseWriter, r *http.Request) {
 		browse(w, r, sessions)
 	}))

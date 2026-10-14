@@ -47,10 +47,12 @@ function initTerminal() {
     status: new URL("/api/status", window.location.origin).toString(),
     execute: new URL("/api/exec", window.location.origin).toString(),
     complete: new URL("/api/complete", window.location.origin).toString(),
+    visit: new URL("/api/visit", window.location.origin).toString(),
   });
   const storageKeys = Object.freeze({
     session: "vaultsh-session",
     currentDirectory: "vaultsh-current-directory",
+    visitor: "vaultsh-visitor",
   });
   const serviceStates = Object.freeze({
     online: "online",
@@ -74,13 +76,13 @@ function initTerminal() {
     : "/";
   let suggestionIndex = 0;
   let running = false;
-  let allowTabExit = false;
   quickCommands.inert = true;
 
   updatePrompt();
   refreshVaultStatus();
   refreshServiceStatus();
   renderOutput();
+  recordVisit();
 
   window.setTimeout(typeWelcomeCommand, autoWelcomeDelayMilliseconds);
 
@@ -112,6 +114,28 @@ function initTerminal() {
       window.sessionStorage.setItem(key, value);
     } catch {
       // Storage can be unavailable in private or restricted browser contexts.
+    }
+  }
+
+  async function recordVisit() {
+    let visitorId;
+    try {
+      visitorId = window.localStorage.getItem(storageKeys.visitor);
+      if (!/^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/.test(visitorId || "")) {
+        visitorId = window.crypto.randomUUID();
+        window.localStorage.setItem(storageKeys.visitor, visitorId);
+      }
+    } catch {
+      return;
+    }
+    try {
+      await fetchWithTimeout(endpoints.visit, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ visitor_id: visitorId }),
+      }, 5000);
+    } catch {
+      // Visitor analytics must not interrupt the terminal.
     }
   }
 
@@ -324,13 +348,12 @@ function initTerminal() {
       return;
     }
 
-    if (event.key === "Tab" && !event.shiftKey && document.activeElement === command && command.value.trim() && !allowTabExit) {
+    if (event.key === "Tab" && !event.shiftKey && document.activeElement === command && command.value.trim()) {
       event.preventDefault();
-      allowTabExit = true;
       await complete();
     }
   });
-  command.addEventListener("input", () => { allowTabExit = false; });
+  command.addEventListener("input", () => setRequestStatus(""));
 
   function isQuickCommandsCollapsed() {
     return quickCommands.classList.contains("quick-commands--collapsed");
@@ -366,7 +389,9 @@ function initTerminal() {
         throw new Error(await friendlyError(response));
       }
       const result = await response.json();
+      if (command.value !== line || document.activeElement !== command) return;
       updateSession(result);
+      const candidates = result.candidates || [];
 
       if (result.replacement) {
         command.value =
@@ -376,10 +401,15 @@ function initTerminal() {
         const nextCursor = result.start + result.replacement.length;
         command.setSelectionRange(nextCursor, nextCursor);
       }
-      setRequestStatus("");
+      setRequestStatus(
+        candidates.length > 1
+          ? `Matches: ${candidates.join(", ")}`
+          : candidates.length === 0
+            ? "No matches."
+            : "",
+      );
     } catch (error) {
-      setRequestStatus(error.name === "AbortError" ? "Completion timed out. Edit to retry, or press Tab again to leave." : (error.message || "Completion unavailable.") + " Edit to retry, or press Tab again to leave.");
-      allowTabExit = true;
+      setRequestStatus(error.name === "AbortError" ? "Completion timed out. Try Tab again." : (error.message || "Completion unavailable.") + " Try Tab again.");
     }
   }
 

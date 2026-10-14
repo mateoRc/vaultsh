@@ -34,6 +34,13 @@ func TestCompleteCommandCommonPrefix(t *testing.T) {
 	}
 }
 
+func TestCompleteReplacesWholeTokenWhenCursorIsInsideIt(t *testing.T) {
+	result := New().Complete("cax next", 2)
+	if result.Start != 0 || result.End != 3 || result.Replacement != "cat" {
+		t.Errorf("completion = %+v, want range 0:3 replaced by cat", result)
+	}
+}
+
 func TestCompleteHidesEasterEggCommands(t *testing.T) {
 	result := New().Complete("hi", len("hi"))
 

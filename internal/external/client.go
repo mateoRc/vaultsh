@@ -157,6 +157,33 @@ func (c *Client) Record(
 	return nil
 }
 
+func (c *Client) RecordVisit(visitorID string) error {
+	if c.forgeURL == "" {
+		return fmt.Errorf("Forge URL is not configured")
+	}
+	body, err := json.Marshal(struct {
+		VisitorID string `json:"visitor_id"`
+	}{VisitorID: visitorID})
+	if err != nil {
+		return err
+	}
+	request, err := http.NewRequest(http.MethodPost, c.forgeURL+"/visits", bytes.NewReader(body))
+	if err != nil {
+		return err
+	}
+	request.Header.Set("Content-Type", "application/json")
+	request.Header.Set("Authorization", "Bearer "+c.forgeToken)
+	response, err := c.http.Do(request)
+	if err != nil {
+		return err
+	}
+	defer response.Body.Close()
+	if response.StatusCode != http.StatusNoContent {
+		return fmt.Errorf("Forge returned %s", response.Status)
+	}
+	return nil
+}
+
 func (c *Client) Availability() (bool, bool) {
 	atlas, _ := c.probe(c.atlasURL)
 	forge, _ := c.probe(c.forgeURL)

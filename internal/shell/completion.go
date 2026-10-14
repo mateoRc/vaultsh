@@ -26,6 +26,12 @@ func (e *Engine) Complete(line string, cursor int) Completion {
 
 	prefix := line[:cursor]
 	start := strings.LastIndexAny(prefix, " \t\n|") + 1
+	end := cursor
+	if offset := strings.IndexAny(line[cursor:], " \t\n|"); offset < 0 {
+		end = len(line)
+	} else {
+		end += offset
+	}
 	fragment := prefix[start:]
 	before := strings.TrimSpace(prefix[:start])
 
@@ -40,14 +46,16 @@ func (e *Engine) Complete(line string, cursor int) Completion {
 	if len(candidates) == 1 {
 		if strings.HasSuffix(candidates[0], "/") {
 			replacement = candidates[0]
-		} else {
+		} else if end == len(line) || !strings.ContainsAny(line[end:end+1], " \t\n") {
 			replacement = candidates[0] + " "
+		} else {
+			replacement = candidates[0]
 		}
 	}
 
 	return Completion{
 		Start:       start,
-		End:         cursor,
+		End:         end,
 		Replacement: replacement,
 		Candidates:  candidates,
 	}

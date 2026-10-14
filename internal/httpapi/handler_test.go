@@ -16,6 +16,37 @@ type statusStub struct {
 	forge bool
 }
 
+type visitorRecorderStub struct {
+	visits []string
+}
+
+func (r *visitorRecorderStub) Availability() (bool, bool) { return false, true }
+func (r *visitorRecorderStub) RecordVisit(visitorID string) error {
+	r.visits = append(r.visits, visitorID)
+	return nil
+}
+
+func TestVisitValidatesAndForwardsVisitorID(t *testing.T) {
+	recorder := &visitorRecorderStub{}
+	handler := NewHandlerWithStatus(shell.NewSessionManager(filesystem.NewDirectory("")), recorder)
+	for _, test := range []struct {
+		body string
+		code int
+	}{
+		{`{"visitor_id":"invalid"}`, http.StatusBadRequest},
+		{`{"visitor_id":"12345678-1234-4123-8123-123456789abc"}`, http.StatusNoContent},
+	} {
+		response := httptest.NewRecorder()
+		handler.ServeHTTP(response, httptest.NewRequest(http.MethodPost, "/api/visit", strings.NewReader(test.body)))
+		if response.Code != test.code {
+			t.Errorf("body %s: status = %d, want %d", test.body, response.Code, test.code)
+		}
+	}
+	if len(recorder.visits) != 1 || recorder.visits[0] != "12345678-1234-4123-8123-123456789abc" {
+		t.Errorf("recorded visits = %v", recorder.visits)
+	}
+}
+
 const aboutOutput = "Vaultsh is the read-only virtual shell and Explorer for Backend Lab.\n\n" +
 	"Start with /projects/overview.md for the integrated system, " +
 	"then /docs/architecture/overview.md for its boundaries. " +
