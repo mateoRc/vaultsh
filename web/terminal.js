@@ -52,6 +52,7 @@ function initTerminal() {
   const storageKeys = Object.freeze({
     session: "vaultsh-session",
     currentDirectory: "vaultsh-current-directory",
+    commandHistory: "vaultsh-command-history",
     visitor: "vaultsh-visitor",
   });
   const serviceStates = Object.freeze({
@@ -69,7 +70,11 @@ function initTerminal() {
     ["Learn search", "help search"],
   ];
   const maxOutputEntries = 100;
+  const maxCommandHistory = 100;
   let outputEntries = output.textContent ? [{ welcome: output.textContent }] : [];
+  let commandHistory = loadCommandHistory();
+  let historyIndex = commandHistory.length;
+  let historyDraft = "";
   let sessionId = storageGet(storageKeys.session) || "";
   let currentDirectory = sessionId
     ? storageGet(storageKeys.currentDirectory) || "/"
@@ -115,6 +120,41 @@ function initTerminal() {
     } catch {
       // Storage can be unavailable in private or restricted browser contexts.
     }
+  }
+
+  function loadCommandHistory() {
+    try {
+      const saved = JSON.parse(storageGet(storageKeys.commandHistory) || "[]");
+      return Array.isArray(saved)
+        ? saved.filter((line) => typeof line === "string" && line.trim() && line.length <= command.maxLength).slice(-maxCommandHistory)
+        : [];
+    } catch {
+      return [];
+    }
+  }
+
+  function rememberCommand(line) {
+    if (commandHistory.at(-1) !== line) {
+      commandHistory.push(line);
+      commandHistory = commandHistory.slice(-maxCommandHistory);
+      storageSet(storageKeys.commandHistory, JSON.stringify(commandHistory));
+    }
+    historyIndex = commandHistory.length;
+    historyDraft = "";
+  }
+
+  function recallCommand(direction) {
+    if (!commandHistory.length || (direction > 0 && historyIndex === commandHistory.length)) {
+      return false;
+    }
+    if (historyIndex === commandHistory.length) historyDraft = command.value;
+    historyIndex = Math.max(0, Math.min(commandHistory.length, historyIndex + direction));
+    command.value = historyIndex === commandHistory.length
+      ? historyDraft
+      : commandHistory[historyIndex];
+    command.setSelectionRange(command.value.length, command.value.length);
+    setRequestStatus("");
+    return true;
   }
 
   async function recordVisit() {
@@ -330,6 +370,17 @@ function initTerminal() {
   }
 
   document.addEventListener("keydown", async (event) => {
+    if (
+      document.activeElement === command &&
+      !event.altKey && !event.ctrlKey && !event.metaKey && !event.shiftKey &&
+      !event.isComposing && !command.readOnly &&
+      (event.key === "ArrowUp" || event.key === "ArrowDown") &&
+      recallCommand(event.key === "ArrowUp" ? -1 : 1)
+    ) {
+      event.preventDefault();
+      return;
+    }
+
     if (event.key === "Escape" && !isQuickCommandsCollapsed()) {
       setQuickCommandsExpanded(false);
       quickCommandToggle.focus();
@@ -353,7 +404,13 @@ function initTerminal() {
       await complete();
     }
   });
-  command.addEventListener("input", () => setRequestStatus(""));
+  command.addEventListener("input", () => {
+    if (historyIndex !== commandHistory.length) {
+      historyIndex = commandHistory.length;
+      historyDraft = command.value;
+    }
+    setRequestStatus("");
+  });
 
   function isQuickCommandsCollapsed() {
     return quickCommands.classList.contains("quick-commands--collapsed");
@@ -400,6 +457,8 @@ function initTerminal() {
           line.slice(result.end);
         const nextCursor = result.start + result.replacement.length;
         command.setSelectionRange(nextCursor, nextCursor);
+        historyIndex = commandHistory.length;
+        historyDraft = command.value;
       }
       setRequestStatus(
         candidates.length > 1
@@ -418,6 +477,7 @@ function initTerminal() {
       return;
     }
 
+    if (!automaticWelcome) rememberCommand(line);
     setRunning(true);
     const submittedFrom = currentDirectory;
     setRequestStatus("Running…");
