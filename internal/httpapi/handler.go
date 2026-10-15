@@ -86,7 +86,7 @@ type completeResponse struct {
 }
 
 type StatusProvider interface {
-	Availability() (atlas bool, forge bool)
+	Availability() (atlas bool, forge bool, oracle bool)
 }
 
 type VisitorRecorder interface {
@@ -168,11 +168,11 @@ func redirectToVault(w http.ResponseWriter, r *http.Request) {
 
 func statusHandler(status StatusProvider) http.HandlerFunc {
 	return func(w http.ResponseWriter, _ *http.Request) {
-		atlas, forge := false, false
+		atlas, forge, oracle := false, false, false
 		if status != nil {
-			atlas, forge = status.Availability()
+			atlas, forge, oracle = status.Availability()
 		}
-		writeJSON(w, map[string]bool{"atlas": atlas, "forge": forge})
+		writeJSON(w, map[string]bool{"atlas": atlas, "forge": forge, "oracle": oracle})
 	}
 }
 

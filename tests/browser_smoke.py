@@ -288,7 +288,7 @@ class Handler(BaseHTTPRequestHandler):
         if url.path == "/healthz":
             return self.send_bytes(b"ok", "text/plain")
         if url.path == "/api/status":
-            return self.send_json({"atlas": True, "forge": True})
+            return self.send_json({"atlas": True, "forge": True, "oracle": True})
         if url.path == "/api/browse":
             if Handler.fail_next:
                 Handler.fail_next = False

@@ -2,6 +2,7 @@ function initTerminal() {
   const status = document.querySelector("#status");
   const atlasStatus = document.querySelector("#atlas-status");
   const forgeStatus = document.querySelector("#forge-status");
+  const oracleStatus = document.querySelector("#oracle-status");
   const form = document.querySelector("#command-form");
   const command = document.querySelector("#command");
   const prompt = document.querySelector("#prompt");
@@ -23,6 +24,7 @@ function initTerminal() {
     !status ||
     !atlasStatus ||
     !forgeStatus ||
+    !oracleStatus ||
     !form ||
     !command ||
     !prompt ||
@@ -37,10 +39,11 @@ function initTerminal() {
     return;
   }
   window.addEventListener("error", () => {
-    status.textContent = "unavailable";
+    status.setAttribute("aria-label", "Vault unavailable");
     status.dataset.state = "unavailable";
     atlasStatus.dataset.state = "unavailable";
     forgeStatus.dataset.state = "unavailable";
+    oracleStatus.dataset.state = "unavailable";
   });
   const endpoints = Object.freeze({
     health: new URL("/healthz", window.location.origin).toString(),
@@ -102,9 +105,8 @@ function initTerminal() {
   });
 
   function setStatus(state) {
-    status.textContent = state;
     status.dataset.state = state;
-    status.setAttribute("aria-label", `Vaultsh ${state}`);
+    status.setAttribute("aria-label", `Vault ${state}`);
     if (offlineSummary) offlineSummary.hidden = state !== serviceStates.unavailable;
   }
 
@@ -214,6 +216,7 @@ function initTerminal() {
     const fallback = window.setTimeout(() => {
       setServiceStatus(atlasStatus, "Atlas", false);
       setServiceStatus(forgeStatus, "Forge", false);
+      setServiceStatus(oracleStatus, "Oracle", false);
     }, statusTimeoutMilliseconds);
     try {
       const response = await fetchWithTimeout(endpoints.status);
@@ -224,10 +227,12 @@ function initTerminal() {
       window.clearTimeout(fallback);
       setServiceStatus(atlasStatus, "Atlas", services.atlas);
       setServiceStatus(forgeStatus, "Forge", services.forge);
+      setServiceStatus(oracleStatus, "Oracle", services.oracle);
     } catch {
       window.clearTimeout(fallback);
       setServiceStatus(atlasStatus, "Atlas", false);
       setServiceStatus(forgeStatus, "Forge", false);
+      setServiceStatus(oracleStatus, "Oracle", false);
     }
   }
 
@@ -249,6 +254,7 @@ function initTerminal() {
     setStatus(serviceStates.unavailable);
     setServiceStatus(atlasStatus, "Atlas", false);
     setServiceStatus(forgeStatus, "Forge", false);
+    setServiceStatus(oracleStatus, "Oracle", false);
   }
 
   function setServiceStatus(element, name, available) {

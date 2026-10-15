@@ -14,13 +14,14 @@ import (
 type statusStub struct {
 	atlas bool
 	forge bool
+	oracle bool
 }
 
 type visitorRecorderStub struct {
 	visits []string
 }
 
-func (r *visitorRecorderStub) Availability() (bool, bool) { return false, true }
+func (r *visitorRecorderStub) Availability() (bool, bool, bool) { return false, true, false }
 func (r *visitorRecorderStub) RecordVisit(visitorID string) error {
 	r.visits = append(r.visits, visitorID)
 	return nil
@@ -51,8 +52,8 @@ const aboutOutput = "Vaultsh is the read-only virtual shell and Explorer for Bac
 	"Start with /docs/projects/overview.md for the integrated system and " +
 	"its boundaries. Professional background is under /cv."
 
-func (s statusStub) Availability() (bool, bool) {
-	return s.atlas, s.forge
+func (s statusStub) Availability() (bool, bool, bool) {
+	return s.atlas, s.forge, s.oracle
 }
 
 func TestStatusReportsExternalServices(t *testing.T) {
@@ -60,13 +61,13 @@ func TestStatusReportsExternalServices(t *testing.T) {
 	response := httptest.NewRecorder()
 	NewHandlerWithStatus(
 		shell.NewSessionManager(filesystem.NewDirectory("")),
-		statusStub{atlas: true, forge: false},
+		statusStub{atlas: true, forge: false, oracle: true},
 	).ServeHTTP(response, request)
 
 	if response.Code != http.StatusOK {
 		t.Fatalf("status = %d", response.Code)
 	}
-	if response.Body.String() != "{\"atlas\":true,\"forge\":false}\n" {
+	if response.Body.String() != "{\"atlas\":true,\"forge\":false,\"oracle\":true}\n" {
 		t.Errorf("body = %q", response.Body.String())
 	}
 }

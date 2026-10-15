@@ -244,10 +244,11 @@ func (c *Client) RecordVisit(visitorID string) error {
 	return nil
 }
 
-func (c *Client) Availability() (bool, bool) {
+func (c *Client) Availability() (bool, bool, bool) {
 	atlas, _ := c.probe(c.atlasURL)
 	forge, _ := c.probe(c.forgeURL)
-	return atlas, forge
+	oracle, _ := c.probe(c.oracleURL)
+	return atlas, forge, oracle
 }
 
 func (c *Client) SystemStatus() command.SystemStatus {
