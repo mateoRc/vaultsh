@@ -22,7 +22,7 @@ function initGui() {
       !treeLocation || !treeToggle) return;
 
   let mode = "shell";
-  let currentPath = "/projects";
+  let currentPath = "/docs/projects";
   let requestNumber = 0;
   let hasLoaded = false;
   let activeRequest;
@@ -333,13 +333,15 @@ function initGui() {
         label.charAt(0).toUpperCase() + label.slice(1);
       const type = document.createElement("small");
       const descriptions = {
+        "atlas": "Markdown search service",
+        "forge": "Telemetry and text dashboard",
+        "oracle": "Grounded question answering",
+        "scribe": "Proposed provider snapshot service",
+        "sentinel": "CI release assessment",
+        "vaultsh": "Virtual shell and Explorer",
         "overview.md": "Integrated system and where to explore",
-        "vaultsh.md": "Virtual shell and Explorer",
-        "atlas.md": "Markdown search service",
-        "forge.md": "Telemetry and text dashboard",
-        "sentinel.md": "CI release assessment",
       };
-      type.textContent = item.path === "/projects" ? descriptions[child.name] || "Document" : child.kind === "directory" ? "Folder" : "Document";
+      type.textContent = item.path === "/docs/projects" ? descriptions[child.name] || (child.kind === "directory" ? "Folder" : "Document") : child.kind === "directory" ? "Folder" : "Document";
       button.append(icon, name, type);
       button.addEventListener("click", () => navigate(child.path));
       folders.append(button);

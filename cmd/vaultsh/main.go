@@ -34,11 +34,14 @@ func main() {
 	}
 	atlasURL := os.Getenv("ATLAS_URL")
 	forgeURL := os.Getenv("FORGE_URL")
-	services := external.NewClient(
+	oracleURL := os.Getenv("ORACLE_URL")
+	services := external.NewClientWithOracle(
 		atlasURL,
 		forgeURL,
+		oracleURL,
 		serviceToken(atlasURL, "ATLAS_AUTH_TOKEN", logger),
 		serviceToken(forgeURL, "FORGE_AUTH_TOKEN", logger),
+		serviceToken(oracleURL, "ORACLE_AUTH_TOKEN", logger),
 	)
 	var deployments *deployment.FileReader
 	if path := os.Getenv("DEPLOYMENT_METADATA_PATH"); path != "" {
@@ -59,6 +62,8 @@ func main() {
 		shell.SessionConfig{MaxSessions: sessionLimit()},
 		shell.Dependencies{
 			Search:      services,
+			Invoke:      services,
+			Ask:         services,
 			Metrics:     services,
 			Deployments: deployments,
 			System:      services,
@@ -76,7 +81,7 @@ func main() {
 		),
 		ReadHeaderTimeout: 5 * time.Second,
 		ReadTimeout:       10 * time.Second,
-		WriteTimeout:      15 * time.Second,
+		WriteTimeout:      45 * time.Second,
 		IdleTimeout:       60 * time.Second,
 		MaxHeaderBytes:    16 * 1024,
 	}

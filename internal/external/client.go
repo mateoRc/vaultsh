@@ -14,17 +14,24 @@ import (
 )
 
 type Client struct {
-	atlasURL     string
-	forgeURL     string
-	atlasToken   string
-	forgeToken   string
-	http         *http.Client
+	atlasURL      string
+	forgeURL      string
+	oracleURL     string
+	atlasToken    string
+	forgeToken    string
+	oracleToken   string
+	http          *http.Client
 	analyticsHTTP *http.Client
-	startedAt    time.Time
+	answerHTTP    *http.Client
+	startedAt     time.Time
 }
 
 type searchResponse struct {
 	Results []command.SearchResult `json:"results"`
+}
+
+type questionRequest struct {
+	Question string `json:"question"`
 }
 
 type event struct {
@@ -40,14 +47,23 @@ type serviceStatusResponse struct {
 }
 
 func NewClient(atlasURL, forgeURL, atlasToken, forgeToken string) *Client {
+	return NewClientWithOracle(atlasURL, forgeURL, "", atlasToken, forgeToken, "")
+}
+
+func NewClientWithOracle(
+	atlasURL, forgeURL, oracleURL, atlasToken, forgeToken, oracleToken string,
+) *Client {
 	return &Client{
-		atlasURL:     strings.TrimRight(atlasURL, "/"),
-		forgeURL:     strings.TrimRight(forgeURL, "/"),
-		atlasToken:   atlasToken,
-		forgeToken:   forgeToken,
-		http:         &http.Client{Timeout: 300 * time.Millisecond},
+		atlasURL:      strings.TrimRight(atlasURL, "/"),
+		forgeURL:      strings.TrimRight(forgeURL, "/"),
+		oracleURL:     strings.TrimRight(oracleURL, "/"),
+		atlasToken:    atlasToken,
+		forgeToken:    forgeToken,
+		oracleToken:   oracleToken,
+		http:          &http.Client{Timeout: 300 * time.Millisecond},
 		analyticsHTTP: &http.Client{Timeout: 10 * time.Second},
-		startedAt:    time.Now(),
+		answerHTTP:    &http.Client{Timeout: 30 * time.Second},
+		startedAt:     time.Now(),
 	}
 }
 
@@ -72,6 +88,50 @@ func (c *Client) Search(query string) ([]command.SearchResult, error) {
 		return nil, err
 	}
 	return result.Results, nil
+}
+
+func (c *Client) Invoke(question string) (command.Answer, error) {
+	return c.answer("/invoke", question)
+}
+
+func (c *Client) Ask(question string) (command.Answer, error) {
+	return c.answer("/ask", question)
+}
+
+func (c *Client) answer(path, question string) (command.Answer, error) {
+	if c.oracleURL == "" {
+		return command.Answer{}, fmt.Errorf("Oracle URL is not configured")
+	}
+
+	body, err := json.Marshal(questionRequest{Question: question})
+	if err != nil {
+		return command.Answer{}, err
+	}
+
+	request, err := http.NewRequest(
+		http.MethodPost,
+		c.oracleURL+path,
+		bytes.NewReader(body),
+	)
+	if err != nil {
+		return command.Answer{}, err
+	}
+	request.Header.Set("Content-Type", "application/json")
+	request.Header.Set("Authorization", "Bearer "+c.oracleToken)
+	response, err := c.answerHTTP.Do(request)
+	if err != nil {
+		return command.Answer{}, err
+	}
+	defer response.Body.Close()
+	if response.StatusCode != http.StatusOK {
+		return command.Answer{}, fmt.Errorf("Oracle returned %s", response.Status)
+	}
+
+	var answer command.Answer
+	if err := json.NewDecoder(response.Body).Decode(&answer); err != nil {
+		return command.Answer{}, err
+	}
+	return answer, nil
 }
 
 func (c *Client) Summary() (command.MetricsSummary, error) {

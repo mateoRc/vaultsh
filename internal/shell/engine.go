@@ -16,6 +16,8 @@ type Engine struct {
 
 type Dependencies struct {
 	Search      command.SearchService
+	Invoke      command.InvokeService
+	Ask         command.AskService
 	Metrics     command.MetricsService
 	Deployments command.DeploymentService
 	System      command.SystemService
@@ -70,6 +72,12 @@ func NewWithContextAndDependencies(
 	commands.Register(NewAcceptOffer("y", negotiation))
 	if dependencies.Search != nil {
 		commands.Register(command.NewSearch(dependencies.Search))
+	}
+	if dependencies.Invoke != nil {
+		commands.Register(command.NewInvoke(dependencies.Invoke))
+	}
+	if dependencies.Ask != nil {
+		commands.Register(command.NewAsk(dependencies.Ask))
 	}
 	if dependencies.Metrics != nil {
 		commands.Register(command.NewMetrics(dependencies.Metrics))

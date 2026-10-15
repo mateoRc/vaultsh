@@ -44,12 +44,12 @@ SMOKE = r"""
     check(document.activeElement.id !== 'command', 'no automatic input focus');
     const examples = [...document.querySelectorAll('#output .terminal-example')];
     check(examples.length === 2 && examples.every(button => button.tagName === 'BUTTON'), 'clickable welcome examples');
-    check(examples[0].textContent === 'ls /projects' &&
+    check(examples[0].textContent === 'ls /docs/projects' &&
           examples[1].textContent === 'help search', 'concise welcome examples');
     const menu = document.querySelector('#quick-commands');
     const menuToggle = document.querySelector('#quick-command-toggle');
     const shortcuts = [...menu.querySelectorAll('[data-command]')].map(button => button.dataset.command);
-    check(shortcuts[0] === 'tree -L 1 /projects' &&
+    check(shortcuts[0] === 'tree -L 1 /docs/projects' &&
           shortcuts.some(line => line === 'metrics | head -n 5') &&
           shortcuts.filter(line => line.startsWith('search ')).length >= 2 &&
           shortcuts.every(line => !line.startsWith('cat ') &&
@@ -68,71 +68,74 @@ SMOKE = r"""
     check(menuToggle.getAttribute('aria-expanded') === 'false' && menu.inert, 'Escape closes command menu');
     menuToggle.click();
     menu.querySelector('button').click();
-    await wait(() => [...document.querySelectorAll('#output .output-command')].at(-1)?.textContent.includes('tree -L 1 /projects'));
+    await wait(() => [...document.querySelectorAll('#output .output-command')].at(-1)?.textContent.includes('tree -L 1 /docs/projects'));
     check(menuToggle.getAttribute('aria-expanded') === 'false', 'project map shortcut runs and closes menu');
     examples[0].click();
-    await wait(() => [...document.querySelectorAll('#output .output-result')].at(-1)?.textContent.includes('vaultsh.md'));
-    check([...document.querySelectorAll('#output .output-result')].at(-1).textContent.trim().split('\n').length <= 6,
+    await wait(() => [...document.querySelectorAll('#output .output-result')].at(-1)?.textContent.includes('vaultsh'));
+    check([...document.querySelectorAll('#output .output-result')].at(-1).textContent.trim().split('\n').length <= 7,
           'project example stays short');
     document.querySelectorAll('#output .terminal-example')[1].click();
     await wait(() => [...document.querySelectorAll('#output .output-result')].at(-1)?.textContent.includes('Usage: search <query>'));
     check([...document.querySelectorAll('#output .output-result')].at(-1).textContent.trim().split('\n').length <= 3,
           'help example stays short');
     document.querySelector('#gui-tab').click();
-    await wait(() => document.querySelector('#gui-breadcrumbs').dataset.path === '/projects');
+    await wait(() => document.querySelector('#gui-breadcrumbs').dataset.path === '/docs/projects');
     await wait(() => document.querySelector('[data-gui-path="/docs"]'));
     check(!document.querySelector('#gui-tree').hidden &&
           document.querySelector('#gui-tree-toggle').getAttribute('aria-expanded') === 'true' &&
-          document.querySelector('#gui-tree-location').textContent.includes('/projects'), 'desktop tree open by default');
+          document.querySelector('#gui-tree-location').textContent.includes('/docs/projects'), 'desktop tree open by default');
     document.querySelector('#gui-tree-toggle').click();
     check(document.querySelector('#gui-tree').hidden &&
           document.querySelector('#gui-tree-toggle').getAttribute('aria-expanded') === 'false', 'desktop tree can close');
     document.querySelector('#gui-tree-toggle').click();
-    check(document.querySelector('#gui-tree-location').textContent.includes('/projects') &&
+    check(document.querySelector('#gui-tree-location').textContent.includes('/docs/projects') &&
           !document.querySelector('#gui-tree').hidden &&
-          document.querySelector('[data-gui-path="/projects"]').getAttribute('aria-current') === 'page', 'project tree and current folder');
+          document.querySelector('[data-gui-path="/docs/projects"]').getAttribute('aria-current') === 'page', 'project tree and current folder');
     check(document.querySelector('.gui-item strong').textContent === 'Overview', 'overview first');
     check(getComputedStyle(document.querySelector('.desktop-main')).display === 'grid', 'desktop layout');
     document.querySelector('.gui-item').click();
-    await wait(() => document.querySelector('#gui-breadcrumbs').dataset.path === '/projects/overview.md');
-    check(document.querySelector('[data-gui-path="/projects/overview.md"]').getAttribute('aria-current') === 'page' &&
-          document.querySelector('#gui-tree-location').textContent.includes('/projects/overview.md'), 'current file in tree');
+    await wait(() => document.querySelector('#gui-breadcrumbs').dataset.path === '/docs/projects/overview.md');
+    check(document.querySelector('[data-gui-path="/docs/projects/overview.md"]').getAttribute('aria-current') === 'page' &&
+          document.querySelector('#gui-tree-location').textContent.includes('/docs/projects/overview.md'), 'current file in tree');
     check(location.search.includes('overview.md'), 'shareable URL');
-    [...document.querySelectorAll('.markdown-body a')].find(a => a.textContent === 'Architecture').click();
-    await wait(() => document.querySelector('#gui-breadcrumbs').dataset.path === '/docs/architecture/overview.md');
-    check(document.querySelector('.markdown-body h1').textContent === 'Backend Lab Architecture', 'relative link');
+    [...document.querySelectorAll('.markdown-body a')].find(a => a.textContent === 'Deployment').click();
+    await wait(() => document.querySelector('#gui-breadcrumbs').dataset.path === '/docs/deployment.md');
+    check(document.querySelector('.markdown-body h1').textContent === 'Production Deployment', 'relative link');
     history.back();
-    await wait(() => document.querySelector('#gui-breadcrumbs').dataset.path === '/projects/overview.md');
+    await wait(() => document.querySelector('#gui-breadcrumbs').dataset.path === '/docs/projects/overview.md');
     check(document.querySelector('.markdown-body h1').textContent.includes('Backend Lab'), 'browser Back');
     history.forward();
-    await wait(() => document.querySelector('#gui-breadcrumbs').dataset.path === '/docs/architecture/overview.md');
+    await wait(() => document.querySelector('#gui-breadcrumbs').dataset.path === '/docs/deployment.md');
     check(document.querySelector('#gui-tab').getAttribute('aria-selected') === 'true', 'browser Forward and tab state');
     document.querySelector('[data-gui-path="/docs"]').click();
     await wait(() => document.querySelector('#gui-breadcrumbs').dataset.path === '/docs');
-    await wait(() => document.querySelector('[data-gui-path="/docs/architecture"]'));
+    await wait(() => document.querySelector('[data-gui-path="/docs/projects"]'));
     check(document.querySelector('[data-gui-path="/docs"]').getAttribute('aria-current') === 'page', 'tree folder navigation');
     document.querySelector('[data-gui-path="/docs"]').previousElementSibling.click();
-    check(!document.querySelector('[data-gui-path="/docs/architecture"]'), 'tree folder collapse');
+    check(!document.querySelector('[data-gui-path="/docs/projects"]'), 'tree folder collapse');
     document.querySelector('[data-gui-path="/docs"]').previousElementSibling.click();
-    await wait(() => document.querySelector('[data-gui-path="/docs/architecture"]'));
-    document.querySelector('[data-gui-path="/docs/architecture"]').click();
-    await wait(() => document.querySelector('#gui-breadcrumbs').dataset.path === '/docs/architecture');
-    await wait(() => document.querySelector('[data-gui-path="/docs/architecture/vaultsh.md"]'));
-    document.querySelector('[data-gui-path="/docs/architecture/vaultsh.md"]').click();
-    await wait(() => document.querySelector('#gui-breadcrumbs').dataset.path === '/docs/architecture/vaultsh.md');
+    await wait(() => document.querySelector('[data-gui-path="/docs/projects"]'));
+    document.querySelector('[data-gui-path="/docs/projects"]').click();
+    await wait(() => document.querySelector('#gui-breadcrumbs').dataset.path === '/docs/projects');
+    await wait(() => document.querySelector('[data-gui-path="/docs/projects/vaultsh"]'));
+    document.querySelector('[data-gui-path="/docs/projects/vaultsh"]').click();
+    await wait(() => document.querySelector('#gui-breadcrumbs').dataset.path === '/docs/projects/vaultsh');
+    await wait(() => document.querySelector('[data-gui-path="/docs/projects/vaultsh/architecture.md"]'));
+    document.querySelector('[data-gui-path="/docs/projects/vaultsh/architecture.md"]').click();
+    await wait(() => document.querySelector('#gui-breadcrumbs').dataset.path === '/docs/projects/vaultsh/architecture.md');
     [...document.querySelectorAll('.markdown-body a')].find(a => a.textContent === 'browse API').click();
     await wait(() => document.querySelector('#gui-breadcrumbs').dataset.path === '/docs/api.md');
     check(location.hash === '#browse-content' && document.activeElement.id === 'browse-content', 'relative fragment');
     await fetch('/api/fail-next');
-    document.querySelector('[data-gui-path="/projects"]').click();
+    document.querySelector('[data-gui-path="/docs/projects"]').click();
     await wait(() => !document.querySelector('#gui-retry').hidden);
     check(document.querySelector('#gui-message').textContent.includes('unavailable'), 'browse error');
     document.querySelector('#gui-retry').click();
-    await wait(() => document.querySelector('#gui-breadcrumbs').dataset.path === '/projects');
+    await wait(() => document.querySelector('#gui-breadcrumbs').dataset.path === '/docs/projects');
     check(document.querySelector('#gui-retry').hidden, 'browse retry');
     document.querySelector('#shell-tab').click();
     const input = document.querySelector('#command');
-    input.focus(); input.value = 'cat /projects/ov'; input.setSelectionRange(input.value.length, input.value.length);
+    input.focus(); input.value = 'cat /docs/projects/ov'; input.setSelectionRange(input.value.length, input.value.length);
     const tab = () => { const event = new KeyboardEvent('keydown', {key: 'Tab', bubbles: true, cancelable: true}); input.dispatchEvent(event); return event.defaultPrevented; };
     check(tab(), 'first Tab completes');
     await wait(() => input.value.includes('overview.md'));
@@ -143,7 +146,7 @@ SMOKE = r"""
     input.dispatchEvent(new KeyboardEvent('keydown', {key: 'Escape', bubbles: true}));
     check(document.activeElement.id === 'quick-command-toggle', 'Escape leaves input');
     await fetch('/api/fail-next-complete');
-    input.focus(); input.value = 'cat /projects/ov2'; input.dispatchEvent(new Event('input'));
+    input.focus(); input.value = 'cat /docs/projects/ov2'; input.dispatchEvent(new Event('input'));
     check(tab(), 'completion request starts');
     await wait(() => document.querySelector('#request-status').textContent.includes('Edit to retry'));
     check(!tab(), 'completion failure permits exit');
@@ -316,7 +319,7 @@ class Handler(BaseHTTPRequestHandler):
                 Handler.fail_complete = False
                 return self.send_error(503)
             line = body["line"]
-            return self.send_json({"start": 4, "end": len(line), "replacement": "/projects/overview.md ", "candidates": ["/projects/overview.md"], "session_id": "test", "current_directory": "/"})
+            return self.send_json({"start": 4, "end": len(line), "replacement": "/docs/projects/overview.md ", "candidates": ["/docs/projects/overview.md"], "session_id": "test", "current_directory": "/"})
         if self.path == "/api/exec":
             if Handler.fail_exec:
                 Handler.fail_exec = False
@@ -327,9 +330,9 @@ class Handler(BaseHTTPRequestHandler):
             if line == "slow":
                 time.sleep(0.2)
             if line == "welcome":
-                output = "Browse projects: ls /projects\nLearn search: help search"
-            elif line == "ls /projects":
-                output = "\n".join(sorted(path.name for path in (CONTENT / "projects").iterdir()))
+                output = "Browse projects: ls /docs/projects\nLearn search: help search"
+            elif line == "ls /docs/projects":
+                output = "\n".join(sorted(path.name for path in (CONTENT / "docs/projects").iterdir()))
             elif line == "help search":
                 output = 'Usage: search <query>\nSearch portfolio content with the Atlas search engine\nExample: search "distributed systems"'
             elif match := re.fullmatch(r"head -n (\d+) (/[\w/.-]+\.md)", line):
@@ -366,7 +369,7 @@ def main():
             ("smoke=main", "PASS terminal default", 1280),
             ("smoke=mobile", "PASS mobile terminal starts without input focus", 512),
             ("smoke=deep&doc=/cv/experience.md", "PASS deep link, refresh, and mobile layout", 512),
-            ("smoke=diagram&doc=/docs/architecture/vaultsh.md", "PASS compact command flow diagram", 512),
+            ("smoke=diagram&doc=/docs/projects/vaultsh/architecture.md", "PASS compact command flow diagram", 512),
         ):
             with tempfile.TemporaryDirectory() as profile:
                 url = f"http://127.0.0.1:{server.server_port}/vault/?{query}"
@@ -383,7 +386,7 @@ def main():
                 if (screenshot_dir := os.environ.get("VAULTSH_SCREENSHOTS")) and "smoke=diagram" not in query:
                     screenshot = Path(screenshot_dir) / f"vaultsh-{width}.png"
                     screenshot.parent.mkdir(parents=True, exist_ok=True)
-                    document = "/projects/overview.md" if width == 1280 else "/cv/experience.md"
+                    document = "/docs/projects/overview.md" if width == 1280 else "/cv/experience.md"
                     capture_url = f"http://127.0.0.1:{server.server_port}/vault/?doc={document}"
                     subprocess.run([browser, "--headless=new", "--disable-gpu", "--no-sandbox",
                                     "--disable-software-rasterizer", "--no-first-run",

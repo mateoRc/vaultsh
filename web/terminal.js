@@ -66,7 +66,7 @@ function initTerminal() {
   const statusTimeoutMilliseconds = 3000;
   const statusRefreshMilliseconds = 10000;
   const suggestions = [
-    ["Browse projects", "ls /projects"],
+    ["Browse projects", "ls /docs/projects"],
     ["Learn search", "help search"],
   ];
   const maxOutputEntries = 100;
@@ -483,9 +483,11 @@ function initTerminal() {
     setRequestStatus("Running…");
     const slowMessage = window.setTimeout(() => {
       setRequestStatus(
-        line.startsWith("search ")
-          ? "Still running—Atlas searches may take a moment…"
-          : "Still running…",
+        line.startsWith("invoke ") || line.startsWith("ask ")
+          ? "Thinking—the assistant can take several seconds…"
+          : line.startsWith("search ")
+            ? "Still running—Atlas searches may take a moment…"
+            : "Still running…",
       );
     }, 1200);
 
@@ -498,7 +500,7 @@ function initTerminal() {
           session_id: sessionId,
           automatic_welcome: automaticWelcome && line === autoWelcomeCommand,
         }),
-      }, 15000);
+      }, 35000);
       if (!response.ok) {
         throw new Error(await friendlyError(response));
       }

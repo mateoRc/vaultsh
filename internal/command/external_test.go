@@ -8,6 +8,10 @@ import (
 type externalStub struct {
 	searchResults []SearchResult
 	searchErr     error
+	invokeAnswer  Answer
+	invokeErr     error
+	askAnswer     Answer
+	askErr        error
 	summary       MetricsSummary
 	dashboard     string
 	metricsErr    error
@@ -31,6 +35,14 @@ func (s externalStub) Dashboard(windowHours int, includeInvalid bool) (string, e
 		s.dashboardArgs.includeInvalid = includeInvalid
 	}
 	return s.dashboard, s.metricsErr
+}
+
+func (s externalStub) Invoke(string) (Answer, error) {
+	return s.invokeAnswer, s.invokeErr
+}
+
+func (s externalStub) Ask(string) (Answer, error) {
+	return s.askAnswer, s.askErr
 }
 
 func TestDashboardWindowAndInvalidFlag(t *testing.T) {
@@ -90,6 +102,76 @@ func TestSearchDegradesWhenAtlasIsUnavailable(t *testing.T) {
 	result := search.Execute([]string{"kafka"}, Input{})
 
 	if result.ExitCode != ExitFailure || result.Output != "search unavailable" {
+		t.Errorf("result = %#v", result)
+	}
+}
+
+func TestInvokeFormatsAnswerAndSources(t *testing.T) {
+	invoke := NewInvoke(externalStub{invokeAnswer: Answer{
+		Answer:  "Vaultsh is the Go shell.",
+		Sources: []string{"/docs/projects/overview.md", "/cv/about.md"},
+	}})
+
+	result := invoke.Execute([]string{"what", "is", "vaultsh"}, Input{})
+
+	if result.ExitCode != ExitSuccess {
+		t.Fatalf("exit code = %d, want %d", result.ExitCode, ExitSuccess)
+	}
+	want := "Vaultsh is the Go shell.\n\nsources: /docs/projects/overview.md, /cv/about.md"
+	if result.Output != want {
+		t.Errorf("output = %q, want %q", result.Output, want)
+	}
+}
+
+func TestInvokeRequiresAQuestion(t *testing.T) {
+	result := NewInvoke(externalStub{}).Execute(nil, Input{})
+
+	if result.ExitCode != ExitUsage || result.Output != "usage: invoke <question>" {
+		t.Errorf("result = %#v", result)
+	}
+}
+
+func TestInvokeDegradesWhenOracleIsUnavailable(t *testing.T) {
+	invoke := NewInvoke(externalStub{invokeErr: errors.New("offline")})
+
+	result := invoke.Execute([]string{"who", "is", "mateo"}, Input{})
+
+	if result.ExitCode != ExitFailure || result.Output != oracleWithdrawn {
+		t.Errorf("result = %#v", result)
+	}
+}
+
+func TestAskFormatsAnswerAndSources(t *testing.T) {
+	ask := NewAsk(externalStub{askAnswer: Answer{
+		Answer:  "Mateo writes Go and Python.",
+		Sources: []string{"/cv/skills.md"},
+	}})
+
+	result := ask.Execute([]string{"which", "languages"}, Input{})
+
+	if result.ExitCode != ExitSuccess {
+		t.Fatalf("exit code = %d, want %d", result.ExitCode, ExitSuccess)
+	}
+	want := "Mateo writes Go and Python.\n\nsources: /cv/skills.md"
+	if result.Output != want {
+		t.Errorf("output = %q, want %q", result.Output, want)
+	}
+}
+
+func TestAskRequiresAQuestion(t *testing.T) {
+	result := NewAsk(externalStub{}).Execute(nil, Input{})
+
+	if result.ExitCode != ExitUsage || result.Output != "usage: ask <question>" {
+		t.Errorf("result = %#v", result)
+	}
+}
+
+func TestAskDegradesWhenOracleIsUnavailable(t *testing.T) {
+	ask := NewAsk(externalStub{askErr: errors.New("offline")})
+
+	result := ask.Execute([]string{"hello"}, Input{})
+
+	if result.ExitCode != ExitFailure || result.Output != assistantOffline {
 		t.Errorf("result = %#v", result)
 	}
 }

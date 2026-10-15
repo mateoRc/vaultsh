@@ -34,6 +34,7 @@ paths; file responses include their Markdown content. The endpoint is read-only.
 
 - `CONTENT_PATH`: mounted Markdown root; default `/app/content`
 - `ATLAS_URL` and `ATLAS_AUTH_TOKEN`: optional search integration
+- `ORACLE_URL` and `ORACLE_AUTH_TOKEN`: optional assistant integration
 - `FORGE_URL` and `FORGE_AUTH_TOKEN`: optional telemetry integration
 - `SESSION_LIMIT`: active-session cap; default `5000`
 - `TRUST_PROXY_HEADERS`: trust proxy client-IP headers only when Vaultsh is
@@ -56,7 +57,7 @@ internal/storage/     mounted-content loader
 web/                  browser terminal and desktop explorer
 ```
 
-Explorer documents have shareable `?doc=/projects/overview.md` URLs and support
+Explorer documents have shareable `?doc=/docs/projects/overview.md` URLs and support
 browser history and relative Markdown links.
 
 The sibling `lab` repository owns shared content, production orchestration,

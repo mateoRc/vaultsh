@@ -22,6 +22,55 @@ func TestSearchSendsAtlasBearerToken(t *testing.T) {
 	}
 }
 
+func TestInvokeSendsOracleBearerToken(t *testing.T) {
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if r.URL.Path != "/invoke" {
+			t.Errorf("path = %q", r.URL.Path)
+		}
+		if got := r.Header.Get("Authorization"); got != "Bearer oracle-secret" {
+			t.Errorf("Authorization = %q", got)
+		}
+		if got := r.Header.Get("Content-Type"); got != "application/json" {
+			t.Errorf("Content-Type = %q", got)
+		}
+		w.Header().Set("Content-Type", "application/json")
+		_, _ = w.Write([]byte(`{"answer":"hi","sources":["/cv/about.md"]}`))
+	}))
+	defer server.Close()
+
+	client := NewClientWithOracle("", "", server.URL, "", "", "oracle-secret")
+	answer, err := client.Invoke("who is mateo?")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if answer.Answer != "hi" || len(answer.Sources) != 1 || answer.Sources[0] != "/cv/about.md" {
+		t.Errorf("answer = %#v", answer)
+	}
+}
+
+func TestAskSendsOracleBearerToken(t *testing.T) {
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if r.URL.Path != "/ask" {
+			t.Errorf("path = %q", r.URL.Path)
+		}
+		if got := r.Header.Get("Authorization"); got != "Bearer oracle-secret" {
+			t.Errorf("Authorization = %q", got)
+		}
+		w.Header().Set("Content-Type", "application/json")
+		_, _ = w.Write([]byte(`{"answer":"plain","sources":["/cv/skills.md"]}`))
+	}))
+	defer server.Close()
+
+	client := NewClientWithOracle("", "", server.URL, "", "", "oracle-secret")
+	answer, err := client.Ask("which languages?")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if answer.Answer != "plain" || len(answer.Sources) != 1 || answer.Sources[0] != "/cv/skills.md" {
+		t.Errorf("answer = %#v", answer)
+	}
+}
+
 func TestForgeRequestsSendBearerToken(t *testing.T) {
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		if got := r.Header.Get("Authorization"); got != "Bearer forge-secret" {

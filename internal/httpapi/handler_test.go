@@ -48,9 +48,8 @@ func TestVisitValidatesAndForwardsVisitorID(t *testing.T) {
 }
 
 const aboutOutput = "Vaultsh is the read-only virtual shell and Explorer for Backend Lab.\n\n" +
-	"Start with /projects/overview.md for the integrated system, " +
-	"then /docs/architecture/overview.md for its boundaries. " +
-	"Professional background is under /cv."
+	"Start with /docs/projects/overview.md for the integrated system and " +
+	"its boundaries. Professional background is under /cv."
 
 func (s statusStub) Availability() (bool, bool) {
 	return s.atlas, s.forge

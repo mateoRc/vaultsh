@@ -28,9 +28,9 @@
       <p class="intro-hint">Prefer clicking through? Switch to the Explorer tab to browse projects and documents.</p>
     </header>
 
-    <noscript><p class="static-summary">Backend Lab connects Vaultsh's read-only virtual shell with Atlas search, Forge telemetry, and Sentinel CI assessment. Read the <a href="https://github.com/mateoRc/lab/blob/main/content/projects/overview.md">project overview</a>, <a href="https://github.com/mateoRc/lab/blob/main/content/docs/architecture/overview.md">architecture</a>, or <a href="https://github.com/mateoRc/lab">source code</a>.</p></noscript>
+    <noscript><p class="static-summary">Backend Lab connects Vaultsh's read-only virtual shell with Atlas search, Forge telemetry, and Sentinel CI assessment. Read the <a href="https://github.com/mateoRc/lab/blob/main/content/docs/projects/overview.md">system overview</a>, <a href="https://github.com/mateoRc/lab/tree/main/content/docs/projects">project docs</a>, or <a href="https://github.com/mateoRc/lab">source code</a>.</p></noscript>
 
-    <p id="offline-summary" class="static-summary" hidden>Backend Lab connects Vaultsh's virtual shell, Atlas search, Forge telemetry, and Sentinel CI assessment. Services are unavailable right now; read the <a href="https://github.com/mateoRc/lab/blob/main/content/projects/overview.md">project overview</a>, <a href="https://github.com/mateoRc/lab/blob/main/content/docs/architecture/overview.md">architecture</a>, or <a href="https://github.com/mateoRc/lab">source</a>.</p>
+    <p id="offline-summary" class="static-summary" hidden>Backend Lab connects Vaultsh's virtual shell, Atlas search, Forge telemetry, and Sentinel CI assessment. Services are unavailable right now; read the <a href="https://github.com/mateoRc/lab/blob/main/content/docs/projects/overview.md">system overview</a>, <a href="https://github.com/mateoRc/lab/tree/main/content/docs/projects">project docs</a>, or <a href="https://github.com/mateoRc/lab">source</a>.</p>
 
     <div class="workspace">
       <header class="workspace-header">
@@ -90,16 +90,16 @@
             aria-hidden="true"
             inert
           >
-            <button type="button" data-command="tree -L 1 /projects">Project map</button>
-            <button type="button" data-command="head -n 11 /projects/overview.md">System overview</button>
-            <button type="button" data-command="head -n 4 /docs/architecture/overview.md">Architecture intro</button>
+            <button type="button" data-command="tree -L 1 /docs/projects">Project map</button>
+            <button type="button" data-command="head -n 11 /docs/projects/overview.md">System overview</button>
+            <button type="button" data-command="head -n 12 /docs/projects/vaultsh/architecture.md">Vaultsh architecture</button>
             <button type="button" data-command="head -n 6 /cv/experience.md">Current role</button>
             <button type="button" data-command="grep 'Primary backend stacks' /cv/skills.md">Backend stack</button>
             <button type="button" data-command="grep 'Cloud and delivery' /cv/skills.md">Cloud toolkit</button>
             <button type="button" data-command="search Kafka | head -n 2">Search Kafka</button>
             <button type="button" data-command="search observability | head -n 2">Search observability</button>
             <button type="button" data-command="search rollback | head -n 2">Search rollback</button>
-            <button type="button" data-command="grep -i 'Defaults are|may remove' /docs/architecture/forge.md">Telemetry limits</button>
+            <button type="button" data-command="grep -i 'Defaults are|may remove' /docs/projects/forge/architecture.md">Telemetry limits</button>
             <button type="button" data-command="metrics | head -n 5">Forge pulse</button>
             <button type="button" data-command="deployments">Latest release</button>
             <button type="button" data-command="help search">Search tips</button>
@@ -121,7 +121,7 @@
       <div class="desktop-main">
         <aside class="desktop-sidebar" aria-label="Project tree">
           <div class="tree-heading">
-            <div><strong>Project tree</strong><span id="gui-tree-location" class="tree-location">Current: /projects</span></div>
+            <div><strong>Project tree</strong><span id="gui-tree-location" class="tree-location">Current: /docs/projects</span></div>
             <button id="gui-tree-toggle" class="tree-toggle" type="button" aria-controls="gui-tree" aria-expanded="false">Show tree</button>
           </div>
           <nav id="gui-tree" class="tree-nav" aria-label="Project files" hidden></nav>

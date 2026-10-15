@@ -43,6 +43,12 @@ var (
 		burst:     20,
 		retry:     "1",
 	}
+	assistantLimit = routeLimit{
+		keyPrefix: "assistant",
+		perMinute: 10,
+		burst:     3,
+		retry:     "10",
+	}
 )
 
 type HandlerConfig struct {
@@ -143,7 +149,7 @@ func NewHandlerWithConfig(
 		http.StripPrefix("/vault/", http.FileServer(http.Dir("web"))),
 	)
 	mux.HandleFunc("POST /api/exec", limited(execLimit, func(w http.ResponseWriter, r *http.Request) {
-		exec(w, r, sessions)
+		exec(w, r, sessions, limiter, config.TrustProxyHeaders)
 	}))
 	mux.HandleFunc("POST /api/complete", limited(completeLimit, func(w http.ResponseWriter, r *http.Request) {
 		complete(w, r, sessions)
@@ -242,7 +248,13 @@ func health(w http.ResponseWriter, _ *http.Request) {
 	_, _ = w.Write([]byte("ok"))
 }
 
-func exec(w http.ResponseWriter, r *http.Request, sessions *shell.SessionManager) {
+func exec(
+	w http.ResponseWriter,
+	r *http.Request,
+	sessions *shell.SessionManager,
+	limiter *rateLimiter,
+	trustProxyHeaders bool,
+) {
 	r.Body = http.MaxBytesReader(w, r.Body, maxRequestBodyBytes)
 	var request execRequest
 	if !decodeRequest(w, r, &request) {
@@ -250,6 +262,12 @@ func exec(w http.ResponseWriter, r *http.Request, sessions *shell.SessionManager
 	}
 	if len(request.Line) > maxCommandLength {
 		http.Error(w, "command is too long", http.StatusRequestEntityTooLarge)
+		return
+	}
+	if isAssistantCommand(request.Line) &&
+		!limiter.allow("assistant:"+clientIP(r, trustProxyHeaders), assistantLimit.perMinute, assistantLimit.burst) {
+		w.Header().Set("Retry-After", assistantLimit.retry)
+		http.Error(w, "rate limit exceeded", http.StatusTooManyRequests)
 		return
 	}
 
@@ -272,6 +290,14 @@ func exec(w http.ResponseWriter, r *http.Request, sessions *shell.SessionManager
 	}
 
 	writeJSON(w, response)
+}
+
+func isAssistantCommand(line string) bool {
+	fields := strings.Fields(line)
+	if len(fields) == 0 {
+		return false
+	}
+	return fields[0] == "invoke" || fields[0] == "ask"
 }
 
 func writeJSON(w http.ResponseWriter, value any) {
