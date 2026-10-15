@@ -139,7 +139,7 @@ SMOKE = r"""
     const tab = () => { const event = new KeyboardEvent('keydown', {key: 'Tab', bubbles: true, cancelable: true}); input.dispatchEvent(event); return event.defaultPrevented; };
     check(tab(), 'first Tab completes');
     await wait(() => input.value.includes('overview.md'));
-    check(!tab(), 'second Tab leaves input');
+    check(tab() && document.activeElement === input, 'Tab keeps focus in the input after completion');
     const shift = new KeyboardEvent('keydown', {key: 'Tab', shiftKey: true, bubbles: true, cancelable: true});
     input.dispatchEvent(shift);
     check(!shift.defaultPrevented, 'Shift+Tab moves normally');
@@ -148,8 +148,8 @@ SMOKE = r"""
     await fetch('/api/fail-next-complete');
     input.focus(); input.value = 'cat /docs/projects/ov2'; input.dispatchEvent(new Event('input'));
     check(tab(), 'completion request starts');
-    await wait(() => document.querySelector('#request-status').textContent.includes('Edit to retry'));
-    check(!tab(), 'completion failure permits exit');
+    await wait(() => document.querySelector('#request-status').textContent.includes('Try Tab again'));
+    check(tab(), 'completion failure keeps focus in the input');
     await fetch('/api/fail-next-exec');
     input.value = 'help';
     document.querySelector('#command-form').dispatchEvent(new Event('submit', {bubbles: true, cancelable: true}));
