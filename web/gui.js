@@ -234,7 +234,7 @@ function initGui() {
   function renderTree() {
     const list = document.createElement("ul");
     list.className = "tree-list";
-    list.append(treeNode({ name: "Backend Lab", kind: "directory", path: "/" }));
+    list.append(treeNode({ name: "Vault", kind: "directory", path: "/" }));
     tree.replaceChildren(list);
     const selected = [...tree.querySelectorAll('[aria-current="page"]')][0];
     if (selected) {
