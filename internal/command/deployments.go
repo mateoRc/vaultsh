@@ -47,7 +47,7 @@ func (d Deployments) Execute(args []string, _ Input) Result {
 }
 
 func FormatDeployment(deployment deployment.Deployment) string {
-	return strings.Join([]string{
+	lines := []string{
 		"DEPLOYMENT",
 		"==========",
 		fmt.Sprintf("  status:  %s", deployment.Status),
@@ -55,11 +55,17 @@ func FormatDeployment(deployment deployment.Deployment) string {
 		fmt.Sprintf("  vault:   %s", shortVersion(deployment.Services["vault"])),
 		fmt.Sprintf("  atlas:   %s", shortVersion(deployment.Services["atlas"])),
 		fmt.Sprintf("  forge:   %s", shortVersion(deployment.Services["forge"])),
+	}
+	if oracle := deployment.Services["oracle"]; oracle != "" {
+		lines = append(lines, fmt.Sprintf("  oracle:  %s", shortVersion(oracle)))
+	}
+	lines = append(lines,
 		fmt.Sprintf(
 			"  updated: %s",
 			deployment.DeployedAt.UTC().Format("2006-01-02 15:04:05 UTC"),
 		),
-	}, "\n")
+	)
+	return strings.Join(lines, "\n")
 }
 
 func shortVersion(version string) string {

@@ -2,6 +2,7 @@ package command
 
 import (
 	"errors"
+	"strings"
 	"testing"
 	"time"
 
@@ -68,6 +69,25 @@ func TestDeploymentsDegradesWhenMetadataIsUnavailable(t *testing.T) {
 
 	if result.ExitCode != ExitFailure || result.Output != "deployment status unavailable" {
 		t.Errorf("result = %#v", result)
+	}
+}
+
+func TestDeploymentsShowsOracleVersionWhenPresent(t *testing.T) {
+	current := deployment.Deployment{
+		Status:     "success",
+		Version:    "deploy-137",
+		DeployedAt: time.Date(2026, 10, 15, 16, 5, 0, 0, time.UTC),
+		Services: map[string]string{
+			"vault":  "111111111111",
+			"atlas":  "222222222222",
+			"forge":  "333333333333",
+			"oracle": "444444444444",
+		},
+	}
+
+	output := FormatDeployment(current)
+	if !strings.Contains(output, "  oracle:  4444444\n  updated:") {
+		t.Errorf("deployment output omitted Oracle: %q", output)
 	}
 }
 
