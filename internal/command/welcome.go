@@ -21,12 +21,12 @@ func (Welcome) Execute(args []string, _ Input) Result {
 
 	return Result{
 		Output: "I wanted to build a portfolio, so naturally I built a shell first.\n\n" +
-			"Vaultsh: a virtual shell connected to search, telemetry, oracle AI agent.\n\n" +
-			"Browse projects: ls /projects\n" +
-			"Search: help search\n\n" +
-			"Ask oracle anything: invoke hello\n\n" +
-			"Telemetry: dashboard"
-			"Type help for commands, or switch to Explorer above.",
+			"Vault: a virtual shell wired to search, telemetry, and an Oracle.\n\n" +
+			"Browse projects: ls /docs/projects\n" +
+			"Ask the Oracle: invoke who is Mateo?\n" +
+			"Telemetry dashboard: dashboard\n" +
+			"All commands: help\n\n" +
+			"Switch to Explorer above to browse the documents.",
 		ExitCode: ExitSuccess,
 	}
 }

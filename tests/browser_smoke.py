@@ -43,9 +43,11 @@ SMOKE = r"""
           'compact header without window decoration');
     check(document.activeElement.id !== 'command', 'no automatic input focus');
     const examples = [...document.querySelectorAll('#output .terminal-example')];
-    check(examples.length === 2 && examples.every(button => button.tagName === 'BUTTON'), 'clickable welcome examples');
+    check(examples.length === 4 && examples.every(button => button.tagName === 'BUTTON'), 'clickable welcome examples');
     check(examples[0].textContent === 'ls /docs/projects' &&
-          examples[1].textContent === 'help search', 'concise welcome examples');
+          examples[1].textContent === 'invoke who is Mateo?' &&
+          examples[2].textContent === 'dashboard' &&
+          examples[3].textContent === 'help', 'concise welcome examples');
     const menu = document.querySelector('#quick-commands');
     const menuToggle = document.querySelector('#quick-command-toggle');
     const shortcuts = [...menu.querySelectorAll('[data-command]')].map(button => button.dataset.command);
@@ -74,8 +76,8 @@ SMOKE = r"""
     await wait(() => [...document.querySelectorAll('#output .output-result')].at(-1)?.textContent.includes('vaultsh'));
     check([...document.querySelectorAll('#output .output-result')].at(-1).textContent.trim().split('\n').length <= 7,
           'project example stays short');
-    document.querySelectorAll('#output .terminal-example')[1].click();
-    await wait(() => [...document.querySelectorAll('#output .output-result')].at(-1)?.textContent.includes('Usage: search <query>'));
+    document.querySelectorAll('#output .terminal-example')[3].click();
+    await wait(() => [...document.querySelectorAll('#output .output-result')].at(-1)?.textContent.includes('Available commands:'));
     check([...document.querySelectorAll('#output .output-result')].at(-1).textContent.trim().split('\n').length <= 3,
           'help example stays short');
     document.querySelector('#gui-tab').click();
@@ -330,11 +332,18 @@ class Handler(BaseHTTPRequestHandler):
             if line == "slow":
                 time.sleep(0.2)
             if line == "welcome":
-                output = "Browse projects: ls /docs/projects\nLearn search: help search"
+                output = ("Browse projects: ls /docs/projects\n"
+                          "Ask the Oracle: invoke who is Mateo?\n"
+                          "Telemetry dashboard: dashboard\n"
+                          "All commands: help")
             elif line == "ls /docs/projects":
                 output = "\n".join(sorted(path.name for path in (CONTENT / "docs/projects").iterdir()))
-            elif line == "help search":
-                output = 'Usage: search <query>\nSearch portfolio content with the Atlas search engine\nExample: search "distributed systems"'
+            elif line == "invoke who is Mateo?":
+                output = "Seeker, Mateo built Vault.\n\nsources: /cv/about.md"
+            elif line == "dashboard":
+                output = "Forge dashboard\nrequests: 12"
+            elif line == "help":
+                output = "Available commands:\n  help - List available commands\n  ls - List directory contents"
             elif match := re.fullmatch(r"head -n (\d+) (/[\w/.-]+\.md)", line):
                 target = CONTENT / match[2].lstrip("/")
                 output = "\n".join(target.read_text(encoding="utf-8").splitlines()[:int(match[1])])

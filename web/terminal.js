@@ -67,7 +67,9 @@ function initTerminal() {
   const statusRefreshMilliseconds = 10000;
   const suggestions = [
     ["Browse projects", "ls /docs/projects"],
-    ["Learn search", "help search"],
+    ["Ask the Oracle", "invoke who is Mateo?"],
+    ["Telemetry dashboard", "dashboard"],
+    ["All commands", "help"],
   ];
   const maxOutputEntries = 100;
   const maxCommandHistory = 100;
