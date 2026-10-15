@@ -6,6 +6,22 @@ import (
 	"testing"
 )
 
+func TestAvailabilityProbesOracle(t *testing.T) {
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if r.URL.Path != "/healthz" {
+			t.Errorf("path = %q", r.URL.Path)
+		}
+		w.WriteHeader(http.StatusOK)
+	}))
+	defer server.Close()
+
+	client := NewClientWithOracle("", "", server.URL, "", "", "")
+	atlas, forge, oracle := client.Availability()
+	if atlas || forge || !oracle {
+		t.Errorf("availability = %v, %v, %v", atlas, forge, oracle)
+	}
+}
+
 func TestSearchSendsAtlasBearerToken(t *testing.T) {
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		if got := r.Header.Get("Authorization"); got != "Bearer atlas-secret" {
