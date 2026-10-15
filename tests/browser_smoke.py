@@ -159,7 +159,7 @@ SMOKE = r"""
     check(!input.disabled, 'execution failure unlocks input');
     await wait(() => document.activeElement === input);
     check(document.activeElement === input, 'input focus after failed command');
-    input.value = 'help';
+    input.value = 'pwd';
     document.querySelector('#command-form').dispatchEvent(new Event('submit', {bubbles: true, cancelable: true}));
     await wait(() => [...document.querySelectorAll('#output .output-result')].at(-1)?.textContent === 'ok');
     check(!input.disabled, 'manual command recovery');
