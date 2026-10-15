@@ -45,7 +45,7 @@ SMOKE = r"""
     const examples = [...document.querySelectorAll('#output .terminal-example')];
     check(examples.length === 4 && examples.every(button => button.tagName === 'BUTTON'), 'clickable welcome examples');
     check(examples[0].textContent === 'ls /docs/projects' &&
-          examples[1].textContent === 'invoke who is Mateo?' &&
+          examples[1].textContent === 'invoke what is Vault?' &&
           examples[2].textContent === 'dashboard' &&
           examples[3].textContent === 'help', 'concise welcome examples');
     const menu = document.querySelector('#quick-commands');
@@ -333,13 +333,13 @@ class Handler(BaseHTTPRequestHandler):
                 time.sleep(0.2)
             if line == "welcome":
                 output = ("Browse projects: ls /docs/projects\n"
-                          "Ask the Oracle: invoke who is Mateo?\n"
+                          "Ask the Oracle: invoke what is Vault?\n"
                           "Telemetry dashboard: dashboard\n"
                           "All commands: help")
             elif line == "ls /docs/projects":
                 output = "\n".join(sorted(path.name for path in (CONTENT / "docs/projects").iterdir()))
-            elif line == "invoke who is Mateo?":
-                output = "Seeker, Mateo built Vault.\n\nsources: /cv/about.md"
+            elif line == "invoke what is Vault?":
+                output = "Seeker, Vault is the entrance to Backend Lab.\n\nsources: /docs/projects/overview.md"
             elif line == "dashboard":
                 output = "Forge dashboard\nrequests: 12"
             elif line == "help":

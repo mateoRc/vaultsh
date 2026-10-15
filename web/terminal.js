@@ -70,7 +70,7 @@ function initTerminal() {
   const statusRefreshMilliseconds = 10000;
   const suggestions = [
     ["Browse projects", "ls /docs/projects"],
-    ["Ask the Oracle", "invoke who is Mateo?"],
+    ["Ask the Oracle", "invoke what is Vault?"],
     ["Telemetry dashboard", "dashboard"],
     ["All commands", "help"],
   ];
